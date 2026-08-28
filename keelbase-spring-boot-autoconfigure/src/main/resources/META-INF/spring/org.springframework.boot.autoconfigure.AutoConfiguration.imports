@@ -1,0 +1,3 @@
+cn.com.keelbase.autoconfigure.DelegationAutoConfiguration
+cn.com.keelbase.autoconfigure.ToolsExportAutoConfiguration
+cn.com.keelbase.autoconfigure.CompensationAutoConfiguration
