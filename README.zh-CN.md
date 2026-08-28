@@ -87,10 +87,6 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
 - `baseUrl` 为**服务器根**，工具 `path` 为**完整路径**（如 `/api/followups`）——KeelBase ProxyTool 用 `baseUrl + path` 拼接。
 - 撤销：`proxy-revoker` 调补偿端点（带委托身份），须返回 2xx 且幂等。
 
-## 明确不做（核心版）
-
-Maven/Gradle plugin、Spring Boot 2 / Java 8 / WebFlux、Java 侧 Agent 编排、多租户、R4 双人审批 Java 特化。KeelBase 工具热更新需重启（配置写入 Settings 后重启生效）。
-
 ## 构建与测试
 
 ```bash

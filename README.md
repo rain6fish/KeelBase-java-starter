@@ -87,10 +87,6 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
 - `baseUrl` is the **server root**; tool `path` is the **full path** (e.g. `/api/followups`). KeelBase's ProxyTool concatenates `baseUrl + path`.
 - Revocation: `proxy-revoker` calls the compensation endpoint (with delegated identity); it must return 2xx and be idempotent.
 
-## Explicitly out of scope (core version)
-
-Maven/Gradle plugin, Spring Boot 2 / Java 8 / WebFlux, Java-side agent orchestration, multi-tenancy, R4 dual-approval Java specialization. KeelBase tool hot-reload requires a restart (write the config to Settings, then restart).
-
 ## Build & test
 
 ```bash
