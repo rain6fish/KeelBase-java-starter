@@ -1,47 +1,45 @@
 # KeelBase Java Starter
 
-让 **Java / Spring 系统接入 KeelBase 作为受治理的 AI 工具**的 Spring Boot Starter（核心可用版）。
+> **Give legacy Java/Spring systems governed AI capabilities.** A Spring Boot starter that connects your existing systems to [KeelBase](https://github.com/rain6fish/KeelBase) as governed AI tools — delegated identity, proxy-tool export, and compensation endpoints. Apache-2.0.
 
-> KeelBase（[github.com/rain6fish/KeelBase](https://github.com/rain6fish/KeelBase)）是开源「企业 AI 信任运行时」。
-> 你的存量 Java 系统无需重写，用本 Starter 把 REST 端点声明为 AI 工具——AI 以登录用户身份操作你的数据，
-> 每次调用都过 KeelBase 治理层（行级权限 / 写操作人工确认 / 审计哈希链 / 副作用可撤销）。
+> KeelBase is an open-source **Enterprise AI Trust Runtime**. With this starter, your existing Java/Spring REST endpoints become AI tools: the AI operates your real data under KeelBase governance — row-level permissions, human confirmation for writes, tamper-evident audit chains, and revocable side effects.
 
-## 它能做什么
+## What it does
 
-1. **委托验签**（`DelegationAuthFilter`）：校验 KeelBase 转发请求携带的委托 JWT（HS256 + audience + issuer + 过期），映射到本地用户，注入 `@DelegationUser DelegationPrincipal`。无 Spring Security 也能用；classpath 含 Security 时自动写入 SecurityContext。
-2. **工具声明 + 导出**（`@KeelbaseTool`）：给 `@RestController` 方法加注解，`GET /keelbase/proxy-tools/export` 导出 `ai_proxy_tools` 配置——写入 KeelBase Settings 即注册为 AI 工具。类型/风险级/参数口径与 KeelBase 生成器对齐。
-3. **补偿脚手架**（`KeelBaseCompensationSupport`）：AI 写副作用的撤销补偿端点——委托身份 + 幂等 + 审计，开箱即用。
+1. **Delegated identity** (`DelegationAuthFilter`): verifies the delegation JWT that KeelBase attaches to forwarded calls (HS256 + audience + issuer + expiry), maps it to a local user, and injects `@DelegationUser DelegationPrincipal`. Works without Spring Security; auto-writes the Spring Security context when Security is on the classpath.
+2. **Tool declaration + export** (`@KeelbaseTool`): annotate your `@RestController` methods, and `GET /keelbase/proxy-tools/export` produces the `ai_proxy_tools` config — write it into KeelBase Settings to register the tools. Types / risk levels / parameters align with the KeelBase generator.
+3. **Compensation scaffold** (`KeelBaseCompensationSupport`): revocation endpoints for AI write side effects — delegated identity, idempotency, and audit out of the box.
 
-## 快速开始（示例）
+## Quick start (example)
 
 ```bash
-# 1. 启动示例（默认 8081）
+# 1. Run the example (default 8081)
 cd keelbase-java-example
 mvn spring-boot:run
 
-# 2. 导出 ai_proxy_tools 配置
+# 2. Export the ai_proxy_tools config
 curl http://localhost:8081/keelbase/proxy-tools/export
 
-# 3. 写入 KeelBase（PUT /settings/ai_proxy_tools，value 为导出 JSON 的字符串），重启 KeelBase
+# 3. Write it into KeelBase (PUT /settings/ai_proxy_tools, value = the exported JSON as a string), restart KeelBase
 ```
 
-## 配置（application.yml）
+## Configuration (application.yml)
 
 ```yaml
 keelbase:
   delegation:
-    secret: ${KEELBASE_DELEGATION_SECRET:}          # 必填，与 KeelBase DELEGATION_SECRET 一致（≥32 字节）
-    audience: legacy-crm                             # 必填，须等于 ai_proxy_tools 顶层 audience
-    issuer: keelbase                                 # 可选
-    paths:                                           # 受保护路径（无 Authorization 头即拒绝）
+    secret: ${KEELBASE_DELEGATION_SECRET:}          # required; same as KeelBase DELEGATION_SECRET (>= 32 bytes)
+    audience: legacy-crm                             # required; must equal the ai_proxy_tools top-level audience
+    issuer: keelbase                                 # optional
+    paths:                                           # protected paths (rejected when no Authorization header)
       - /api/compensation
   tools:
-    base-url: http://localhost:8081/api              # 目标 baseUrl（导出用，不来自注解）
+    base-url: http://localhost:8081                  # target server root (export; baseUrl + full path convention)
   compensation:
-    ledger-size: 1024                                # 幂等账本 LRU 上限
+    ledger-size: 1024                                # idempotency ledger LRU cap
 ```
 
-## 注解示例
+## Annotation example
 
 ```java
 @RestController
@@ -49,11 +47,11 @@ keelbase:
 public class FollowupController extends KeelBaseCompensationSupport<Map<String, Object>> {
 
     @GetMapping("/followups")
-    @KeelbaseTool(name = "list_followups", description = "列出跟进任务（读，R1 自动）")
+    @KeelbaseTool(name = "list_followups", description = "List follow-up tasks (read, R1 auto)")
     public List<Map<String, Object>> list() { ... }
 
     @PostMapping("/followups")
-    @KeelbaseTool(name = "create_followup", description = "创建跟进任务（写，R3 需确认）",
+    @KeelbaseTool(name = "create_followup", description = "Create a follow-up task (write, R3 needs confirmation)",
                   revokePath = "DELETE /api/compensation/followups/{id}")
     public Map<String, Object> create(@RequestBody FollowupRequest req,
                                       @DelegationUser DelegationPrincipal principal) { ... }
@@ -66,32 +64,41 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
 }
 ```
 
-## 模块
+## Modules
 
-| 模块 | 说明 |
+| Module | Purpose |
 |---|---|
 | `keelbase-tools-annotation` | `@KeelbaseTool` / `KeelbaseRiskLevel` / `@EnableKeelbaseTools` |
-| `keelbase-delegation-filter` | 委托验签过滤器 + 用户映射 SPI + `@DelegationUser` |
-| `keelbase-tools-export` | 注解扫描器 + 类型映射 + `/keelbase/proxy-tools/export` |
-| `keelbase-compensation` | 补偿脚手架 + 幂等账本 + 审计钩子 |
-| `keelbase-spring-boot-autoconfigure` | 自动装配（三件套 + 可选 Security 适配） |
-| `keelbase-spring-boot-starter` | 聚合器（用户只引这个） |
-| `keelbase-java-example` | 示例应用（不发布） |
+| `keelbase-delegation-filter` | Delegation verification filter + user-mapping SPI + `@DelegationUser` |
+| `keelbase-tools-export` | Annotation scanner + type mapping + `/keelbase/proxy-tools/export` |
+| `keelbase-compensation` | Compensation scaffold + idempotency ledger + audit hook |
+| `keelbase-spring-boot-autoconfigure` | Auto-configuration (all three pieces + optional Security adapter) |
+| `keelbase-spring-boot-starter` | Aggregator (the only dependency you need) |
+| `keelbase-java-example` | Example app (not published) |
 
-## 契约（与 KeelBase 对齐）
+## Contract (aligned with KeelBase)
 
-- 委托 JWT：`{sub, oidcSub?, aud, iss:'keelbase', iat, exp}`，HS256，`DELEGATION_SECRET`。
-- `ai_proxy_tools`：`{baseUrl, audience, tools:[{name, description, method, path, parameters, queryParams, riskLevel, revokePath}]}`；读 GET=R1 / 写 POST·PUT·PATCH·DELETE=R3；类型 integer/number/boolean/string（复杂结构→string）。
-- 撤销：`proxy-revoker` 调补偿端点（带委托身份），须返回 2xx + 幂等语义。
+- Delegation JWT: `{sub, oidcSub?, aud, iss:'keelbase', iat, exp}`, HS256, `DELEGATION_SECRET`.
+- `ai_proxy_tools`: `{baseUrl, audience, tools:[{name, description, method, path, parameters, queryParams, riskLevel, revokePath}]}`; read GET=R1 / write POST·PUT·PATCH·DELETE=R3; types integer/number/boolean/string (complex → string).
+- `baseUrl` is the **server root**; tool `path` is the **full path** (e.g. `/api/followups`). KeelBase's ProxyTool concatenates `baseUrl + path`.
+- Revocation: `proxy-revoker` calls the compensation endpoint (with delegated identity); it must return 2xx and be idempotent.
 
-## 明确不做（核心版）
+## Explicitly out of scope (core version)
 
-Maven/Gradle plugin、Spring Boot 2 / Java 8 / WebFlux、Java 侧 Agent 编排、多租户、R4 双人审批 Java 特化。KeelBase 工具热更新需重启（配置写入 Settings 后重启生效）。
+Maven/Gradle plugin, Spring Boot 2 / Java 8 / WebFlux, Java-side agent orchestration, multi-tenancy, R4 dual-approval Java specialization. KeelBase tool hot-reload requires a restart (write the config to Settings, then restart).
 
-## 构建与测试
+## Build & test
 
 ```bash
-mvn install   # 编译全部模块 + 跑 JUnit（filter 6 场景 / 类型映射 / 补偿幂等 / 示例导出与补偿 e2e）
+mvn install   # compiles all modules + runs JUnit (filter 6 scenarios / type mapping / compensation idempotency / example export & compensation e2e)
+```
+
+## E2E verification
+
+```bash
+# with KeelBase (localhost:3000) and the example (localhost:8081) running:
+node scripts/verify-java-starter-e2e.mjs --configure   # export + write ai_proxy_tools (then restart KeelBase)
+node scripts/verify-java-starter-e2e.mjs --verify --llm # full loop: confirmation gate -> streaming approve -> proxy write -> audit -> revoke -> compensation
 ```
 
 ## License
