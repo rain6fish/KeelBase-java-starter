@@ -4,6 +4,10 @@
 
 > KeelBase is an open-source **Enterprise AI Trust Runtime**. With this starter, your existing Java/Spring REST endpoints become AI tools: the AI operates your real data under KeelBase governance — row-level permissions, human confirmation for writes, tamper-evident audit chains, and revocable side effects.
 
+<p align="center">
+  <img src="docs/keelbase-java-starter-position.svg" alt="KeelBase Java Starter — positioned between the KeelBase Trust Runtime and your Java business systems" width="840">
+</p>
+
 ## What it does
 
 1. **Delegated identity** (`DelegationAuthFilter`): verifies the delegation JWT that KeelBase attaches to forwarded calls (HS256 + audience + issuer + expiry), maps it to a local user, and injects `@DelegationUser DelegationPrincipal`. Works without Spring Security; auto-writes the Spring Security context when Security is on the classpath.

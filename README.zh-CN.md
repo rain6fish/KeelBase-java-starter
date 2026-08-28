@@ -4,6 +4,10 @@
 
 > KeelBase 是开源「企业 AI 信任运行时」。用本 Starter，你的存量 Java/Spring REST 端点即可成为 AI 工具——AI 在你的真实数据上干活，全程过 KeelBase 治理层（行级权限 / 写操作人工确认 / 防篡改审计哈希链 / 副作用可撤销）。
 
+<p align="center">
+  <img src="docs/keelbase-java-starter-position.svg" alt="KeelBase Java Starter 的位置——处于 KeelBase Trust Runtime 与你的 Java 业务系统之间" width="840">
+</p>
+
 ## 它能做什么
 
 1. **委托身份**（`DelegationAuthFilter`）：校验 KeelBase 转发请求携带的委托 JWT（HS256 + audience + issuer + 过期），映射到本地用户，注入 `@DelegationUser DelegationPrincipal`。无 Spring Security 也能用；classpath 含 Security 时自动写入 SecurityContext。
