@@ -48,7 +48,7 @@ public class DelegationAuthFilter extends OncePerRequestFilter {
     /**
      * @param properties 委托配置（secret/audience/issuer/paths）
      * @param userMapper 身份映射 SPI（可传默认实现）
-     * @throws IllegalStateException secret 缺失或不足 32 字节（HS256 硬要求）
+     * @throws IllegalStateException secret 缺失或不足 32 字节（HS256 硬要求），或 audience 缺失
      */
     public DelegationAuthFilter(DelegationProperties properties, KeelBaseUserMapper userMapper) {
         this.properties = properties;
@@ -63,6 +63,11 @@ public class DelegationAuthFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             throw new IllegalStateException(
                     "keelbase.delegation.secret 无效（HS256 需 ≥32 字节）: " + e.getMessage(), e);
+        }
+        String audience = properties.getAudience();
+        if (audience == null || audience.isBlank()) {
+            throw new IllegalStateException(
+                    "keelbase.delegation.audience 未配置：必须等于 KeelBase ai_proxy_tools 顶层 audience（目标系统标识）");
         }
     }
 

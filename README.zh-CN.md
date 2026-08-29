@@ -10,9 +10,23 @@
 
 ## 它能做什么
 
-1. **委托身份**（`DelegationAuthFilter`）：校验 KeelBase 转发请求携带的委托 JWT（HS256 + audience + issuer + 过期），映射到本地用户，注入 `@DelegationUser DelegationPrincipal`。无 Spring Security 也能用；classpath 含 Security 时自动写入 SecurityContext。
-2. **工具声明 + 导出**（`@KeelbaseTool`）：给 `@RestController` 方法加注解，`GET /keelbase/proxy-tools/export` 导出 `ai_proxy_tools` 配置——写入 KeelBase Settings 即注册为 AI 工具。类型/风险级/参数口径与 KeelBase 生成器对齐。
+1. **委托身份**（`DelegationAuthFilter`）：校验 KeelBase 转发请求携带的委托 JWT（HS256 + audience + issuer + 过期），映射到本地用户，注入 `@DelegationUser DelegationPrincipal`。无 Spring Security 也能用；classpath 含 Security 时自动写入 SecurityContext。`secret` 与 `audience` 均为必填——缺任一项启动即失败（fail-fast）。
+2. **工具声明 + 导出**（`@KeelbaseTool`）：给 `@RestController` 方法加注解，`GET /keelbase/proxy-tools/export` 导出 `ai_proxy_tools` 配置——写入 KeelBase Settings 即注册为 AI 工具。类型/风险级/参数口径与 KeelBase 生成器对齐；参数提取对齐 Jackson（继承 / @JsonIgnore / record）；audience 单一来源（tools 回退 delegation）。
 3. **补偿脚手架**（`KeelBaseCompensationSupport`）：AI 写副作用的撤销补偿端点——委托身份 + 幂等 + 审计，开箱即用。
+4. **诊断端点**（`GET /keelbase/status`）：委托配置、解析后的导出 audience、工具计数与配置告警——绝不泄露密钥。
+
+## 文档
+
+| 主题 | 说明 |
+|---|---|
+| [快速开始](docs/quickstart.zh-CN.md) | 10 分钟端到端接入指南 |
+| [配置参考](docs/configuration.zh-CN.md) | 全量属性参考 + audience 解析规则 |
+| [委托身份与授权](docs/delegated-identity.zh-CN.md) | JWT、验签、用户映射、Spring Security、行级归属 |
+| [工具声明与导出](docs/tool-declaration.zh-CN.md) | 注解、参数提取、类型映射、风险级 |
+| [补偿与撤销](docs/compensation.zh-CN.md) | 撤销调用契约、幂等、审计、多实例 |
+| [排障与 FAQ](docs/troubleshooting.zh-CN.md) | 错误码、常见坑、核对清单 |
+
+英文版在同目录（`.md`）。
 
 ## 快速开始（示例）
 
@@ -21,11 +35,16 @@
 cd keelbase-java-example
 mvn spring-boot:run
 
-# 2. 导出 ai_proxy_tools 配置
+# 2. 诊断接线（委托配置 / 解析后 audience / 工具计数 / 告警）
+curl http://localhost:8081/keelbase/status
+
+# 3. 导出 ai_proxy_tools 配置
 curl http://localhost:8081/keelbase/proxy-tools/export
 
-# 3. 写入 KeelBase（PUT /settings/ai_proxy_tools，value 为导出 JSON 的字符串），重启 KeelBase
+# 4. 写入 KeelBase（PUT /settings/ai_proxy_tools，value 为导出 JSON 的字符串），重启 KeelBase
 ```
+
+尚未发布到 Maven Central（待 OSSRH 账号）——先用 `mvn install` 本地安装一次，再按 `cn.com.keelbase:keelbase-spring-boot-starter:0.1.0-SNAPSHOT` 消费（Maven 或 Gradle）。完整步骤见 [docs/quickstart.zh-CN.md](docs/quickstart.zh-CN.md)。
 
 ## 配置（application.yml）
 
@@ -39,6 +58,9 @@ keelbase:
       - /api/compensation
   tools:
     base-url: http://localhost:8081                  # 服务器根（导出；baseUrl + 完整 path 约定）
+    # audience: legacy-crm                           # 可选——缺省回退 delegation.audience
+    # export-enabled: true                           # 注册完成后可关闭导出端点
+    # status-enabled: true                           # 高安全环境可关闭 /keelbase/status
   compensation:
     ledger-size: 1024                                # 幂等账本 LRU 上限
 ```

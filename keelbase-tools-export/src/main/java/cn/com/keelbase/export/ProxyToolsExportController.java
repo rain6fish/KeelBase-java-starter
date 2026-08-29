@@ -14,24 +14,32 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>接入步骤：{@code GET /keelbase/proxy-tools/export} → 结果作为
  * {@code {"value":"<json 字符串>","type":"string"}} PUT {@code /settings/ai_proxy_tools}
  * → 重启 KeelBase 生效。
+ *
+ * <p>配置经 {@link ExportConfigResolver} 统一处理：audience 单一来源（tools → delegation 回退）、
+ * baseUrl 去尾部斜杠、缺省必填校验（缺失返回 500 + 明确原因）。
  */
 @RestController
 @RequestMapping("/keelbase/proxy-tools")
 public class ProxyToolsExportController {
 
     private final ProxyToolsScanner scanner;
-    private final ProxyToolExportProperties properties;
+    private final ExportConfigResolver resolver;
 
-    public ProxyToolsExportController(ProxyToolsScanner scanner, ProxyToolExportProperties properties) {
+    public ProxyToolsExportController(ProxyToolsScanner scanner, ExportConfigResolver resolver) {
         this.scanner = scanner;
-        this.properties = properties;
+        this.resolver = resolver;
     }
 
     @GetMapping("/export")
     public ProxyToolsConfig export() {
-        if (!properties.isExportEnabled()) {
+        if (!resolver.exportEnabled()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "export disabled");
         }
-        return new ProxyToolsConfig(properties.getBaseUrl(), properties.getAudience(), scanner.scan());
+        try {
+            resolver.validate();
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+        return new ProxyToolsConfig(resolver.normalizedBaseUrl(), resolver.effectiveAudience(), scanner.scan());
     }
 }

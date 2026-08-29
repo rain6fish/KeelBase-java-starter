@@ -10,9 +10,23 @@
 
 ## What it does
 
-1. **Delegated identity** (`DelegationAuthFilter`): verifies the delegation JWT that KeelBase attaches to forwarded calls (HS256 + audience + issuer + expiry), maps it to a local user, and injects `@DelegationUser DelegationPrincipal`. Works without Spring Security; auto-writes the Spring Security context when Security is on the classpath.
-2. **Tool declaration + export** (`@KeelbaseTool`): annotate your `@RestController` methods, and `GET /keelbase/proxy-tools/export` produces the `ai_proxy_tools` config — write it into KeelBase Settings to register the tools. Types / risk levels / parameters align with the KeelBase generator.
+1. **Delegated identity** (`DelegationAuthFilter`): verifies the delegation JWT that KeelBase attaches to forwarded calls (HS256 + audience + issuer + expiry), maps it to a local user, and injects `@DelegationUser DelegationPrincipal`. Works without Spring Security; auto-writes the Spring Security context when Security is on the classpath. `secret` and `audience` are required — the app fails fast at startup if either is missing.
+2. **Tool declaration + export** (`@KeelbaseTool`): annotate your `@RestController` methods, and `GET /keelbase/proxy-tools/export` produces the `ai_proxy_tools` config — write it into KeelBase Settings to register the tools. Types / risk levels / parameters align with the KeelBase generator. Jackson-aware parameter extraction (inheritance, `@JsonIgnore`, records) and a single `audience` source of truth (tools falls back to delegation).
 3. **Compensation scaffold** (`KeelBaseCompensationSupport`): revocation endpoints for AI write side effects — delegated identity, idempotency, and audit out of the box.
+4. **Diagnostics** (`GET /keelbase/status`): delegation config, resolved export audience, tool count, and configuration warnings — without ever leaking the secret.
+
+## Documentation
+
+| Topic | Description |
+|---|---|
+| [quickstart](docs/quickstart.md) | 10-minute end-to-end wiring guide |
+| [configuration](docs/configuration.md) | Full property reference + audience resolution rules |
+| [delegated-identity](docs/delegated-identity.md) | JWT, verification, user mapping, Spring Security, row-level ownership |
+| [tool-declaration](docs/tool-declaration.md) | Annotation, parameter extraction, type mapping, risk levels |
+| [compensation](docs/compensation.md) | Revocation call contract, idempotency, audit, multi-instance |
+| [troubleshooting](docs/troubleshooting.md) | Error codes, common mistakes, verification checklist |
+
+Chinese versions live alongside each file (`*.zh-CN.md`).
 
 ## Quick start (example)
 
@@ -21,11 +35,16 @@
 cd keelbase-java-example
 mvn spring-boot:run
 
-# 2. Export the ai_proxy_tools config
+# 2. Diagnose the wiring (delegation config, resolved audience, tool count, warnings)
+curl http://localhost:8081/keelbase/status
+
+# 3. Export the ai_proxy_tools config
 curl http://localhost:8081/keelbase/proxy-tools/export
 
-# 3. Write it into KeelBase (PUT /settings/ai_proxy_tools, value = the exported JSON as a string), restart KeelBase
+# 4. Write it into KeelBase (PUT /settings/ai_proxy_tools, value = the exported JSON as a string), restart KeelBase
 ```
+
+Not yet on Maven Central (OSSRH pending) — install locally once with `mvn install`, then consume as `cn.com.keelbase:keelbase-spring-boot-starter:0.1.0-SNAPSHOT` (Maven or Gradle). Full steps in [docs/quickstart.md](docs/quickstart.md).
 
 ## Configuration (application.yml)
 
@@ -39,6 +58,9 @@ keelbase:
       - /api/compensation
   tools:
     base-url: http://localhost:8081                  # target server root (export; baseUrl + full path convention)
+    # audience: legacy-crm                           # optional — falls back to delegation.audience
+    # export-enabled: true                           # disable the export endpoint after registration
+    # status-enabled: true                           # disable the /keelbase/status endpoint in lockdown
   compensation:
     ledger-size: 1024                                # idempotency ledger LRU cap
 ```

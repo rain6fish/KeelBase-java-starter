@@ -13,11 +13,18 @@ All notable changes to this project are documented in this file. Format follows 
 - **`keelbase-spring-boot-autoconfigure` / `keelbase-spring-boot-starter`** — auto-configuration and aggregator modules.
 - **`keelbase-java-example`** — reference Spring Boot app (read R1 / write R3 with revokePath / compensation endpoint).
 - **E2E verification** — `scripts/verify-java-starter-e2e.mjs` (configure + verify), validated against a real KeelBase: confirmation gate → streaming approve → proxy write with delegated identity → audit → revoke → compensation.
+- **Diagnostic endpoint** — `GET /keelbase/status` reports delegation config, resolved export audience, tool count, and configuration warnings (audience mismatch, missing base-url, no tools); never leaks the secret. Controlled by `keelbase.tools.status-enabled`.
+- **Config resolver** — `ExportConfigResolver`: single `audience` source of truth (`keelbase.tools.audience` falls back to `keelbase.delegation.audience`), `base-url` trailing-slash normalization, and export validation that returns a clear 500 when `base-url`/`audience` are missing.
+- **Jackson-aware body parameter extraction** — `RequestBodyFields`: inherited DTO fields included, `@JsonIgnore`/static/transient skipped, `@JsonProperty` name & `required` respected, records supported.
+- **Scanner warnings** — skipped tools (invalid name, unresolvable mapping) and auto-renamed name conflicts are logged instead of silently dropped.
+- **Integration docs** — `docs/` quickstart / configuration / delegated-identity / tool-declaration / compensation / troubleshooting, bilingual (en + zh-CN).
 
 ### Fixed
 
 - Verification script must **approve while streaming** — the confirmation gate suspends the SSE stream until a decision, so awaiting the full stream first lets the token expire (404).
 - `baseUrl` convention is the **server root** + full tool `path` (avoids a doubled `/api` prefix).
+- `DelegationAuthFilter` now also **requires `audience` at startup** (fail-fast with a clear message) instead of rejecting every delegated call at runtime with 403.
+- Example integration test aligned with the server-root `baseUrl` convention (fixes the CI failure).
 
 ## [0.1.0-SNAPSHOT]
 

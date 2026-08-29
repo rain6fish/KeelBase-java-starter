@@ -7,10 +7,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * <ul>
  *   <li>{@code keelbase.tools.base-url}：目标系统 baseUrl（部署相关，不来自注解），写入导出的
- *       {@code ai_proxy_tools} 配置；</li>
- *   <li>{@code keelbase.tools.audience}：目标系统 audience（与 {@code keelbase.delegation.audience}
- *       一致）；</li>
- *   <li>{@code keelbase.tools.export-enabled}：导出端点开关（缺省 true）。</li>
+ *       {@code ai_proxy_tools} 配置。约定为<b>服务器根</b>（如 {@code http://host:8081}），
+ *       工具 path 为完整路径；导出时自动去尾部斜杠。</li>
+ *   <li>{@code keelbase.tools.audience}：目标系统 audience。缺省回退
+ *       {@code keelbase.delegation.audience}（单一来源，避免两处配置不一致）。</li>
+ *   <li>{@code keelbase.tools.export-enabled}：导出端点开关（缺省 true，生产可关）。</li>
+ *   <li>{@code keelbase.tools.status-enabled}：诊断端点开关（缺省 true，生产可关）。</li>
  * </ul>
  */
 @ConfigurationProperties(prefix = "keelbase.tools")
@@ -22,10 +24,14 @@ public class ProxyToolExportProperties {
 
     private boolean exportEnabled = true;
 
+    private boolean statusEnabled = true;
+
     public String getBaseUrl() { return baseUrl; }
     public void setBaseUrl(String baseUrl) { this.baseUrl = baseUrl; }
     public String getAudience() { return audience; }
     public void setAudience(String audience) { this.audience = audience; }
     public boolean isExportEnabled() { return exportEnabled; }
     public void setExportEnabled(boolean exportEnabled) { this.exportEnabled = exportEnabled; }
+    public boolean isStatusEnabled() { return statusEnabled; }
+    public void setStatusEnabled(boolean statusEnabled) { this.statusEnabled = statusEnabled; }
 }

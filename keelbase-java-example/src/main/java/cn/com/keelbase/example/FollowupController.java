@@ -65,6 +65,25 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
     }
 
     /**
+     * 查询端点：演示继承 DTO 参数提取（父类 page/limit 导出、@JsonIgnore 不导出）。
+     * 写方法 → 默认 R3 需确认（KeelBase 侧）。
+     */
+    @PostMapping("/followups/search")
+    @KeelbaseTool(name = "search_followups",
+            description = "按关键词查询跟进任务（演示继承 DTO 参数提取：父类字段导出，@JsonIgnore 不导出）")
+    public List<Map<String, Object>> search(@RequestBody FollowupQuery query) {
+        String keyword = query.getKeyword() == null ? "" : query.getKeyword().toLowerCase();
+        List<Map<String, Object>> hits = new ArrayList<>();
+        for (Map<String, Object> item : store.values()) {
+            String content = String.valueOf(item.get("content")).toLowerCase();
+            if (keyword.isBlank() || content.contains(keyword)) {
+                hits.add(item);
+            }
+        }
+        return hits;
+    }
+
+    /**
      * 补偿端点：KeelBase 撤销 AI 创建的跟进任务时调用（委托身份 + 幂等 + 审计由基类处理）。
      * DelegationAuthFilter 保护（paths 含 /api/compensation）。
      */

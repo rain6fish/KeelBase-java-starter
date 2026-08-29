@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -103,6 +104,15 @@ class DelegationAuthFilterTest {
                 .perform(get("/api/echo").header("Authorization", "Bearer " + t))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("delegation.audience_mismatch"));
+    }
+
+    @Test
+    void missingAudience_failsFast_atConstruction() {
+        DelegationProperties p = new DelegationProperties();
+        p.setSecret(SECRET);
+        assertThrows(IllegalStateException.class,
+                () -> new DelegationAuthFilter(p, new DefaultKeelBaseUserMapper()),
+                "audience 缺失应启动即失败（fail-fast），避免运行时全部 403");
     }
 
     @Test

@@ -2,10 +2,8 @@ package cn.com.keelbase.export;
 
 import cn.com.keelbase.annotation.KeelbaseTool;
 import cn.com.keelbase.annotation.KeelbaseRiskLevel;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,14 +14,11 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * 扫描带 {@code @KeelbaseTool} 的 Spring MVC handler 方法，推断为代理工具配置。
@@ -33,6 +28,8 @@ import java.util.stream.Collectors;
  * 读 GET=R1 / 写 POST·PUT·PATCH·DELETE=R3、header 参数跳过、名称冲突去重。
  */
 public class ProxyToolsScanner {
+
+    private static final Logger log = LoggerFactory.getLogger(ProxyToolsScanner.class);
 
     private static final List<String> WRITE_METHODS = List.of("POST", "PUT", "PATCH", "DELETE");
     private static final List<Class<?>> SKIPPED_PARAM_TYPES = List.of(
@@ -68,6 +65,8 @@ public class ProxyToolsScanner {
                 while (seenNames.contains(name + "_" + i)) {
                     i += 1;
                 }
+                log.warn("keelbase 工具名冲突：'{}' 已自动改名为 '{}'（建议显式 @KeelbaseTool(name=...) 避免歧义）",
+                        name, name + "_" + i);
                 name = name + "_" + i;
                 tool = new ProxyToolItem(name, tool.description(), tool.method(), tool.path(),
                         tool.parameters(), tool.queryParams(), tool.riskLevel(), tool.revokePath());
@@ -91,12 +90,16 @@ public class ProxyToolsScanner {
                     .findFirst().orElse(null);
         }
         if (method == null || path == null) {
+            log.warn("keelbase 工具跳过 {}#{}: 无法解析 HTTP method/path（检查 @RequestMapping 映射是否完整）",
+                    handler.getMethod().getDeclaringClass().getSimpleName(), handler.getMethod().getName());
             return null;
         }
         boolean write = WRITE_METHODS.contains(method);
 
         String name = ann.name().isBlank() ? camelToSnake(handler.getMethod().getName()) : ann.name();
         if (name == null || !name.matches("^[a-z][a-z0-9_]{0,39}$")) {
+            log.warn("keelbase 工具跳过 {}#{}: 工具名 '{}' 非法（需 ^[a-z][a-z0-9_]{{0,39}}$；缺省由方法名 camelCase→snake_case）",
+                    handler.getMethod().getDeclaringClass().getSimpleName(), handler.getMethod().getName(), name);
             return null;
         }
         String description = ann.description().isBlank() ? method + " " + path : ann.description();
@@ -128,13 +131,12 @@ public class ProxyToolsScanner {
                     queryParams.add(pname);
                 }
             } else if (rb != null && mp.getParameterType() != null) {
-                for (Field f : mp.getParameterType().getDeclaredFields()) {
-                    String fname = sanitizeParamName(f.getName());
+                for (RequestBodyFields.BodyField bf : RequestBodyFields.of(mp.getParameterType())) {
+                    String fname = sanitizeParamName(bf.name());
                     if (fname == null || !seen.add(fname)) {
                         continue;
                     }
-                    parameters.add(new ToolParameter(fname, TypeMapper.map(f.getType()),
-                            fieldDescription(f), isRequiredField(f)));
+                    parameters.add(new ToolParameter(fname, bf.type(), bf.description(), bf.required()));
                 }
             } else if (!SKIPPED_PARAM_TYPES.contains(mp.getParameterType())) {
                 // 其他未知参数（如 @DelegationUser 自定义对象）跳过
@@ -172,24 +174,5 @@ public class ProxyToolsScanner {
         }
         String n = s.replaceAll("[-\\s]", "_");
         return n.matches("^[a-z][a-zA-Z0-9_]{0,29}$") ? n : null;
-    }
-
-    private static boolean isRequiredField(Field f) {
-        if (f.isAnnotationPresent(NotNull.class)
-                || f.isAnnotationPresent(NotBlank.class)
-                || f.isAnnotationPresent(NotEmpty.class)) {
-            return true;
-        }
-        JsonProperty jp = f.getAnnotation(JsonProperty.class);
-        return jp != null && jp.required();
-    }
-
-    private static String fieldDescription(Field f) {
-        if (f.getType().isEnum()) {
-            Object[] constants = f.getType().getEnumConstants();
-            return "可选: " + Arrays.stream(constants)
-                    .map(Object::toString).collect(Collectors.joining("/"));
-        }
-        return "";
     }
 }

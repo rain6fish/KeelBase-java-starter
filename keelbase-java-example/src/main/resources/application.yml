@@ -17,5 +17,4 @@ keelbase:
     # 注意约定：KeelBase ProxyTool 用 baseUrl + 完整 path 拼接，因此 baseUrl 应为「服务器根」
     # （如 http://localhost:8081），工具 path 为完整路径（如 /api/followups）。
     base-url: http://localhost:8081
-    # audience（导出 ai_proxy_tools 配置用，须与 delegation.audience 一致）
-    audience: legacy-crm
+    # audience 缺省回退 delegation.audience（单一来源，此处不显式配置以演示回退）
