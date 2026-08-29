@@ -24,6 +24,7 @@
 | [delegated-identity](docs/delegated-identity.md) | JWT, verification, user mapping, Spring Security, row-level ownership |
 | [tool-declaration](docs/tool-declaration.md) | Annotation, parameter extraction, type mapping, risk levels |
 | [compensation](docs/compensation.md) | Revocation call contract, idempotency, audit, multi-instance |
+| [client](docs/client.md) | Delegation-token lifecycle (`KeelbaseClient`) + audit reporting |
 | [troubleshooting](docs/troubleshooting.md) | Error codes, common mistakes, verification checklist |
 | [production-checklist](docs/production-checklist.md) | Hardening, secret rotation, ops monitoring before go-live |
 
@@ -99,7 +100,8 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
 | `keelbase-delegation-filter` | Delegation verification filter + user-mapping SPI + `@DelegationUser` |
 | `keelbase-tools-export` | Annotation scanner + type mapping + `/keelbase/proxy-tools/export` |
 | `keelbase-compensation` | Compensation scaffold + idempotency ledger + audit hook |
-| `keelbase-spring-boot-autoconfigure` | Auto-configuration (all three pieces + optional Security adapter) |
+| `keelbase-client` | `KeelbaseClient` (delegation-token lifecycle) + audit reporting to the governance plane |
+| `keelbase-spring-boot-autoconfigure` | Auto-configuration (all four pieces + optional Security adapter) |
 | `keelbase-spring-boot-starter` | Aggregator (the only dependency you need) |
 | `keelbase-java-example` | Example app (not published) |
 

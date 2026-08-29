@@ -4,7 +4,9 @@ All notable changes to this project are documented in this file. Format follows 
 
 ## [Unreleased]
 
-_No unreleased changes yet._
+### Added
+
+- **`keelbase-client`** — `KeelbaseClient` (delegation-token lifecycle: `obtain` / `obtainAndCache` with proactive refresh / local `verify`, audience-bound) + `KeelbaseAuditReporter` (async audit reporting to the governance plane, D2-3a `/external/audit`, local-log fallback when unconfigured).
 
 ## [0.1.0] - 2026-08-29
 

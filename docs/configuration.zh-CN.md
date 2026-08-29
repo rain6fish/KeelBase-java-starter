@@ -15,6 +15,12 @@
 | `keelbase.tools.export-enabled` | boolean | `true` | — | 控制 `GET /keelbase/proxy-tools/export`。注册完成后生产可关。 |
 | `keelbase.tools.status-enabled` | boolean | `true` | — | 控制 `GET /keelbase/status`（诊断端点，绝不泄露密钥）。 |
 | `keelbase.compensation.ledger-size` | integer | `1024` | — | 补偿端点的进程内幂等账本 LRU 上限。 |
+| `keelbase.client.base-url` | string | — | — | KeelBase 服务根（如 `http://localhost:3000`），调 `POST /api/v1/auth/delegation-token`。未配置 → `KeelbaseClient.obtain` 不可用（仅本地 `verify`）。见[客户端与审计上报](client.zh-CN.md)。 |
+| `keelbase.client.audience` | string | — | — | 委托 token 的目标 audience。**缺省回退 `keelbase.delegation.audience`。** |
+| `keelbase.client.connect-timeout` / `read-timeout` | duration | `3s` / `10s` | — | 委托 token 调用的 HTTP 超时。 |
+| `keelbase.audit.base-url` | string | — | — | 治理台服务根（如 `http://localhost:3001`），审计上报 D2-3a `/external/audit`。未配置 → 上报禁用（仅本地日志）。 |
+| `keelbase.audit.api-key` | string | — | — | 治理台服务身份（`GOVERNANCE_API_KEY`），`x-api-key` 头。 |
+| `keelbase.audit.enabled` | boolean | `true` | — | 审计上报总开关；`base-url` 未配置时仍整体禁用。 |
 
 ## 环境变量
 
@@ -50,6 +56,12 @@ keelbase:
     status-enabled: true      # 诊断用；高安全环境可关
   compensation:
     ledger-size: 4096
+  client:
+    base-url: ${KEELBASE_URL:http://localhost:3000}
+    # audience: legacy-crm            # 可选；缺省回退 delegation.audience
+  audit:
+    # base-url: ${GOVERNANCE_URL:}    # 未配置 → 仅本地审计日志
+    # api-key: ${GOVERNANCE_API_KEY:}
 ```
 
 各必填项对应的失败模式见[排障](troubleshooting.zh-CN.md)。

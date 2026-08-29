@@ -18,3 +18,11 @@ keelbase:
     # （如 http://localhost:8081），工具 path 为完整路径（如 /api/followups）。
     base-url: http://localhost:8081
     # audience 缺省回退 delegation.audience（单一来源，此处不显式配置以演示回退）
+  client:
+    # KeelbaseClient：委托 token 获取（调 KeelBase /api/v1/auth/delegation-token）。
+    # 演示用：KeelBase 服务根 + audience（缺省回退 delegation.audience）
+    # base-url: http://localhost:3000
+  audit:
+    # 审计上报到治理台（D2-3a /external/audit）：配置 base-url + api-key 后启用，未配置仅本地日志
+    # base-url: http://localhost:3001
+    # api-key: ${GOVERNANCE_API_KEY:}

@@ -15,6 +15,12 @@ All properties live under the `keelbase.*` prefix. Spring Boot's [relaxed bindin
 | `keelbase.tools.export-enabled` | boolean | `true` | — | Enables `GET /keelbase/proxy-tools/export`. Turn off in production once registered. |
 | `keelbase.tools.status-enabled` | boolean | `true` | — | Enables `GET /keelbase/status` (diagnostics; never leaks the secret). |
 | `keelbase.compensation.ledger-size` | integer | `1024` | — | LRU cap of the in-memory idempotency ledger for compensation endpoints. |
+| `keelbase.client.base-url` | string | — | — | KeelBase service root (e.g. `http://localhost:3000`) for `POST /api/v1/auth/delegation-token`. Unset → `KeelbaseClient.obtain` disabled (only local `verify` works). See [client](client.md). |
+| `keelbase.client.audience` | string | — | — | Target audience for delegation tokens. **Falls back to `keelbase.delegation.audience`.** |
+| `keelbase.client.connect-timeout` / `read-timeout` | duration | `3s` / `10s` | — | HTTP timeouts for the delegation-token call. |
+| `keelbase.audit.base-url` | string | — | — | Governance control-plane root (e.g. `http://localhost:3001`) for audit reporting (D2-3a `/external/audit`). Unset → reporting disabled (local log only). |
+| `keelbase.audit.api-key` | string | — | — | Governance service identity (`GOVERNANCE_API_KEY`), sent as `x-api-key`. |
+| `keelbase.audit.enabled` | boolean | `true` | — | Master switch for audit reporting; still disabled while `base-url` is unset. |
 
 ## Environment variables
 
@@ -50,6 +56,12 @@ keelbase:
     status-enabled: true      # diagnostics; disable in locked-down environments
   compensation:
     ledger-size: 4096
+  client:
+    base-url: ${KEELBASE_URL:http://localhost:3000}
+    # audience: legacy-crm            # optional; falls back to delegation.audience
+  audit:
+    # base-url: ${GOVERNANCE_URL:}    # unset → local-only audit logging
+    # api-key: ${GOVERNANCE_API_KEY:}
 ```
 
 See [troubleshooting](troubleshooting.md) for the failure modes behind each required property.

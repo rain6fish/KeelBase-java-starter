@@ -1,6 +1,8 @@
 package cn.com.keelbase.example;
 
 import cn.com.keelbase.annotation.KeelbaseTool;
+import cn.com.keelbase.client.KeelbaseAuditEvent;
+import cn.com.keelbase.client.KeelbaseAuditReporter;
 import cn.com.keelbase.compensation.CompensationAuditSink;
 import cn.com.keelbase.compensation.KeelBaseCompensationSupport;
 import cn.com.keelbase.compensation.RevocationLedgerStore;
@@ -39,9 +41,12 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
 
     private final Map<Long, Map<String, Object>> store = new ConcurrentHashMap<>();
     private final AtomicLong idSeq = new AtomicLong(1);
+    private final KeelbaseAuditReporter auditReporter;
 
-    public FollowupController(RevocationLedgerStore ledger, CompensationAuditSink auditSink) {
+    public FollowupController(RevocationLedgerStore ledger, CompensationAuditSink auditSink,
+                              KeelbaseAuditReporter auditReporter) {
         super(ledger, auditSink);
+        this.auditReporter = auditReporter;
     }
 
     @GetMapping("/followups")
@@ -126,15 +131,25 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
     /**
      * 补偿端点：KeelBase 撤销 AI 创建的跟进任务时调用（委托身份 + 幂等 + 审计由基类处理）。
      * DelegationAuthFilter 保护（paths 含 /api/compensation）。
+     * 实际撤销成功后异步上报治理台审计（keelbase.audit.base-url 配置后生效，source=java）。
      */
     @DeleteMapping("/compensation/followups/{id}")
     public ResponseEntity<?> revoke(@PathVariable Long id, HttpServletRequest request) {
-        return handleRevoke(request, id,
+        ResponseEntity<?> result = handleRevoke(request, id,
                 store::get,
                 (item, subject) -> {
                     item.put("cancelled", true);
                     item.put("cancelledBy", subject);
                 },
                 "compensation.followups.revoke");
+        if (result.getStatusCode().is2xxSuccessful()
+                && result.getBody() instanceof Map<?, ?> m
+                && Boolean.FALSE.equals(m.get("idempotent"))) {
+            auditReporter.report(KeelbaseAuditEvent.builder()
+                    .action("compensation.followups.revoke")
+                    .detail("revoked followup id=" + id)
+                    .build());
+        }
+        return result;
     }
 }

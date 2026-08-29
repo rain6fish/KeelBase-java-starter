@@ -33,5 +33,9 @@
       <groupId>cn.com.keelbase</groupId>
       <artifactId>keelbase-compensation</artifactId>
     </dependency>
+    <dependency>
+      <groupId>cn.com.keelbase</groupId>
+      <artifactId>keelbase-client</artifactId>
+    </dependency>
   </dependencies>
 </project>

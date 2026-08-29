@@ -5,4 +5,5 @@ dependencies {
     api project(':keelbase-delegation-filter')
     api project(':keelbase-tools-export')
     api project(':keelbase-compensation')
+    api project(':keelbase-client')
 }

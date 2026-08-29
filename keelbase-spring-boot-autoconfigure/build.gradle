@@ -3,6 +3,7 @@ dependencies {
     api project(':keelbase-delegation-filter')
     api project(':keelbase-tools-export')
     api project(':keelbase-compensation')
+    api project(':keelbase-client')
     api 'org.springframework.boot:spring-boot-autoconfigure'
     api 'org.springframework.boot:spring-boot'
     compileOnly 'org.springframework.security:spring-security-core'   // Maven optional：classpath 有才装配
