@@ -109,6 +109,15 @@
     </pluginManagement>
   </build>
 
+  <url>https://github.com/rain6fish/KeelBase-java-starter</url>
+
+  <scm>
+    <connection>scm:git:https://github.com/rain6fish/KeelBase-java-starter.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/rain6fish/KeelBase-java-starter.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://github.com/rain6fish/KeelBase-java-starter</url>
+  </scm>
+
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
