@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file. Format follows 
 
 ## [Unreleased]
 
+_No unreleased changes yet._
+
+## [0.1.0] - 2026-08-29
+
+> First release published to Maven Central (`cn.com.keelbase:*`), uploaded via the Central Portal with GPG signing (key `7ECAABC1ABDC27F3`).
+
 ### Added
 
 - **`keelbase-tools-annotation`** — `@KeelbaseTool`, `KeelbaseRiskLevel` (R0-R5), `@EnableKeelbaseTools`.
@@ -32,7 +38,3 @@ All notable changes to this project are documented in this file. Format follows 
 - `baseUrl` convention is the **server root** + full tool `path` (avoids a doubled `/api` prefix).
 - `DelegationAuthFilter` now also **requires `audience` at startup** (fail-fast with a clear message) instead of rejecting every delegated call at runtime with 403.
 - Example integration test aligned with the server-root `baseUrl` convention (fixes the CI failure).
-
-## [0.1.0-SNAPSHOT]
-
-Initial development snapshot. Not yet released to Maven Central.

@@ -14,14 +14,7 @@
 
 ## 1. 引入依赖
 
-> starter 尚未发布到 Maven Central（待 OSSRH 账号）。先在本地构建安装一次，再按常规消费：
-
-```bash
-# 构建并安装全部模块到本地仓库
-git clone https://github.com/rain6fish/KeelBase-java-starter.git
-cd KeelBase-java-starter
-mvn install
-```
+已发布到 Maven Central——直接加 `0.1.0`：
 
 **Maven** — 加入 `pom.xml`：
 
@@ -29,14 +22,22 @@ mvn install
 <dependency>
   <groupId>cn.com.keelbase</groupId>
   <artifactId>keelbase-spring-boot-starter</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
 </dependency>
 ```
 
 **Gradle** — 加入 `build.gradle`：
 
 ```groovy
-implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.0-SNAPSHOT'
+implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.0'
+```
+
+> 开发快照版（`0.1.1-SNAPSHOT`）需先在本地构建安装一次：
+
+```bash
+git clone https://github.com/rain6fish/KeelBase-java-starter.git
+cd KeelBase-java-starter
+mvn install
 ```
 
 这一个依赖会带全：注解、委托验签过滤器、工具导出、补偿脚手架。classpath 含 Spring MVC 时全部自动装配。

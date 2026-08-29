@@ -45,7 +45,7 @@ curl http://localhost:8081/keelbase/proxy-tools/export
 # 4. 写入 KeelBase（PUT /settings/ai_proxy_tools，value 为导出 JSON 的字符串），重启 KeelBase
 ```
 
-尚未发布到 Maven Central（待 OSSRH 账号）——先用 `mvn install` 本地安装一次，再按 `cn.com.keelbase:keelbase-spring-boot-starter:0.1.0-SNAPSHOT` 消费（Maven 或 Gradle）。完整步骤见 [docs/quickstart.zh-CN.md](docs/quickstart.zh-CN.md)。
+已发布到 Maven Central——直接加依赖 `cn.com.keelbase:keelbase-spring-boot-starter:0.1.0`（Maven 或 Gradle）。开发快照版（`0.1.1-SNAPSHOT`）需先 `mvn install` 本地安装一次。完整步骤见 [docs/quickstart.zh-CN.md](docs/quickstart.zh-CN.md)。
 
 ## 配置（application.yml）
 

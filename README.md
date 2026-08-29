@@ -45,7 +45,7 @@ curl http://localhost:8081/keelbase/proxy-tools/export
 # 4. Write it into KeelBase (PUT /settings/ai_proxy_tools, value = the exported JSON as a string), restart KeelBase
 ```
 
-Not yet on Maven Central (OSSRH pending) — install locally once with `mvn install`, then consume as `cn.com.keelbase:keelbase-spring-boot-starter:0.1.0-SNAPSHOT` (Maven or Gradle). Full steps in [docs/quickstart.md](docs/quickstart.md).
+Published to Maven Central — add `cn.com.keelbase:keelbase-spring-boot-starter:0.1.0` as a dependency (Maven or Gradle). For the development snapshot (`0.1.1-SNAPSHOT`), install locally once with `mvn install`. Full steps in [docs/quickstart.md](docs/quickstart.md).
 
 ## Configuration (application.yml)
 

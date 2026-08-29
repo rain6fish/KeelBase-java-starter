@@ -14,29 +14,30 @@ Full reference: [configuration](configuration.md) · [delegated identity](delega
 
 ## 1. Add the dependency
 
-> The starter is not yet on Maven Central (OSSRH account pending). Install it locally once, then consume normally:
+Published to Maven Central — add `0.1.0` directly:
 
-```bash
-# build & install all modules into your local repository
-git clone https://github.com/rain6fish/KeelBase-java-starter.git
-cd KeelBase-java-starter
-mvn install
-```
-
-**Maven** — add to `pom.xml`:
+**Maven** — `pom.xml`:
 
 ```xml
 <dependency>
   <groupId>cn.com.keelbase</groupId>
   <artifactId>keelbase-spring-boot-starter</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
 </dependency>
 ```
 
-**Gradle** — add to `build.gradle`:
+**Gradle** — `build.gradle`:
 
 ```groovy
-implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.0-SNAPSHOT'
+implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.0'
+```
+
+> For the development snapshot (`0.1.1-SNAPSHOT`), install it locally once first:
+
+```bash
+git clone https://github.com/rain6fish/KeelBase-java-starter.git
+cd KeelBase-java-starter
+mvn install
 ```
 
 That single dependency pulls in the annotation, delegation filter, tools export, and compensation scaffold. Everything auto-configures when the classpath contains Spring MVC.

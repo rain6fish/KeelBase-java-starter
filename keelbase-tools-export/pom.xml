@@ -6,7 +6,7 @@
   <parent>
     <groupId>cn.com.keelbase</groupId>
     <artifactId>keelbase-java-starter-parent</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.1-SNAPSHOT</version>
   </parent>
   <artifactId>keelbase-tools-export</artifactId>
   <name>KeelBase Tools Export</name>
