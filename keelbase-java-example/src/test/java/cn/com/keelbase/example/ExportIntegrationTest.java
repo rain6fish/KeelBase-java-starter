@@ -32,7 +32,7 @@ class ExportIntegrationTest {
                 .andReturn();
         JsonNode root = mapper.readTree(res.getResponse().getContentAsString());
 
-        assertEquals("http://localhost:8081/api", root.get("baseUrl").asText());
+        assertEquals("http://localhost:8081", root.get("baseUrl").asText());
         assertEquals("legacy-crm", root.get("audience").asText());
 
         JsonNode tools = root.get("tools");
