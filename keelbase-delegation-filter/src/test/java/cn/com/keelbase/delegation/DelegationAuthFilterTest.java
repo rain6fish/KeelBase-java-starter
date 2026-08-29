@@ -57,6 +57,16 @@ class DelegationAuthFilterTest {
     static class EchoController {
         @GetMapping("/api/echo")
         public Map<String, Object> echo(HttpServletRequest req) {
+            return echoBody(req);
+        }
+
+        // 与受保护前缀 /api/compensation 同前缀但不同段，验证 fail-closed 不误伤
+        @GetMapping("/api/compensations")
+        public Map<String, Object> similarPrefix(HttpServletRequest req) {
+            return echoBody(req);
+        }
+
+        private Map<String, Object> echoBody(HttpServletRequest req) {
             DelegationPrincipal p =
                     (DelegationPrincipal) req.getAttribute(DelegationAuthFilter.PRINCIPAL_ATTR);
             Object user = req.getAttribute(DelegationAuthFilter.MAPPED_USER_ATTR);
@@ -129,6 +139,28 @@ class DelegationAuthFilterTest {
         p.setPaths(List.of("/api/compensation"));
         mvc(p)
                 .perform(get("/api/compensation/followups/1"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("delegation.missing"));
+    }
+
+    @Test
+    void noHeader_samePrefixDifferentSegment_passesThrough() throws Exception {
+        // 受保护路径按「段边界」匹配：/api/compensation 不应误保护 /api/compensations
+        DelegationProperties p = props();
+        p.setPaths(List.of("/api/compensation"));
+        mvc(p)
+                .perform(get("/api/compensations"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.identity").doesNotExist());
+    }
+
+    @Test
+    void noHeader_exactProtectedPath_returns401_missing() throws Exception {
+        // 精确命中受保护路径本身也应 fail-closed
+        DelegationProperties p = props();
+        p.setPaths(List.of("/api/compensation"));
+        mvc(p)
+                .perform(get("/api/compensation"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("delegation.missing"));
     }

@@ -76,7 +76,7 @@ public class DelegationAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         String auth = request.getHeader("Authorization");
         boolean protectedPath = properties.getPaths().stream()
-                .anyMatch(p -> p != null && !p.isEmpty() && request.getRequestURI().startsWith(p));
+                .anyMatch(p -> p != null && !p.isEmpty() && matchesSegment(request.getRequestURI(), p));
 
         if (auth == null || auth.isBlank()) {
             if (protectedPath) {
@@ -126,6 +126,15 @@ public class DelegationAuthFilter extends OncePerRequestFilter {
         } catch (JwtException | IllegalArgumentException e) {
             writeError(response, 401, "delegation.invalid", "委托 token 验签失败");
         }
+    }
+
+    /**
+     * 受保护路径前缀的<b>段边界</b>匹配：`/api/compensation` 命中自身与 `/api/compensation/...`，
+     * 但<b>不</b>命中 `/api/compensations` 这类同前缀但不跨段的路径（避免误保护无关端点）。
+     */
+    private static boolean matchesSegment(String uri, String prefix) {
+        return uri.startsWith(prefix)
+                && (uri.length() == prefix.length() || uri.charAt(prefix.length()) == '/');
     }
 
     /** 写 JSON 错误体：{@code {"code":..., "message":...}}。 */

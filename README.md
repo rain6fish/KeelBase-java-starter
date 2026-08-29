@@ -25,6 +25,7 @@
 | [tool-declaration](docs/tool-declaration.md) | Annotation, parameter extraction, type mapping, risk levels |
 | [compensation](docs/compensation.md) | Revocation call contract, idempotency, audit, multi-instance |
 | [troubleshooting](docs/troubleshooting.md) | Error codes, common mistakes, verification checklist |
+| [production-checklist](docs/production-checklist.md) | Hardening, secret rotation, ops monitoring before go-live |
 
 Chinese versions live alongside each file (`*.zh-CN.md`).
 

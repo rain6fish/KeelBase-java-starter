@@ -18,8 +18,11 @@ All notable changes to this project are documented in this file. Format follows 
 - **Jackson-aware body parameter extraction** — `RequestBodyFields`: inherited DTO fields included, `@JsonIgnore`/static/transient skipped, `@JsonProperty` name & `required` respected, records supported.
 - **Scanner warnings** — skipped tools (invalid name, unresolvable mapping) and auto-renamed name conflicts are logged instead of silently dropped.
 - **Integration docs** — `docs/` quickstart / configuration / delegated-identity / tool-declaration / compensation / troubleshooting, bilingual (en + zh-CN).
+- **Production checklist** — `docs/production-checklist.{md,zh-CN.md}`: hardening (dedicated secret, one audience per system, disable export), secret rotation, ops monitoring.
 
 ### Fixed
+
+- **Protected-path segment matching** — `keelbase.delegation.paths` now matches at path-segment boundaries (a prefix `/api/compensation` no longer protects `/api/compensations`).
 
 - Verification script must **approve while streaming** — the confirmation gate suspends the SSE stream until a decision, so awaiting the full stream first lets the token expire (404).
 - `baseUrl` convention is the **server root** + full tool `path` (avoids a doubled `/api` prefix).
