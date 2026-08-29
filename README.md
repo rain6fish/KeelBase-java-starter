@@ -112,8 +112,11 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
 
 ## Build & test
 
+Either build system works (Maven is canonical for CI/release; Gradle is a parallel dev/publish path — dependencies mirror the poms):
+
 ```bash
-mvn install   # compiles all modules + runs JUnit (filter 6 scenarios / type mapping / compensation idempotency / example export & compensation e2e)
+mvn install          # Maven: compiles all modules + runs JUnit
+./gradlew build      # Gradle (wrapper included): same reactor, all tests
 ```
 
 ## E2E verification

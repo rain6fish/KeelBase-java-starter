@@ -1,0 +1,10 @@
+dependencies {
+    api project(':keelbase-tools-annotation')
+    api 'org.slf4j:slf4j-api'
+    api 'org.springframework:spring-webmvc'
+    api 'com.fasterxml.jackson.core:jackson-databind'
+    api 'com.fasterxml.jackson.core:jackson-annotations'
+    api 'jakarta.validation:jakarta.validation-api'
+    api 'org.springframework.boot:spring-boot'
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+}

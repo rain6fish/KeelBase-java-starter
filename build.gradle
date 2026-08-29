@@ -1,0 +1,47 @@
+// 根构建脚本：Java 17 + Spring Boot 依赖 BOM 管理。
+// Maven 仍是主构建（CI/发布走 mvn），Gradle 提供平行开发/发布体验（roadmap「Maven Central + Gradle 发布」）。
+// 依赖与各模块 pom.xml 保持一一对应（compile → api / provided → compileOnly / runtime → runtimeOnly）。
+
+plugins {
+    id 'org.springframework.boot' version '3.2.5' apply false
+    id 'io.spring.dependency-management' version '1.1.4' apply false
+}
+
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'io.spring.dependency-management'
+
+    group = rootProject.group
+    version = rootProject.version
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom 'org.springframework.boot:spring-boot-dependencies:3.2.5'
+        }
+        // Spring Boot BOM 不管 jjwt；对齐 Maven 父 pom 的 dependencyManagement（jjwt.version）
+        dependencies {
+            dependency 'io.jsonwebtoken:jjwt-api:0.11.5'
+            dependency 'io.jsonwebtoken:jjwt-impl:0.11.5'
+            dependency 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+        }
+    }
+
+    dependencies {
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.compilerArgs += ['-parameters']   // 对齐 Maven compiler <parameters>true</parameters>
+    }
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+    }
+}

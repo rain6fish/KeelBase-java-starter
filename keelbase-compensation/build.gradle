@@ -1,0 +1,9 @@
+dependencies {
+    api project(':keelbase-tools-annotation')
+    api project(':keelbase-delegation-filter')
+    api 'org.springframework:spring-webmvc'
+    api 'org.springframework.boot:spring-boot'
+    api 'org.slf4j:slf4j-api'
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'   // 对齐 Maven provided（测试 classpath 需要）
+}

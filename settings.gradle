@@ -1,0 +1,18 @@
+// 插件解析：阿里云镜像优先（国内团队），官方 Plugin Portal 兜底
+pluginManagement {
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'keelbase-java-starter'
+
+include 'keelbase-tools-annotation'
+include 'keelbase-delegation-filter'
+include 'keelbase-tools-export'
+include 'keelbase-compensation'
+include 'keelbase-spring-boot-autoconfigure'
+include 'keelbase-spring-boot-starter'
+include 'keelbase-java-example'

@@ -112,8 +112,11 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
 
 ## 构建与测试
 
+两套构建系统皆可（Maven 为 CI/发布主构建；Gradle 为平行开发/发布路径，依赖与 pom 一一对应）：
+
 ```bash
-mvn install   # 编译全部模块 + 跑 JUnit（filter 6 场景 / 类型映射 / 补偿幂等 / 示例导出与补偿 e2e）
+mvn install          # Maven：编译全部模块 + 跑 JUnit
+./gradlew build      # Gradle（含 wrapper）：同一 reactor，全部测试
 ```
 
 ## 端到端验证

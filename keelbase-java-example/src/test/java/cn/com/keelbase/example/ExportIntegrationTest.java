@@ -110,6 +110,86 @@ class ExportIntegrationTest {
     }
 
     @Test
+    void export_queryAndPatchTools_alignParameters() throws Exception {
+        JsonNode root = exportJson();
+        JsonNode tools = root.get("tools");
+        JsonNode queryTool = null;
+        JsonNode patchTool = null;
+        for (JsonNode t : tools) {
+            String n = t.get("name").asText();
+            if ("list_followups_by_customer".equals(n)) {
+                queryTool = t;
+            }
+            if ("mark_followup_complete".equals(n)) {
+                patchTool = t;
+            }
+        }
+
+        // 读工具 + @RequestParam：customerId 必填、priority 可选枚举（string）
+        assertNotNull(queryTool, "应包含 list_followups_by_customer 读工具");
+        assertEquals("GET", queryTool.get("method").asText());
+        assertEquals("R1", queryTool.get("riskLevel").asText());
+        boolean sawCustomerId = false;
+        boolean customerIdRequired = false;
+        boolean sawPriority = false;
+        boolean priorityRequired = true;
+        for (JsonNode p : queryTool.get("parameters")) {
+            switch (p.get("name").asText()) {
+                case "customerId" -> {
+                    sawCustomerId = true;
+                    customerIdRequired = p.get("required").asBoolean();
+                    assertEquals("integer", p.get("type").asText());
+                }
+                case "priority" -> {
+                    sawPriority = true;
+                    priorityRequired = p.get("required").asBoolean();
+                    assertEquals("string", p.get("type").asText());
+                }
+                default -> {
+                }
+            }
+        }
+        assertTrue(sawCustomerId, "customerId（无缺省值）应必填");
+        assertTrue(customerIdRequired);
+        assertTrue(sawPriority, "priority 应导出");
+        assertFalse(priorityRequired, "priority(required=false) 应可选");
+
+        // 写方法（PATCH）+ @RequestParam：path 参数 + 参数进 queryParams，R3
+        assertNotNull(patchTool, "应包含 mark_followup_complete 写工具");
+        assertEquals("PATCH", patchTool.get("method").asText());
+        assertEquals("R3", patchTool.get("riskLevel").asText());
+        boolean sawId = false;
+        boolean sawDone = false;
+        boolean doneRequired = true;
+        for (JsonNode p : patchTool.get("parameters")) {
+            switch (p.get("name").asText()) {
+                case "id" -> {
+                    sawId = true;
+                    assertEquals("integer", p.get("type").asText());
+                }
+                case "done" -> {
+                    sawDone = true;
+                    doneRequired = p.get("required").asBoolean();
+                    assertEquals("boolean", p.get("type").asText());
+                }
+                default -> {
+                }
+            }
+        }
+        assertTrue(sawId, "path 参数 id 应导出");
+        assertTrue(sawDone, "@RequestParam done 应导出");
+        assertFalse(doneRequired, "done(defaultValue=true) 应可选");
+        assertTrue(patchTool.get("queryParams").isArray());
+        boolean doneInQueryParams = false;
+        for (JsonNode q : patchTool.get("queryParams")) {
+            if ("done".equals(q.asText())) {
+                doneInQueryParams = true;
+            }
+        }
+        assertTrue(doneInQueryParams, "写方法的 @RequestParam 应进入 queryParams");
+    }
+
+    @Test
     void status_reportsDelegationExportTools_withoutSecret() throws Exception {
         MvcResult res = mvc.perform(get("/keelbase/status"))
                 .andExpect(status().isOk())
@@ -132,7 +212,7 @@ class ExportIntegrationTest {
         assertEquals("legacy-crm", export.get("audience").asText());
 
         JsonNode tools = root.get("tools");
-        assertTrue(tools.get("count").asInt() >= 3, "示例至少导出 list/create/search 三个工具");
+        assertTrue(tools.get("count").asInt() >= 5, "示例应导出读/写/查询/标记等 5 个以上工具");
         assertNotNull(tools.get("names"));
 
         assertTrue(root.get("warnings").isArray(), "warnings 应为数组");

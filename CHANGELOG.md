@@ -19,10 +19,14 @@ All notable changes to this project are documented in this file. Format follows 
 - **Scanner warnings** — skipped tools (invalid name, unresolvable mapping) and auto-renamed name conflicts are logged instead of silently dropped.
 - **Integration docs** — `docs/` quickstart / configuration / delegated-identity / tool-declaration / compensation / troubleshooting, bilingual (en + zh-CN).
 - **Production checklist** — `docs/production-checklist.{md,zh-CN.md}`: hardening (dedicated secret, one audience per system, disable export), secret rotation, ops monitoring.
+- **Gradle multi-module build** — `settings.gradle` + root/module `build.gradle` mirroring the poms (`java-library`, `api`/`compileOnly`/`runtimeOnly` scopes, Spring Boot BOM 3.2.5), Gradle wrapper, and a parallel CI job (`./gradlew build`). Maven remains the canonical CI/release build.
+- **Example query & patch tools** — `list_followups_by_customer` (read tool with `@RequestParam` → query parameters) and `mark_followup_complete` (write tool with `@RequestParam` → `queryParams`), covering the read-query-param and write-`queryParams` paths.
 
 ### Fixed
 
 - **Protected-path segment matching** — `keelbase.delegation.paths` now matches at path-segment boundaries (a prefix `/api/compensation` no longer protects `/api/compensations`).
+- **Scanner dropped path/query params** — `MethodParameter`s from `HandlerMethod.getMethodParameters()` carry no `ParameterNameDiscoverer`, so `@PathVariable`/`@RequestParam` without an explicit name silently produced empty tool parameters. The scanner now injects `DefaultParameterNameDiscoverer`; exposed by the new query/patch example tools.
+- **`@RequestParam` required inversion** — `required` was computed from an inverted default-value check; a param with no default was exported optional and one with a default required. Now: required = `@RequestParam` required **and** no explicit `defaultValue`.
 
 - Verification script must **approve while streaming** — the confirmation gate suspends the SSE stream until a decision, so awaiting the full stream first lets the token expire (404).
 - `baseUrl` convention is the **server root** + full tool `path` (avoids a doubled `/api` prefix).

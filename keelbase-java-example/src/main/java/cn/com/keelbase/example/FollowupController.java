@@ -7,14 +7,18 @@ import cn.com.keelbase.compensation.RevocationLedgerStore;
 import cn.com.keelbase.delegation.DelegationPrincipal;
 import cn.com.keelbase.delegation.DelegationUser;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,6 +65,42 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
         item.put("priority", req.priority() == null ? null : req.priority().name());
         item.put("createdBy", principal == null ? "anonymous" : principal.identity());
         store.put(id, item);
+        return item;
+    }
+
+    /**
+     * 读工具 + {@code @RequestParam}：查询参数进入工具 parameters（customerId 必填、priority 可选）。
+     */
+    @GetMapping("/followups/by-customer")
+    @KeelbaseTool(name = "list_followups_by_customer",
+            description = "按客户/优先级筛选跟进任务（读工具，演示 @RequestParam → 查询参数）")
+    public List<Map<String, Object>> byCustomer(
+            @RequestParam Long customerId,
+            @RequestParam(required = false) FollowupRequest.Priority priority) {
+        List<Map<String, Object>> hits = new ArrayList<>();
+        for (Map<String, Object> item : store.values()) {
+            boolean customerOk = customerId == null || customerId.equals(item.get("customerId"));
+            boolean priorityOk = priority == null || priority.name().equals(item.get("priority"));
+            if (customerOk && priorityOk) {
+                hits.add(item);
+            }
+        }
+        return hits;
+    }
+
+    /**
+     * 写方法（PATCH）+ {@code @RequestParam}：参数进 queryParams（KeelBase 以查询串发送，不入 body）。
+     */
+    @PatchMapping("/followups/{id}/complete")
+    @KeelbaseTool(name = "mark_followup_complete",
+            description = "标记跟进任务完成/未完成（写工具，演示写方法 @RequestParam → queryParams）")
+    public Map<String, Object> complete(@PathVariable Long id,
+                                        @RequestParam(defaultValue = "true") boolean done) {
+        Map<String, Object> item = store.get(id);
+        if (item == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "followup not found");
+        }
+        item.put("completed", done);
         return item;
     }
 

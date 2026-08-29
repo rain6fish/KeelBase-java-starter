@@ -1,0 +1,8 @@
+// 聚合器：api 依赖让下游一次性获得全部模块（对齐 Maven 聚合 pom 的 compile scope）
+dependencies {
+    api project(':keelbase-spring-boot-autoconfigure')
+    api project(':keelbase-tools-annotation')
+    api project(':keelbase-delegation-filter')
+    api project(':keelbase-tools-export')
+    api project(':keelbase-compensation')
+}

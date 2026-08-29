@@ -4,6 +4,7 @@ import cn.com.keelbase.annotation.KeelbaseTool;
 import cn.com.keelbase.annotation.KeelbaseRiskLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -109,7 +110,11 @@ public class ProxyToolsScanner {
         List<ToolParameter> parameters = new ArrayList<>();
         List<String> queryParams = new ArrayList<>();
         Set<String> seen = new HashSet<>();
+        // HandlerMethod.getMethodParameters() 的 MethodParameter 不带 ParameterNameDiscoverer，
+        // 不注入则 mp.getParameterName() 恒为 null，@RequestParam/@PathVariable（未显式 name）会整体丢失。
+        DefaultParameterNameDiscoverer paramNameDiscoverer = new DefaultParameterNameDiscoverer();
         for (MethodParameter mp : handler.getMethodParameters()) {
+            mp.initParameterNameDiscovery(paramNameDiscoverer);
             PathVariable pv = mp.getParameterAnnotation(PathVariable.class);
             RequestParam rp = mp.getParameterAnnotation(RequestParam.class);
             RequestBody rb = mp.getParameterAnnotation(RequestBody.class);
@@ -123,9 +128,10 @@ public class ProxyToolsScanner {
                 if (pname == null || !seen.add(pname)) {
                     continue;
                 }
+                // 必填 = @RequestParam 默认必填 且 未显式设置 defaultValue（设置缺省值即视为可选）
                 boolean required = rp.required()
-                        && !org.springframework.core.annotation.AnnotationUtils
-                                .getDefaultValue(rp, "defaultValue").toString().equals(rp.defaultValue());
+                        && org.springframework.web.bind.annotation.ValueConstants.DEFAULT_NONE
+                                .equals(rp.defaultValue());
                 parameters.add(new ToolParameter(pname, TypeMapper.map(mp.getParameterType()), "", required));
                 if (write) {
                     queryParams.add(pname);
