@@ -17,8 +17,9 @@ VER="${1:-0.1.0}"
 KEY="${GPG_KEY_ID:-7ECAABC1ABDC27F3}"
 PP="${GPG_PASSPHRASE_FILE:-/tmp/gpg-passphrase.txt}"
 M2="${M2_REPO:-$HOME/.m2/repository/cn/com/keelbase}"
-STAGE="$HOME/.m2/keelbase-upload-$VER"
-ZIP="$HOME/.m2/keelbase-$VER-upload.zip"
+# 命名带 keelbase-java-starter 前缀（与仓库一致），避免与主库 keelbase 混淆
+STAGE="$HOME/.m2/keelbase-java-starter-upload-$VER"
+ZIP="$HOME/.m2/keelbase-java-starter-$VER-upload.zip"
 
 MODULES="keelbase-tools-annotation keelbase-delegation-filter keelbase-tools-export keelbase-compensation keelbase-client keelbase-spring-boot-autoconfigure keelbase-spring-boot-starter"
 
