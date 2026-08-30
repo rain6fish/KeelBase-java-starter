@@ -130,4 +130,20 @@ class CrmExportTest {
         assertTrue(contentRequired, "content（@JsonProperty(required=true)）应必填");
         assertTrue(amountRequired, "amount（@JsonProperty(required=true)）应必填");
     }
+
+    @Test
+    void export_classLevelAnnotation_toolsAllMethods_andExcludesDisabled() throws Exception {
+        JsonNode tools = export().get("tools");
+
+        // 类级 @KeelbaseTool：controller 所有映射方法一键工具化（名称 = 方法名 snake_case）
+        for (String expected : new String[]{"get_crm_summary", "list_overdue_orders", "get_risk_customers"}) {
+            assertNotNull(tool(tools, expected), "类级标注应导出 " + expected);
+            assertEquals("R1", tool(tools, expected).get("riskLevel").asText());
+        }
+        assertEquals("GET", tool(tools, "get_crm_summary").get("method").asText());
+        assertEquals("/api/insights/summary", tool(tools, "get_crm_summary").get("path").asText());
+
+        // enabled=false 的方法排除（辅助/内部端点不工具化）
+        assertEquals(null, tool(tools, "internal_health"), "enabled=false 的方法不应导出");
+    }
 }

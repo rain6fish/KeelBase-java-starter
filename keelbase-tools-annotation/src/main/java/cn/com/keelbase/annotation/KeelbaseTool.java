@@ -6,16 +6,24 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 声明一个 Spring MVC handler 方法为 KeelBase 可用的 AI 工具。
+ * 声明 Spring MVC handler 为 KeelBase 可用的 AI 工具。
  *
- * <p>标注在 {@code @RestController} 的方法上（配合 {@code @GetMapping/@PostMapping/...}
- * 等映射注解）。KeelBase 会把这个端点暴露为 AI 工具：读方法（GET）默认 R1 自动执行，
- * 写方法（POST/PUT/PATCH/DELETE）默认 R3 需人工确认，全部经委托身份 + 审计。
+ * <p>可标注在<b>方法</b>（配合 {@code @GetMapping/@PostMapping/...} 映射注解）或
+ * <b>类</b>（{@code @RestController}）上：
+ * <ul>
+ *   <li><b>方法级</b>：仅该方法工具化；name/description/riskLevel/revokePath 可覆盖类级。</li>
+ *   <li><b>类级</b>：整个 controller 的<b>所有映射方法</b>一键工具化（名称 = 方法名
+ *       camelCase → snake_case）；个别方法用 {@code @KeelbaseTool(enabled=false)} 排除
+ *       （如补偿端点/辅助端点）。</li>
+ * </ul>
+ *
+ * <p>KeelBase 会把这些端点暴露为 AI 工具：读方法（GET）默认 R1 自动执行，写方法
+ * （POST/PUT/PATCH/DELETE）默认 R3 需人工确认，全部经委托身份 + 审计。
  *
  * <p>工具声明通过 {@code /keelbase/proxy-tools/export} 导出为 {@code ai_proxy_tools}
  * 配置，写入 KeelBase Settings 后（重启生效）即注册为 AI 工具。
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface KeelbaseTool {
 
@@ -42,4 +50,10 @@ public @interface KeelbaseTool {
      * 若设置此值必须等于顶层 audience，否则委托验签失败。
      */
     String audience() default "";
+
+    /**
+     * 工具化开关。类级标注时用 {@code enabled=false} 排除个别方法（补偿端点/辅助端点）；
+     * 缺省 true。
+     */
+    boolean enabled() default true;
 }

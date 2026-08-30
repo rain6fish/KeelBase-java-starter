@@ -23,9 +23,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 存量 Java CRM 控制器：把 CRM 业务端点声明为治理 AI 工具（域对齐
@@ -38,27 +35,11 @@ import java.util.concurrent.atomic.AtomicLong;
 @RequestMapping("/api")
 public class CrmController extends KeelBaseCompensationSupport<FollowupTask> {
 
-    private final Map<Long, CrmCustomer> customers = new ConcurrentHashMap<>();
-    private final Map<Long, CrmOrder> orders = new ConcurrentHashMap<>();
-    private final Map<Long, FollowupTask> followups = new ConcurrentHashMap<>();
-    private final AtomicLong customerId = new AtomicLong(1);
-    private final AtomicLong orderId = new AtomicLong(1);
-    private final AtomicLong taskId = new AtomicLong(1);
+    private final CrmStore store;
 
-    public CrmController(RevocationLedgerStore ledger, CompensationAuditSink auditSink) {
+    public CrmController(RevocationLedgerStore ledger, CompensationAuditSink auditSink, CrmStore store) {
         super(ledger, auditSink);
-        seed();
-    }
-
-    private void seed() {
-        // 客户：一个活跃、一个逾期风险（供 AI 风险分析演示）
-        long a = customerId.getAndIncrement();
-        long b = customerId.getAndIncrement();
-        customers.put(a, new CrmCustomer(a, "蓝湾地产", "BlueBay Real Estate", "contact@bluebay.cn", "ACTIVE"));
-        customers.put(b, new CrmCustomer(b, "天穹科技", "SkyTech", "ops@skytech.cn", "RISK"));
-        orders.put(orderId.getAndIncrement(), new CrmOrder(1, a, 120000, "PAID", "2026-07-01"));
-        orders.put(orderId.getAndIncrement(), new CrmOrder(2, a, 56000, "OVERDUE", "2026-06-15"));
-        orders.put(orderId.getAndIncrement(), new CrmOrder(3, b, 980000, "OVERDUE", "2026-05-30"));
+        this.store = store;
     }
 
     // ---- 读工具（R1 自动）----
@@ -66,7 +47,7 @@ public class CrmController extends KeelBaseCompensationSupport<FollowupTask> {
     @GetMapping("/customers")
     @KeelbaseTool(name = "list_customers", description = "客户列表（读工具，R1 自动），可按名称/公司关键字筛选")
     public List<CrmCustomer> listCustomers(@RequestParam(required = false) String keyword) {
-        List<CrmCustomer> all = new ArrayList<>(customers.values());
+        List<CrmCustomer> all = new ArrayList<>(store.customers.values());
         if (keyword != null && !keyword.isBlank()) {
             String k = keyword.toLowerCase();
             return all.stream()
@@ -80,7 +61,7 @@ public class CrmController extends KeelBaseCompensationSupport<FollowupTask> {
     @GetMapping("/customers/{id}")
     @KeelbaseTool(name = "get_customer", description = "客户详情（读工具，R1 自动）")
     public CrmCustomer getCustomer(@PathVariable long id) {
-        CrmCustomer c = customers.get(id);
+        CrmCustomer c = store.customers.get(id);
         if (c == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "customer not found");
         }
@@ -90,7 +71,7 @@ public class CrmController extends KeelBaseCompensationSupport<FollowupTask> {
     @GetMapping("/customers/{id}/orders")
     @KeelbaseTool(name = "list_customer_orders", description = "客户订单列表（读工具，R1 自动）——逾期/金额风险分析依据")
     public List<CrmOrder> listCustomerOrders(@PathVariable long id) {
-        return orders.values().stream()
+        return store.orders.values().stream()
                 .filter(o -> o.customerId() == id)
                 .sorted(Comparator.comparingLong(CrmOrder::id))
                 .toList();
@@ -105,13 +86,13 @@ public class CrmController extends KeelBaseCompensationSupport<FollowupTask> {
     public FollowupTask createFollowupTask(@PathVariable long id,
                                            @RequestBody CreateFollowupRequest req,
                                            @DelegationUser DelegationPrincipal principal) {
-        if (!customers.containsKey(id)) {
+        if (!store.customers.containsKey(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "customer not found");
         }
-        long taskIdVal = taskId.getAndIncrement();
+        long taskIdVal = store.taskId.getAndIncrement();
         FollowupTask task = new FollowupTask(taskIdVal, id, req.content(), req.dueDate(),
                 principal == null ? "anonymous" : principal.identity());
-        followups.put(taskIdVal, task);
+        store.followups.put(taskIdVal, task);
         return task;
     }
 
@@ -121,13 +102,13 @@ public class CrmController extends KeelBaseCompensationSupport<FollowupTask> {
     public CrmOrder updateOrderAmount(@PathVariable long id,
                                       @PathVariable long orderId,
                                       @RequestBody UpdateAmountRequest req) {
-        CrmOrder existing = orders.get(orderId);
+        CrmOrder existing = store.orders.get(orderId);
         if (existing == null || existing.customerId() != id) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "order not found");
         }
         CrmOrder updated = new CrmOrder(existing.id(), existing.customerId(), req.amount(),
                 existing.status(), existing.dueDate());
-        orders.put(orderId, updated);
+        store.orders.put(orderId, updated);
         return updated;
     }
 
@@ -136,7 +117,7 @@ public class CrmController extends KeelBaseCompensationSupport<FollowupTask> {
     @DeleteMapping("/compensation/followups/{id}")
     public ResponseEntity<?> revoke(@PathVariable Long id, HttpServletRequest request) {
         return handleRevoke(request, id,
-                followups::get,
+                store.followups::get,
                 (task, subject) -> {
                     task.setCancelled(true);
                     task.setCancelledBy(subject);

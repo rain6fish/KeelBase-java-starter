@@ -14,6 +14,24 @@ public List<Map<String, Object>> list() { ... }
 
 The scanner picks methods up through `RequestMappingHandlerMapping`, so class-level `@RequestMapping("/api")` prefixes are honored automatically.
 
+**Class-level annotation** — put `@KeelbaseTool` on the `@RestController` itself to tool up **every** mapped method in one go (tool name = method name `camelCase → snake_case`); exclude a specific method with `@KeelbaseTool(enabled = false)`:
+
+```java
+@RestController
+@RequestMapping("/api/insights")
+@KeelbaseTool(description = "CRM analysis tools (class-level: all mapped methods)")
+public class CrmInsightsController {
+    @GetMapping("/summary")
+    public Map<String, Object> getCrmSummary() { ... }   // → tool get_crm_summary (R1)
+
+    @GetMapping("/internal/health")                      // not exported
+    @KeelbaseTool(enabled = false)
+    public Map<String, String> internalHealth() { ... }
+}
+```
+
+Method-level attributes (`name`/`description`/`riskLevel`/`revokePath`) override the class-level ones; `enabled=false` on a method under a class-level annotation excludes it. See `keelbase-java-crm-example` for a working class-level controller.
+
 ## 2. Annotation attributes
 
 | Attribute | Default | Meaning |

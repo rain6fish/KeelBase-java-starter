@@ -14,6 +14,24 @@ public List<Map<String, Object>> list() { ... }
 
 扫描器通过 `RequestMappingHandlerMapping` 取方法，类级 `@RequestMapping("/api")` 前缀自动生效。
 
+**类级标注**——把 `@KeelbaseTool` 标在 `@RestController` 类上，整个 controller 的**所有映射方法一键工具化**（工具名 = 方法名 `camelCase → snake_case`）；个别方法用 `@KeelbaseTool(enabled = false)` 排除：
+
+```java
+@RestController
+@RequestMapping("/api/insights")
+@KeelbaseTool(description = "CRM 分析工具（类级标注：所有映射方法工具化）")
+public class CrmInsightsController {
+    @GetMapping("/summary")
+    public Map<String, Object> getCrmSummary() { ... }   // → 工具 get_crm_summary（R1）
+
+    @GetMapping("/internal/health")                      // 不导出
+    @KeelbaseTool(enabled = false)
+    public Map<String, String> internalHealth() { ... }
+}
+```
+
+方法级属性（`name`/`description`/`riskLevel`/`revokePath`）覆盖类级；类级标注下的方法 `enabled=false` 即排除。可运行示例见 `keelbase-java-crm-example`。
+
 ## 2. 注解属性
 
 | 属性 | 缺省 | 说明 |

@@ -52,7 +52,7 @@ public class ProxyToolsScanner {
         Set<String> seenNames = new HashSet<>();
         for (Map.Entry<RequestMappingInfo, HandlerMethod> e : mapping.getHandlerMethods().entrySet()) {
             HandlerMethod handler = e.getValue();
-            KeelbaseTool ann = handler.getMethodAnnotation(KeelbaseTool.class);
+            KeelbaseTool ann = resolveToolAnnotation(handler);
             if (ann == null) {
                 continue;
             }
@@ -76,6 +76,19 @@ public class ProxyToolsScanner {
             tools.add(tool);
         }
         return tools;
+    }
+
+    /**
+     * 解析工具注解：方法级优先（enabled=false 明确排除）；无方法级 → 类级
+     * {@code @KeelbaseTool}（整个 controller 一键工具化），类级 enabled=false 同样跳过。
+     */
+    private static KeelbaseTool resolveToolAnnotation(HandlerMethod handler) {
+        KeelbaseTool methodAnn = handler.getMethodAnnotation(KeelbaseTool.class);
+        if (methodAnn != null) {
+            return methodAnn.enabled() ? methodAnn : null;
+        }
+        KeelbaseTool typeAnn = handler.getBeanType().getAnnotation(KeelbaseTool.class);
+        return typeAnn != null && typeAnn.enabled() ? typeAnn : null;
     }
 
     private ProxyToolItem buildTool(RequestMappingInfo info, HandlerMethod handler, KeelbaseTool ann) {

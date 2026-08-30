@@ -8,6 +8,7 @@ All notable changes to this project are documented in this file. Format follows 
 
 - **`keelbase-client`** — `KeelbaseClient` (delegation-token lifecycle: `obtain` / `obtainAndCache` with proactive refresh / local `verify`, audience-bound) + `KeelbaseAuditReporter` (async audit reporting to the governance plane, D2-3a `/external/audit`, local-log fallback when unconfigured).
 - **`keelbase-java-crm-example`** — Integrator Kit Reference Project: a legacy Java CRM (customers/orders/follow-ups) declared as 5 governed AI tools (read R1 / write R3 + revocable `create_followup_task`), the real Java side of the `external-crm-demo` CRM domain, with `verify-crm-e2e.mjs` and `docs/reference-project-crm{,.zh-CN}.md`.
+- **Class-level `@KeelbaseTool`** — `@KeelbaseTool` now also targets `TYPE`: a whole `@RestController` is tooled up in one go (tool name = method `camelCase → snake_case`), with method-level `enabled=false` to exclude helper/internal endpoints. Method-level attributes override class-level. Demoed by `keelbase-java-crm-example`'s `CrmInsightsController` (3 tools + 1 excluded).
 
 ## [0.1.0] - 2026-08-29
 
