@@ -37,7 +37,7 @@ Method-level attributes (`name`/`description`/`riskLevel`/`revokePath`) override
 | Attribute | Default | Meaning |
 |---|---|---|
 | `name` | method name, `camelCase → snake_case` | Tool name. Must match `^[a-z][a-z0-9_]{0,39}$`. A duplicate name is auto-renamed to `name_2` (a warning is logged). |
-| `description` | `METHOD /path` | LLM-facing description. **Set it** — it is the only thing the model has to choose the right tool. |
+| `description` | `METHOD /path`, or `@Operation` summary/description | LLM-facing description. **Set it** — it is the only thing the model has to choose the right tool. When springdoc is on the classpath and you don't set it, the tool description is auto-extracted from `@Operation(summary/description)`; an explicit `@KeelbaseTool` value always wins. |
 | `riskLevel` | `AUTO` | `AUTO` infers GET→R1 (read, auto) / POST·PUT·PATCH·DELETE→R3 (write, confirm). Set explicitly to any of R0–R5. |
 | `revokePath` | none | Compensation endpoint relative to `baseUrl`, e.g. `"DELETE /api/compensation/followups/{id}"`. Used by KeelBase to undo the AI's side effect. |
 | `audience` | global | Per-tool audience override. **Only** use if your deployment ever supports per-tool audiences; it must equal the top-level audience or verification fails. |

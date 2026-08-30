@@ -34,6 +34,8 @@ public class ProxyToolsScanner {
 
     private static final Logger log = LoggerFactory.getLogger(ProxyToolsScanner.class);
 
+    private final SwaggerDocExtractor swaggerDoc = new SwaggerDocExtractor();
+
     private static final List<String> WRITE_METHODS = List.of("POST", "PUT", "PATCH", "DELETE");
     private static final List<Class<?>> SKIPPED_PARAM_TYPES = List.of(
             org.springframework.ui.Model.class,
@@ -118,7 +120,9 @@ public class ProxyToolsScanner {
                     handler.getMethod().getDeclaringClass().getSimpleName(), handler.getMethod().getName(), name);
             return null;
         }
-        String description = ann.description().isBlank() ? method + " " + path : ann.description();
+        String description = ann.description().isBlank()
+                ? swaggerDoc.toolDescription(handler.getMethod(), method + " " + path)
+                : ann.description();
         String riskLevel = resolveRiskLevel(ann.riskLevel(), write);
         String revokePath = ann.revokePath().isBlank() ? null : ann.revokePath();
 
@@ -136,7 +140,8 @@ public class ProxyToolsScanner {
             if (pv != null) {
                 String pname = sanitizeParamName(shortName(pv.name(), mp));
                 if (pname != null && seen.add(pname)) {
-                    parameters.add(new ToolParameter(pname, TypeMapper.map(mp.getParameterType()), "", true));
+                    String pathDesc = swaggerDoc.paramDescription(mp, "");
+                    parameters.add(new ToolParameter(pname, TypeMapper.map(mp.getParameterType()), pathDesc, true));
                 }
             } else if (rp != null) {
                 String pname = sanitizeParamName(shortName(rp.name(), mp));
@@ -147,7 +152,8 @@ public class ProxyToolsScanner {
                 boolean required = rp.required()
                         && org.springframework.web.bind.annotation.ValueConstants.DEFAULT_NONE
                                 .equals(rp.defaultValue());
-                String paramDesc = paramDescription(mp.getParameterType(), rp.defaultValue());
+                String paramDesc = swaggerDoc.paramDescription(mp,
+                        paramDescription(mp.getParameterType(), rp.defaultValue()));
                 parameters.add(new ToolParameter(pname, TypeMapper.map(mp.getParameterType()), paramDesc, required));
                 if (write) {
                     queryParams.add(pname);

@@ -7,4 +7,6 @@ dependencies {
     api 'jakarta.validation:jakarta.validation-api'
     api 'org.springframework.boot:spring-boot'
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
+
+    testImplementation 'io.swagger.core.v3:swagger-annotations:2.2.22'
 }

@@ -37,7 +37,7 @@ public class CrmInsightsController {
 | 属性 | 缺省 | 说明 |
 |---|---|---|
 | `name` | 方法名 `camelCase → snake_case` | 工具名，须匹配 `^[a-z][a-z0-9_]{0,39}$`。重名自动改名为 `name_2`（会打 warn）。 |
-| `description` | `METHOD /path` | 给 LLM 看的描述。**务必填写**——模型靠它选工具。 |
+| `description` | `METHOD /path`，或 `@Operation` summary/description | 给 LLM 看的描述。**务必填写**——模型靠它选工具。classpath 有 springdoc 且未显式填写时，自动从 `@Operation(summary/description)` 提取；显式 `@KeelbaseTool` 值始终优先。 |
 | `riskLevel` | `AUTO` | `AUTO` 推断 GET→R1（读自动）/ POST·PUT·PATCH·DELETE→R3（写确认）。可显式设 R0–R5。 |
 | `revokePath` | 无 | 相对 baseUrl 的补偿端点，如 `"DELETE /api/compensation/followups/{id}"`。KeelBase 撤销 AI 副作用时调用。 |
 | `audience` | 全局 | 每工具 audience 覆盖。**仅当**部署真的支持 per-tool audience 才用；必须等于顶层 audience，否则验签失败。 |
