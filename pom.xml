@@ -167,7 +167,7 @@
             <artifactId>maven-gpg-plugin</artifactId>
             <version>3.2.2</version>
             <configuration>
-              <!-- CI 无 pinentry：--batch + loopback 从 -Dgpg.passphrase 读 passphrase 签名 -->
+              <!-- CI 无 pinentry：batch + loopback 从 -Dgpg.passphrase 读 passphrase 签名 -->
               <gpgArguments>
                 <arg>--batch</arg>
                 <arg>--pinentry-mode</arg>
