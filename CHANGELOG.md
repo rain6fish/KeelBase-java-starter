@@ -17,6 +17,7 @@ All notable changes to this project are documented in this file. Format follows 
 - **Tool patterns guide** — `docs/tool-patterns{,.zh-CN}.md`: recipes for pagination, keyword filters, enum params, springdoc descriptions, class-level tools, and write+revoke, each pointing at a working example.
 - **crm-example batch write** — `batch_create_followups` demonstrates bulk writes with a nested array body that exports as a `string` param (JSON array text); `CrmExportTest` asserts it, and the tool-patterns guide gains a batch-write section.
 - **Deterministic export order** — the scanner now sorts exported tools by name (the underlying `RequestMappingHandlerMapping` iteration order is unstable across restarts), so `ai_proxy_tools` diffs/audits are stable; `CrmExportTest` asserts the sorted order.
+- **Gradle consumer guide** — `docs/gradle-usage{,.zh-CN}.md`: dependency block, `application.yml`, version table, and building from source via Gradle.
 
 ## [0.1.0] - 2026-08-29
 
