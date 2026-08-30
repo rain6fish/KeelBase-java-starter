@@ -62,6 +62,10 @@ AI：
 
 从 KeelBase 视角两者可互换——AI 工具相同，只是声明方式不同（真实 Java 注解 vs OpenAPI 导入）。
 
+## springdoc 描述自动提取（可选）
+
+本样板也演示 springdoc 集成：`CrmInsightsController` 是**类级** `@KeelbaseTool` + 方法级 `@Operation(summary=…)`，`list_customers` 用 `@Parameter(description=…)`。classpath 有 springdoc 注解时，导出的工具/参数描述自动来自它们——不必在 `@KeelbaseTool` 重复写。见[工具声明](tool-declaration.zh-CN.md)。
+
 ## 配置
 
 见[配置参考](configuration.zh-CN.md)——`keelbase.delegation.*`（共享 `DELEGATION_SECRET`、`audience: legacy-crm`）与 `keelbase.tools.base-url`（服务器根 `http://localhost:8082`）。补偿路径 `/api/compensation` fail-closed（匿名无法撤销）。

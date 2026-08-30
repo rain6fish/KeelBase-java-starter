@@ -5,4 +5,5 @@ plugins {
 dependencies {
     implementation project(':keelbase-spring-boot-starter')
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'io.swagger.core.v3:swagger-annotations:2.2.22'
 }

@@ -62,6 +62,10 @@ AI:
 
 The two are drop-in interchangeable from KeelBase's perspective — the AI tools are the same, only the declaration surface differs (annotation on real Java vs. OpenAPI import).
 
+## Descriptions from springdoc (optional)
+
+The sample also shows the springdoc integration: `CrmInsightsController` is a **class-level** `@KeelbaseTool` with per-method `@Operation(summary=…)`, and `list_customers` uses `@Parameter(description=…)`. Because springdoc annotations are on the classpath, the exported tool/parameter descriptions come from them automatically — you don't have to repeat them in `@KeelbaseTool`. See [tool declaration](tool-declaration.md).
+
 ## Configuration
 
 See [configuration](configuration.md) — `keelbase.delegation.*` (shared `DELEGATION_SECRET`, `audience: legacy-crm`) and `keelbase.tools.base-url` (server root `http://localhost:8082`). The compensation path `/api/compensation` is fail-closed (no anonymous revocation).

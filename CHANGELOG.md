@@ -12,6 +12,7 @@ All notable changes to this project are documented in this file. Format follows 
 - **Export param description** — `@RequestParam` parameters now export enum allowed values (`可选: A/B/C`) and explicit defaults (`默认: x`) into the tool parameter `description`, matching the `@RequestBody` enum description so the LLM sees precise options.
 - **Spring Boot 3.5.16** — dependency BOM + Gradle plugin upgraded from 3.2.5 to 3.5.16 (Spring Framework 6.2); full Maven + Gradle builds green.
 - **Swagger/OpenAPI doc extraction** — when springdoc annotations are on the classpath, tool descriptions come from `@Operation(summary/description)`, parameter descriptions from `@Parameter(description)`, and `@RequestBody` field descriptions from `@Schema(description)` (reflection-based, no hard dependency), so `@KeelbaseTool`/`@Schema` descriptions need not be repeated.
+- **crm-example springdoc demo** — the CRM sample annotates `CrmInsightsController` (class-level `@KeelbaseTool` + per-method `@Operation`) and `CrmController.listCustomers` (`@Parameter`), proving class-level tools and params pick up descriptions automatically; `CrmExportTest` asserts them.
 
 ## [0.1.0] - 2026-08-29
 

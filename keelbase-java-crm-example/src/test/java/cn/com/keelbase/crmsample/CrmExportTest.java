@@ -3,6 +3,8 @@ package cn.com.keelbase.crmsample;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+
+import java.nio.charset.StandardCharsets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,7 +36,7 @@ class CrmExportTest {
         var res = mvc.perform(get("/keelbase/proxy-tools/export"))
                 .andExpect(status().isOk())
                 .andReturn();
-        return mapper.readTree(res.getResponse().getContentAsString());
+        return mapper.readTree(res.getResponse().getContentAsString(StandardCharsets.UTF_8));
     }
 
     private JsonNode tool(JsonNode tools, String name) {
@@ -143,7 +145,30 @@ class CrmExportTest {
         assertEquals("GET", tool(tools, "get_crm_summary").get("method").asText());
         assertEquals("/api/insights/summary", tool(tools, "get_crm_summary").get("path").asText());
 
+        // 类级标注 + springdoc：工具描述从 @Operation(summary) 自动提取（无需 @KeelbaseTool.description）
+        assertEquals("CRM 汇总：客户数/订单数/逾期订单数",
+                tool(tools, "get_crm_summary").get("description").asText(),
+                "类级工具描述应从 @Operation(summary) 自动提取");
+        assertEquals("逾期订单列表（风险分析依据）",
+                tool(tools, "list_overdue_orders").get("description").asText());
+
         // enabled=false 的方法排除（辅助/内部端点不工具化）
         assertEquals(null, tool(tools, "internal_health"), "enabled=false 的方法不应导出");
+    }
+
+    @Test
+    void export_requestParam_usesParameterDescription() throws Exception {
+        JsonNode tools = export().get("tools");
+        JsonNode list = tool(tools, "list_customers");
+        assertNotNull(list);
+        boolean sawKeyword = false;
+        for (JsonNode p : list.get("parameters")) {
+            if ("keyword".equals(p.get("name").asText())) {
+                sawKeyword = true;
+                assertEquals("名称/公司关键字", p.get("description").asText(),
+                        "@Parameter(description) 应作为参数描述");
+            }
+        }
+        assertTrue(sawKeyword, "list_customers 应导出 keyword 参数");
     }
 }

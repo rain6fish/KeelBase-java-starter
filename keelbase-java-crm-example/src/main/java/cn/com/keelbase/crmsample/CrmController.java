@@ -2,6 +2,7 @@ package cn.com.keelbase.crmsample;
 
 import cn.com.keelbase.annotation.KeelbaseTool;
 import cn.com.keelbase.compensation.CompensationAuditSink;
+import io.swagger.v3.oas.annotations.Parameter;
 import cn.com.keelbase.compensation.KeelBaseCompensationSupport;
 import cn.com.keelbase.compensation.RevocationLedgerStore;
 import cn.com.keelbase.delegation.DelegationPrincipal;
@@ -46,7 +47,8 @@ public class CrmController extends KeelBaseCompensationSupport<FollowupTask> {
 
     @GetMapping("/customers")
     @KeelbaseTool(name = "list_customers", description = "客户列表（读工具，R1 自动），可按名称/公司关键字筛选")
-    public List<CrmCustomer> listCustomers(@RequestParam(required = false) String keyword) {
+    public List<CrmCustomer> listCustomers(
+            @RequestParam(required = false) @Parameter(description = "名称/公司关键字") String keyword) {
         List<CrmCustomer> all = new ArrayList<>(store.customers.values());
         if (keyword != null && !keyword.isBlank()) {
             String k = keyword.toLowerCase();
