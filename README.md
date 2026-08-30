@@ -47,7 +47,7 @@ curl http://localhost:8081/keelbase/proxy-tools/export
 # 4. Write it into KeelBase (PUT /settings/ai_proxy_tools, value = the exported JSON as a string), restart KeelBase
 ```
 
-Release automation is configured (the `-Prelease` profile + Maven Central Portal token flow, see [docs/release-central.md](docs/release-central.md)), but **not yet published to Maven Central** — the artifact will go live once the Central Portal account/token is provisioned. For development, install locally once with `mvn install` (current version `0.1.2-SNAPSHOT`). Full steps in [docs/quickstart.md](docs/quickstart.md).
+Published to Maven Central — add `cn.com.keelbase:keelbase-spring-boot-starter:0.1.1` as a dependency (0.1.0 and 0.1.1 are live). For the development snapshot (`0.1.2-SNAPSHOT`), install locally once with `mvn install`. Release automation (the `-Prelease` profile + Central Portal token flow) is configured — see [docs/release-central.md](docs/release-central.md). Full steps in [docs/quickstart.md](docs/quickstart.md).
 
 ## Configuration (application.yml)
 

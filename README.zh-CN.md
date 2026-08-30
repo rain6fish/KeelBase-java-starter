@@ -47,7 +47,7 @@ curl http://localhost:8081/keelbase/proxy-tools/export
 # 4. 写入 KeelBase（PUT /settings/ai_proxy_tools，value 为导出 JSON 的字符串），重启 KeelBase
 ```
 
-发布自动化已配置（`-Prelease` profile + Maven Central Portal token 流程，见 [docs/release-central.md](docs/release-central.md)），但**尚未发布到 Maven Central**——待 Central Portal 账号/token 就绪后发布。开发期用 `mvn install` 本地安装（当前版本 `0.1.2-SNAPSHOT`）。完整步骤见 [docs/quickstart.zh-CN.md](docs/quickstart.zh-CN.md)。
+已发布到 Maven Central——直接加依赖 `cn.com.keelbase:keelbase-spring-boot-starter:0.1.1`（0.1.0 与 0.1.1 均已上线）。开发快照版（`0.1.2-SNAPSHOT`）需 `mvn install` 本地安装一次。发布自动化（`-Prelease` profile + Central Portal token 流程）已配置——见 [docs/release-central.md](docs/release-central.md)。完整步骤见 [docs/quickstart.zh-CN.md](docs/quickstart.zh-CN.md)。
 
 ## 配置（application.yml）
 

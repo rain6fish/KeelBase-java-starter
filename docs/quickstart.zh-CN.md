@@ -14,7 +14,7 @@
 
 ## 1. 引入依赖
 
-尚未发布到 Maven Central（发布管线已就绪，待 Central Portal 账号——见 [release-central.md](release-central.md)）。开发期先 `mvn install` 本地安装一次，再加 `0.1.2-SNAPSHOT`：
+已发布到 Maven Central——直接加依赖 `cn.com.keelbase:keelbase-spring-boot-starter:0.1.1`（0.1.0 也已上线）：
 
 **Maven** — 加入 `pom.xml`：
 
@@ -22,17 +22,17 @@
 <dependency>
   <groupId>cn.com.keelbase</groupId>
   <artifactId>keelbase-spring-boot-starter</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
 </dependency>
 ```
 
 **Gradle** — 加入 `build.gradle`：
 
 ```groovy
-implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.0'
+implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.1'
 ```
 
-> 开发快照版（`0.1.1-SNAPSHOT`）需先在本地构建安装一次：
+> 开发快照版（`0.1.2-SNAPSHOT`）需先在本地构建安装一次：
 
 ```bash
 git clone https://github.com/rain6fish/KeelBase-java-starter.git
