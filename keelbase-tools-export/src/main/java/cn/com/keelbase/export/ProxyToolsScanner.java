@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +80,8 @@ public class ProxyToolsScanner {
             seenNames.add(name);
             tools.add(tool);
         }
+        // 按工具名排序：导出确定性（mapping.getHandlerMethods() 顺序不稳定，配置 diff/审计友好）
+        tools.sort(Comparator.comparing(ProxyToolItem::name));
         return tools;
     }
 

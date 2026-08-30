@@ -225,4 +225,16 @@ class CrmExportTest {
         assertTrue(sawCustomerId, "应导出 customerId");
         assertTrue(sawItems, "应导出 items（复杂 body → string）");
     }
+
+    @Test
+    void export_toolsSortedByName() throws Exception {
+        JsonNode tools = export().get("tools");
+        String prev = "";
+        for (JsonNode t : tools) {
+            String name = t.get("name").asText();
+            assertTrue(name.compareTo(prev) > 0,
+                    "工具应按 name 升序导出（确定性 diff/审计）：" + name + " 应在 " + prev + " 后");
+            prev = name;
+        }
+    }
 }

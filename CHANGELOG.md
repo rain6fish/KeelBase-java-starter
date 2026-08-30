@@ -16,6 +16,7 @@ All notable changes to this project are documented in this file. Format follows 
 - **crm-example pagination** — `list_customers` now paginates: `page`/`limit` params (with `@Parameter` descriptions + defaults exported, e.g. `页码（从 1 起）；默认: 1`) and a stable `{items,total,page,limit}` response; `CrmExportTest` asserts the pagination params.
 - **Tool patterns guide** — `docs/tool-patterns{,.zh-CN}.md`: recipes for pagination, keyword filters, enum params, springdoc descriptions, class-level tools, and write+revoke, each pointing at a working example.
 - **crm-example batch write** — `batch_create_followups` demonstrates bulk writes with a nested array body that exports as a `string` param (JSON array text); `CrmExportTest` asserts it, and the tool-patterns guide gains a batch-write section.
+- **Deterministic export order** — the scanner now sorts exported tools by name (the underlying `RequestMappingHandlerMapping` iteration order is unstable across restarts), so `ai_proxy_tools` diffs/audits are stable; `CrmExportTest` asserts the sorted order.
 
 ## [0.1.0] - 2026-08-29
 
