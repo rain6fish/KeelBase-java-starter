@@ -2,8 +2,11 @@ package cn.com.keelbase.export;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
+
+import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -27,6 +30,13 @@ class SwaggerDocExtractorTest {
         public String noAnnotation() {
             return null;
         }
+    }
+
+    static class SchemaDto {
+        @Schema(description = "客户名称")
+        public String name;
+
+        public String plain;
     }
 
     @Test
@@ -63,5 +73,15 @@ class SwaggerDocExtractorTest {
                 DocController.class.getMethod("list", String.class, String.class), 1);
         assertEquals("默认: x", extractor.paramDescription(mp, "默认: x"),
                 "无 description 的 @Parameter 不应改动现有描述");
+    }
+
+    @Test
+    void schemaDescription_extractsFromField() throws Exception {
+        Field name = SchemaDto.class.getField("name");
+        assertEquals("客户名称", SwaggerDocExtractor.fieldDescription(name, "fallback"),
+                "@Schema(description) 应作为 body 字段描述");
+        Field plain = SchemaDto.class.getField("plain");
+        assertEquals("可选: A/B", SwaggerDocExtractor.fieldDescription(plain, "可选: A/B"),
+                "无 @Schema 时保留现有描述（枚举可选值）");
     }
 }

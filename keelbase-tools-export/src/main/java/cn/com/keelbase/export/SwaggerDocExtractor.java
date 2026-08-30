@@ -3,6 +3,7 @@ package cn.com.keelbase.export;
 import org.springframework.core.MethodParameter;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**
@@ -16,6 +17,22 @@ final class SwaggerDocExtractor {
 
     private static final String OP_CLASS = "io.swagger.v3.oas.annotations.Operation";
     private static final String PARAM_CLASS = "io.swagger.v3.oas.annotations.Parameter";
+    private static final String SCHEMA_CLASS = "io.swagger.v3.oas.annotations.media.Schema";
+
+    /**
+     * {@code @RequestBody} 字段描述：{@code @Schema(description)} 优先，否则 fallback
+     * （枚举可选值等）。静态便于 {@link RequestBodyFields} 复用。
+     */
+    static String fieldDescription(Field field, String fallback) {
+        Annotation schema = findAnnotation(field.getAnnotations(), SCHEMA_CLASS);
+        if (schema != null) {
+            String d = invokeString(schema, "description");
+            if (d != null && !d.isBlank()) {
+                return d;
+            }
+        }
+        return fallback;
+    }
 
     /**
      * 工具描述：{@code @Operation.summary} 优先，其次 {@code description}，无则 fallback

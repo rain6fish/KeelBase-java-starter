@@ -52,7 +52,7 @@ public class CrmInsightsController {
 |---|---|
 | `@PathVariable Long id` | 必填路径参数（`integer`）。 |
 | `@RequestParam` | 查询参数；有缺省值才非必填（导出 `默认: x`）；枚举类型导出可选值（`可选: A/B/C`）。**写方法**上还会进工具的 `queryParams`（KeelBase 以查询串发送而非 body）。 |
-| `@RequestBody Dto dto` | 每个 DTO 字段成为一个参数——**对齐 Jackson**：含继承字段、跳过 `@JsonIgnore`/static/transient 字段、尊重 `@JsonProperty`（名与 required）、支持 record。 |
+| `@RequestBody Dto dto` | 每个 DTO 字段成为一个参数——**对齐 Jackson**：含继承字段、跳过 `@JsonIgnore`/static/transient 字段、尊重 `@JsonProperty`（名与 required）、支持 record。classpath 有 springdoc 时，字段的 `@Schema(description)` 成为其参数描述（枚举可选值为兜底）。 |
 | `@DelegationUser` / `HttpServletRequest` / `Model` / servlet 类型 | 跳过（不是工具参数）。 |
 
 类型映射（对齐 KeelBase 生成器）：

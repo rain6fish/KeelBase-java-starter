@@ -55,7 +55,8 @@ final class RequestBodyFields {
                         || f.isAnnotationPresent(NotNull.class)
                         || f.isAnnotationPresent(NotBlank.class)
                         || f.isAnnotationPresent(NotEmpty.class);
-                fields.add(new BodyField(name, TypeMapper.map(f.getType()), fieldDescription(f), required));
+                String description = SwaggerDocExtractor.fieldDescription(f, fieldDescription(f));
+                fields.add(new BodyField(name, TypeMapper.map(f.getType()), description, required));
             }
         }
         return fields;
