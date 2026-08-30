@@ -1,0 +1,18 @@
+server:
+  port: 8082
+
+keelbase:
+  delegation:
+    enabled: true
+    # 与 KeelBase 共享的 DELEGATION_SECRET（HS256，≥32 字节）。生产用环境变量注入。
+    secret: ${KEELBASE_DELEGATION_SECRET:0123456789012345678901234567890123456789012345678901234567890123}
+    # 必须等于 KeelBase ai_proxy_tools 顶层 audience
+    audience: legacy-crm
+    issuer: keelbase
+    # 受保护路径（无 Authorization 头即拒绝）；未列路径 fail-open
+    paths:
+      - /api/compensation
+  tools:
+    # 目标服务器根（部署相关，导出 ai_proxy_tools 用）；工具 path 为完整路径
+    base-url: http://localhost:8082
+    # audience 缺省回退 delegation.audience（单一来源）

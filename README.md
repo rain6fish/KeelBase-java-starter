@@ -25,6 +25,7 @@
 | [tool-declaration](docs/tool-declaration.md) | Annotation, parameter extraction, type mapping, risk levels |
 | [compensation](docs/compensation.md) | Revocation call contract, idempotency, audit, multi-instance |
 | [client](docs/client.md) | Delegation-token lifecycle (`KeelbaseClient`) + audit reporting |
+| [reference-project-crm](docs/reference-project-crm.md) | Integrator Kit Reference Project: legacy Java CRM → AI CRM (real Java side) |
 | [troubleshooting](docs/troubleshooting.md) | Error codes, common mistakes, verification checklist |
 | [production-checklist](docs/production-checklist.md) | Hardening, secret rotation, ops monitoring before go-live |
 
@@ -102,6 +103,7 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
 | `keelbase-compensation` | Compensation scaffold + idempotency ledger + audit hook |
 | `keelbase-client` | `KeelbaseClient` (delegation-token lifecycle) + audit reporting to the governance plane |
 | `keelbase-spring-boot-autoconfigure` | Auto-configuration (all four pieces + optional Security adapter) |
+| `keelbase-java-crm-example` | Reference Project: legacy Java CRM → AI CRM (not published) |
 | `keelbase-spring-boot-starter` | Aggregator (the only dependency you need) |
 | `keelbase-java-example` | Example app (not published) |
 

@@ -21,6 +21,7 @@
     <module>keelbase-spring-boot-autoconfigure</module>
     <module>keelbase-spring-boot-starter</module>
     <module>keelbase-java-example</module>
+    <module>keelbase-java-crm-example</module>
   </modules>
 
   <properties>

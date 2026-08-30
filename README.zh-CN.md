@@ -25,6 +25,7 @@
 | [工具声明与导出](docs/tool-declaration.zh-CN.md) | 注解、参数提取、类型映射、风险级 |
 | [补偿与撤销](docs/compensation.zh-CN.md) | 撤销调用契约、幂等、审计、多实例 |
 | [客户端与审计上报](docs/client.zh-CN.md) | 委托 token 生命周期（`KeelbaseClient`）+ 审计上报 |
+| [参考项目 CRM](docs/reference-project-crm.zh-CN.md) | Integrator Kit 参考项目：传统 Java CRM → AI CRM（Java 侧真实实现） |
 | [排障与 FAQ](docs/troubleshooting.zh-CN.md) | 错误码、常见坑、核对清单 |
 | [生产上线核对清单](docs/production-checklist.zh-CN.md) | 上线硬化、密钥轮换、运维监控 |
 
@@ -102,6 +103,7 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
 | `keelbase-compensation` | 补偿脚手架 + 幂等账本 + 审计钩子 |
 | `keelbase-client` | `KeelbaseClient`（委托 token 生命周期）+ 治理台审计上报 |
 | `keelbase-spring-boot-autoconfigure` | 自动装配（四件套 + 可选 Security 适配） |
+| `keelbase-java-crm-example` | 参考项目：传统 Java CRM → AI CRM（不发布） |
 | `keelbase-spring-boot-starter` | 聚合器（用户只引这个） |
 | `keelbase-java-example` | 示例应用（不发布） |
 
