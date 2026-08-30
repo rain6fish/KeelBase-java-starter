@@ -26,6 +26,7 @@
 | [补偿与撤销](docs/compensation.zh-CN.md) | 撤销调用契约、幂等、审计、多实例 |
 | [客户端与审计上报](docs/client.zh-CN.md) | 委托 token 生命周期（`KeelbaseClient`）+ 审计上报 |
 | [参考项目 CRM](docs/reference-project-crm.zh-CN.md) | Integrator Kit 参考项目：传统 Java CRM → AI CRM（Java 侧真实实现） |
+| [工具模式](docs/tool-patterns.zh-CN.md) | 配方：分页、筛选、枚举参数、springdoc 描述、类级工具、写+撤销 |
 | [排障与 FAQ](docs/troubleshooting.zh-CN.md) | 错误码、常见坑、核对清单 |
 | [生产上线核对清单](docs/production-checklist.zh-CN.md) | 上线硬化、密钥轮换、运维监控 |
 

@@ -26,6 +26,7 @@
 | [compensation](docs/compensation.md) | Revocation call contract, idempotency, audit, multi-instance |
 | [client](docs/client.md) | Delegation-token lifecycle (`KeelbaseClient`) + audit reporting |
 | [reference-project-crm](docs/reference-project-crm.md) | Integrator Kit Reference Project: legacy Java CRM → AI CRM (real Java side) |
+| [tool-patterns](docs/tool-patterns.md) | Recipes: pagination, filters, enum params, springdoc descriptions, class-level tools, write+revoke |
 | [troubleshooting](docs/troubleshooting.md) | Error codes, common mistakes, verification checklist |
 | [production-checklist](docs/production-checklist.md) | Hardening, secret rotation, ops monitoring before go-live |
 

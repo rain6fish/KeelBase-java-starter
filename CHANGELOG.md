@@ -14,6 +14,7 @@ All notable changes to this project are documented in this file. Format follows 
 - **Swagger/OpenAPI doc extraction** — when springdoc annotations are on the classpath, tool descriptions come from `@Operation(summary/description)`, parameter descriptions from `@Parameter(description)`, and `@RequestBody` field descriptions from `@Schema(description)` (reflection-based, no hard dependency), so `@KeelbaseTool`/`@Schema` descriptions need not be repeated.
 - **crm-example springdoc demo** — the CRM sample annotates `CrmInsightsController` (class-level `@KeelbaseTool` + per-method `@Operation`) and `CrmController.listCustomers` (`@Parameter`), proving class-level tools and params pick up descriptions automatically; `CrmExportTest` asserts them.
 - **crm-example pagination** — `list_customers` now paginates: `page`/`limit` params (with `@Parameter` descriptions + defaults exported, e.g. `页码（从 1 起）；默认: 1`) and a stable `{items,total,page,limit}` response; `CrmExportTest` asserts the pagination params.
+- **Tool patterns guide** — `docs/tool-patterns{,.zh-CN}.md`: recipes for pagination, keyword filters, enum params, springdoc descriptions, class-level tools, and write+revoke, each pointing at a working example.
 
 ## [0.1.0] - 2026-08-29
 
