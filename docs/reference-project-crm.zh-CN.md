@@ -62,6 +62,10 @@ AI：
 
 从 KeelBase 视角两者可互换——AI 工具相同，只是声明方式不同（真实 Java 注解 vs OpenAPI 导入）。
 
+## 分页
+
+`list_customers` 演示分页模式：参数 `keyword` + `page`（默认 1）+ `limit`（默认 20），返回稳定的 `{items, total, page, limit}` 结构——AI 可解析并翻页。`page`/`limit` 导出各自的 `@Parameter` 描述与默认值（如 `页码（从 1 起）；默认: 1`），模型无需猜测即可正确分页。
+
 ## springdoc 描述自动提取（可选）
 
 本样板也演示 springdoc 集成：`CrmInsightsController` 是**类级** `@KeelbaseTool` + 方法级 `@Operation(summary=…)`，`list_customers` 用 `@Parameter(description=…)`。classpath 有 springdoc 注解时，导出的工具/参数描述自动来自它们——不必在 `@KeelbaseTool` 重复写。见[工具声明](tool-declaration.zh-CN.md)。

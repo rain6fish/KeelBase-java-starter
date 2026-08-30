@@ -62,6 +62,10 @@ AI:
 
 The two are drop-in interchangeable from KeelBase's perspective — the AI tools are the same, only the declaration surface differs (annotation on real Java vs. OpenAPI import).
 
+## Pagination
+
+`list_customers` demonstrates the pagination pattern: it takes `keyword` + `page` (default 1) + `limit` (default 20) query params and returns a stable `{items, total, page, limit}` structure the AI can parse and page through. The `page`/`limit` params export their `@Parameter` descriptions and defaults (e.g. `页码（从 1 起）；默认: 1`), so the model pages correctly without guessing.
+
 ## Descriptions from springdoc (optional)
 
 The sample also shows the springdoc integration: `CrmInsightsController` is a **class-level** `@KeelbaseTool` with per-method `@Operation(summary=…)`, and `list_customers` uses `@Parameter(description=…)`. Because springdoc annotations are on the classpath, the exported tool/parameter descriptions come from them automatically — you don't have to repeat them in `@KeelbaseTool`. See [tool declaration](tool-declaration.md).

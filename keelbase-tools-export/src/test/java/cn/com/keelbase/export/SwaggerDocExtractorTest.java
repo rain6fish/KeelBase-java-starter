@@ -61,8 +61,8 @@ class SwaggerDocExtractorTest {
     void parameterDescription_appendedToExisting() throws Exception {
         MethodParameter mp = new MethodParameter(
                 DocController.class.getMethod("list", String.class, String.class), 0);
-        assertEquals("可选: A/B；名称/公司关键字", extractor.paramDescription(mp, "可选: A/B"),
-                "@Parameter(description) 应附加到枚举可选值之后");
+        assertEquals("名称/公司关键字；可选: A/B", extractor.paramDescription(mp, "可选: A/B"),
+                "@Parameter(description) 应在前面，枚举可选值追加在后");
         assertEquals("名称/公司关键字", extractor.paramDescription(mp, ""),
                 "现有描述为空时直接用 @Parameter 描述");
     }

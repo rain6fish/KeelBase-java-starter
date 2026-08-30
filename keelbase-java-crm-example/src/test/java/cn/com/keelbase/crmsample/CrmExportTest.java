@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -157,18 +158,39 @@ class CrmExportTest {
     }
 
     @Test
-    void export_requestParam_usesParameterDescription() throws Exception {
+    void export_listCustomers_paginationAndParameterDescriptions() throws Exception {
         JsonNode tools = export().get("tools");
         JsonNode list = tool(tools, "list_customers");
         assertNotNull(list);
         boolean sawKeyword = false;
+        boolean sawPage = false;
+        boolean sawLimit = false;
         for (JsonNode p : list.get("parameters")) {
-            if ("keyword".equals(p.get("name").asText())) {
-                sawKeyword = true;
-                assertEquals("名称/公司关键字", p.get("description").asText(),
-                        "@Parameter(description) 应作为参数描述");
+            switch (p.get("name").asText()) {
+                case "keyword" -> {
+                    sawKeyword = true;
+                    assertEquals("名称/公司关键字", p.get("description").asText(),
+                            "@Parameter(description) 应作为参数描述");
+                }
+                case "page" -> {
+                    sawPage = true;
+                    assertEquals("integer", p.get("type").asText());
+                    assertEquals("页码（从 1 起）；默认: 1", p.get("description").asText(),
+                            "分页参数应透传 @Parameter + 默认值");
+                    assertFalse(p.get("required").asBoolean(), "带 defaultValue 的分页参数非必填");
+                }
+                case "limit" -> {
+                    sawLimit = true;
+                    assertEquals("integer", p.get("type").asText());
+                    assertEquals("每页条数（默认 20）；默认: 20", p.get("description").asText());
+                    assertFalse(p.get("required").asBoolean());
+                }
+                default -> {
+                }
             }
         }
-        assertTrue(sawKeyword, "list_customers 应导出 keyword 参数");
+        assertTrue(sawKeyword, "应导出 keyword 筛选参数");
+        assertTrue(sawPage, "应导出 page 分页参数");
+        assertTrue(sawLimit, "应导出 limit 分页参数");
     }
 }

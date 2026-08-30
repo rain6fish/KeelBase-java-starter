@@ -24,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 存量 Java CRM 控制器：把 CRM 业务端点声明为治理 AI 工具（域对齐
@@ -46,18 +47,27 @@ public class CrmController extends KeelBaseCompensationSupport<FollowupTask> {
     // ---- 读工具（R1 自动）----
 
     @GetMapping("/customers")
-    @KeelbaseTool(name = "list_customers", description = "客户列表（读工具，R1 自动），可按名称/公司关键字筛选")
-    public List<CrmCustomer> listCustomers(
-            @RequestParam(required = false) @Parameter(description = "名称/公司关键字") String keyword) {
-        List<CrmCustomer> all = new ArrayList<>(store.customers.values());
+    @KeelbaseTool(name = "list_customers", description = "客户列表（读工具，R1 自动），支持关键字筛选 + 分页")
+    public Map<String, Object> listCustomers(
+            @RequestParam(required = false) @Parameter(description = "名称/公司关键字") String keyword,
+            @RequestParam(required = false, defaultValue = "1") @Parameter(description = "页码（从 1 起）") int page,
+            @RequestParam(required = false, defaultValue = "20") @Parameter(description = "每页条数（默认 20）") int limit) {
+        List<CrmCustomer> all = store.customers.values().stream()
+                .sorted(Comparator.comparingLong(CrmCustomer::id))
+                .toList();
         if (keyword != null && !keyword.isBlank()) {
             String k = keyword.toLowerCase();
-            return all.stream()
+            all = all.stream()
                     .filter(c -> c.name().toLowerCase().contains(k)
                             || (c.company() != null && c.company().toLowerCase().contains(k)))
                     .toList();
         }
-        return all.stream().sorted(Comparator.comparingLong(CrmCustomer::id)).toList();
+        int total = all.size();
+        int from = Math.max(0, (page - 1) * limit);
+        int to = Math.min(total, from + limit);
+        List<CrmCustomer> items = from >= total ? List.of() : all.subList(from, to);
+        // 稳定分页结构：AI 可解析 {items,total,page,limit}
+        return Map.of("items", items, "total", total, "page", page, "limit", limit);
     }
 
     @GetMapping("/customers/{id}")

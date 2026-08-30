@@ -54,15 +54,15 @@ final class SwaggerDocExtractor {
     }
 
     /**
-     * 参数描述：{@code @Parameter(description)} 附加到现有描述（枚举可选值/默认值保留），
-     * 现有为空则直接使用。
+     * 参数描述：{@code @Parameter(description)} 放前面，现有描述（枚举可选值/默认值）追加在后——
+     * 业务描述优先（如 {@code 页码（从 1 起）；默认: 1}），现有为空则直接用 @Parameter。
      */
     String paramDescription(MethodParameter mp, String existing) {
         for (Annotation a : mp.getParameterAnnotations()) {
             if (a.annotationType().getName().equals(PARAM_CLASS)) {
                 String d = invokeString(a, "description");
                 if (d != null && !d.isBlank()) {
-                    return existing == null || existing.isBlank() ? d : existing + "；" + d;
+                    return existing == null || existing.isBlank() ? d : d + "；" + existing;
                 }
             }
         }
