@@ -20,7 +20,7 @@ M2="${M2_REPO:-$HOME/.m2/repository/cn/com/keelbase}"
 STAGE="$HOME/.m2/keelbase-upload-$VER"
 ZIP="$HOME/.m2/keelbase-$VER-upload.zip"
 
-MODULES="keelbase-tools-annotation keelbase-delegation-filter keelbase-tools-export keelbase-compensation keelbase-spring-boot-autoconfigure keelbase-spring-boot-starter"
+MODULES="keelbase-tools-annotation keelbase-delegation-filter keelbase-tools-export keelbase-compensation keelbase-client keelbase-spring-boot-autoconfigure keelbase-spring-boot-starter"
 
 # zip-capable tar: Windows System32 ships bsdtar (libarchive); git-bash's tar is GNU (no zip)
 if [ -x /c/Windows/System32/tar.exe ]; then

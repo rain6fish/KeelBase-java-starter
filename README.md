@@ -1,5 +1,7 @@
 # KeelBase Java Starter
 
+[![Maven Central](https://img.shields.io/maven-central/v/cn.com.keelbase/keelbase-spring-boot-starter)](https://central.sonatype.com/artifact/cn.com.keelbase/keelbase-spring-boot-starter)
+
 > **Give legacy Java/Spring systems governed AI capabilities.** A Spring Boot starter that connects your existing systems to [KeelBase](https://github.com/rain6fish/KeelBase) as governed AI tools — delegated identity, proxy-tool export, and compensation endpoints. Apache-2.0.
 
 > KeelBase is an open-source **Enterprise AI Trust Runtime**. With this starter, your existing Java/Spring REST endpoints become AI tools: the AI operates your real data under KeelBase governance — row-level permissions, human confirmation for writes, tamper-evident audit chains, and revocable side effects.

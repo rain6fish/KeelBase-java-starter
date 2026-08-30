@@ -80,17 +80,18 @@ bash scripts/build-central-upload.sh 0.1.0   # 版本号默认 0.1.0
 ### 验证 / Verify
 
 ```bash
-# 暂存仓库检查（Staging → Close → Release 流程在 OSSRH UI）
-# 中央同步后（几小时）：
-curl https://repo1.maven.org/maven2/cn/com/keelbase/keelbase-spring-boot-starter/0.1.0/
-# 或
+# 上传后在 Portal「Your deployments」看状态：SUBMITTED → PUBLISHING → PUBLISHED
+# PUBLISHING 通常持续 1~4 小时（首次/多模块更久），期间 repo1 与 search.maven.org 尚不可见属正常
+# 翻为 PUBLISHED 后（可能再等一小段传播）：
+curl -I https://repo1.maven.org/maven2/cn/com/keelbase/keelbase-spring-boot-starter/0.1.0/keelbase-spring-boot-starter-0.1.0.pom | head -1   # 期望 200
+# 或浏览器：
 https://central.sonatype.com/artifact/cn.com.keelbase/keelbase-spring-boot-starter
 ```
 
 ## 版本维护 / Versioning
 
 - **快照**：`0.1.1-SNAPSHOT`（开发中，不发布 Central，本地 `mvn install` 用）
-- **发布**：`0.1.1`（去 `-SNAPSHOT` + `mvn deploy -Prelease`）
+- **发布**：`0.1.1`（去 `-SNAPSHOT` → `mvn clean install -Prelease` → `bash scripts/build-central-upload.sh 0.1.1` → Portal 上传）
 - **版本号策略**：遵循项目 [version-strategy](https://github.com/rain6fish/KeelBase)（1.0.x 增量维护）
 
 ## 常见问题 / Troubleshooting

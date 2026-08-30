@@ -1,5 +1,7 @@
 # KeelBase Java Starter
 
+[![Maven Central](https://img.shields.io/maven-central/v/cn.com.keelbase/keelbase-spring-boot-starter)](https://central.sonatype.com/artifact/cn.com.keelbase/keelbase-spring-boot-starter)
+
 > **让存量 Java/Spring 系统获得受治理的 AI 能力**——基于 [KeelBase](https://github.com/rain6fish/KeelBase) 的 Spring Boot Starter：委托身份验签、代理工具导出、撤销补偿端点。Apache-2.0。
 
 > KeelBase 是开源「企业 AI 信任运行时」。用本 Starter，你的存量 Java/Spring REST 端点即可成为 AI 工具——AI 在你的真实数据上干活，全程过 KeelBase 治理层（行级权限 / 写操作人工确认 / 防篡改审计哈希链 / 副作用可撤销）。
