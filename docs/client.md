@@ -40,6 +40,10 @@ String token = keelbaseClient.obtainAndCache(userJwt, "legacy-crm", 300);
 
 // 3. Verify a delegation token you received (shared DELEGATION_SECRET, HS256 + audience)
 keelbaseClient.verify(token, "legacy-crm");   // throws KeelbaseClientException on bad sig / wrong aud
+
+// 3b. Verify and get the parsed identity (subject / oidcSub / audience / expiresAt)
+Map<String, Object> identity = keelbaseClient.verifyAndGet(token, "legacy-crm");
+// identity.get("oidcSub") -> map to your local user
 ```
 
 Contract (matches KeelBase `POST /api/v1/auth/delegation-token`):

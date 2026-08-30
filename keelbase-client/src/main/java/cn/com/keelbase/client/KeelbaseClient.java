@@ -18,6 +18,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -118,6 +120,26 @@ public class KeelbaseClient {
 
     /** 本地验签委托 JWT：HS256 + audience（共享 DELEGATION_SECRET）。 */
     public void verify(String token, String expectedAudience) {
+        parse(token, expectedAudience);
+    }
+
+    /**
+     * 验签并返回解析的身份信息（subject / oidcSub / audience / expiresAt），
+     * 供校验通过后的业务逻辑使用（如把 oidcSub 映射为本地用户）。
+     */
+    public Map<String, Object> verifyAndGet(String token, String expectedAudience) {
+        Claims c = parse(token, expectedAudience).getBody();
+        Map<String, Object> info = new LinkedHashMap<>();
+        info.put("subject", c.getSubject());
+        info.put("audience", c.getAudience());
+        if (c.get("oidcSub") != null) {
+            info.put("oidcSub", c.get("oidcSub"));
+        }
+        info.put("expiresAt", c.getExpiration());
+        return info;
+    }
+
+    private Jws<Claims> parse(String token, String expectedAudience) {
         if (delegationSecret == null || delegationSecret.isBlank()) {
             throw new KeelbaseClientException("keelbase.delegation.secret 未配置，无法本地验签委托 token");
         }
@@ -132,6 +154,7 @@ public class KeelbaseClient {
                 && !expectedAudience.equals(jws.getBody().getAudience())) {
             throw new KeelbaseClientException("委托 token audience 不匹配（期望 " + expectedAudience + "）");
         }
+        return jws;
     }
 
     private String resolveAudience(String audience) {

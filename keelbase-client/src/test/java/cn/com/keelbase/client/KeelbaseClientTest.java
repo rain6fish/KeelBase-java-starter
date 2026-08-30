@@ -14,9 +14,11 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -112,6 +114,22 @@ class KeelbaseClientTest {
                 .setExpiration(new Date(System.currentTimeMillis() + 60000))
                 .signWith(key, SignatureAlgorithm.HS256).compact();
         client("legacy-crm").verify(token, "legacy-crm"); // 不抛
+    }
+
+    @Test
+    void verifyAndGet_returnsParsedIdentity() {
+        SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+        String token = Jwts.builder()
+                .setSubject("local:42").claim("oidcSub", "oidc-user-1")
+                .setAudience("legacy-crm").setIssuer("keelbase")
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 60000))
+                .signWith(key, SignatureAlgorithm.HS256).compact();
+        Map<String, Object> info = client("legacy-crm").verifyAndGet(token, "legacy-crm");
+        assertEquals("local:42", info.get("subject"));
+        assertEquals("oidc-user-1", info.get("oidcSub"));
+        assertEquals("legacy-crm", info.get("audience"));
+        assertNotNull(info.get("expiresAt"));
     }
 
     @Test

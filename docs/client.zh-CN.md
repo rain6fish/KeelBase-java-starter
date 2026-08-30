@@ -40,6 +40,10 @@ String token = keelbaseClient.obtainAndCache(userJwt, "legacy-crm", 300);
 
 // 3. 验签收到的委托 token（共享 DELEGATION_SECRET，HS256 + audience）
 keelbaseClient.verify(token, "legacy-crm");   // 验签失败/aud 不符抛 KeelbaseClientException
+
+// 3b. 验签并取解析后的身份（subject / oidcSub / audience / expiresAt）
+Map<String, Object> identity = keelbaseClient.verifyAndGet(token, "legacy-crm");
+// identity.get("oidcSub") -> 映射你的本地用户
 ```
 
 契约（对齐 KeelBase `POST /api/v1/auth/delegation-token`）：
