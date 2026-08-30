@@ -14,7 +14,7 @@ Full reference: [configuration](configuration.md) · [delegated identity](delega
 
 ## 1. Add the dependency
 
-Published to Maven Central — add `0.1.0` directly:
+Not yet published to Maven Central (release pipeline ready, awaiting the Central Portal account — see [release-central.md](release-central.md)). For development, install locally once with `mvn install`, then add `0.1.2-SNAPSHOT`:
 
 **Maven** — `pom.xml`:
 

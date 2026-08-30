@@ -1,7 +1,5 @@
 # KeelBase Java Starter
 
-[![Maven Central](https://img.shields.io/maven-central/v/cn.com.keelbase/keelbase-spring-boot-starter)](https://central.sonatype.com/artifact/cn.com.keelbase/keelbase-spring-boot-starter)
-
 > **让存量 Java/Spring 系统获得受治理的 AI 能力**——基于 [KeelBase](https://github.com/rain6fish/KeelBase) 的 Spring Boot Starter：委托身份验签、代理工具导出、撤销补偿端点。Apache-2.0。
 
 > KeelBase 是开源「企业 AI 信任运行时」。用本 Starter，你的存量 Java/Spring REST 端点即可成为 AI 工具——AI 在你的真实数据上干活，全程过 KeelBase 治理层（行级权限 / 写操作人工确认 / 防篡改审计哈希链 / 副作用可撤销）。
@@ -49,7 +47,7 @@ curl http://localhost:8081/keelbase/proxy-tools/export
 # 4. 写入 KeelBase（PUT /settings/ai_proxy_tools，value 为导出 JSON 的字符串），重启 KeelBase
 ```
 
-已发布到 Maven Central——直接加依赖 `cn.com.keelbase:keelbase-spring-boot-starter:0.1.0`（Maven 或 Gradle）。开发快照版（`0.1.1-SNAPSHOT`）需先 `mvn install` 本地安装一次。完整步骤见 [docs/quickstart.zh-CN.md](docs/quickstart.zh-CN.md)。
+发布自动化已配置（`-Prelease` profile + Maven Central Portal token 流程，见 [docs/release-central.md](docs/release-central.md)），但**尚未发布到 Maven Central**——待 Central Portal 账号/token 就绪后发布。开发期用 `mvn install` 本地安装（当前版本 `0.1.2-SNAPSHOT`）。完整步骤见 [docs/quickstart.zh-CN.md](docs/quickstart.zh-CN.md)。
 
 ## 配置（application.yml）
 

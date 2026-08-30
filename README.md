@@ -1,7 +1,5 @@
 # KeelBase Java Starter
 
-[![Maven Central](https://img.shields.io/maven-central/v/cn.com.keelbase/keelbase-spring-boot-starter)](https://central.sonatype.com/artifact/cn.com.keelbase/keelbase-spring-boot-starter)
-
 > **Give legacy Java/Spring systems governed AI capabilities.** A Spring Boot starter that connects your existing systems to [KeelBase](https://github.com/rain6fish/KeelBase) as governed AI tools — delegated identity, proxy-tool export, and compensation endpoints. Apache-2.0.
 
 > KeelBase is an open-source **Enterprise AI Trust Runtime**. With this starter, your existing Java/Spring REST endpoints become AI tools: the AI operates your real data under KeelBase governance — row-level permissions, human confirmation for writes, tamper-evident audit chains, and revocable side effects.
@@ -49,7 +47,7 @@ curl http://localhost:8081/keelbase/proxy-tools/export
 # 4. Write it into KeelBase (PUT /settings/ai_proxy_tools, value = the exported JSON as a string), restart KeelBase
 ```
 
-Published to Maven Central — add `cn.com.keelbase:keelbase-spring-boot-starter:0.1.0` as a dependency (Maven or Gradle). For the development snapshot (`0.1.1-SNAPSHOT`), install locally once with `mvn install`. Full steps in [docs/quickstart.md](docs/quickstart.md).
+Release automation is configured (the `-Prelease` profile + Maven Central Portal token flow, see [docs/release-central.md](docs/release-central.md)), but **not yet published to Maven Central** — the artifact will go live once the Central Portal account/token is provisioned. For development, install locally once with `mvn install` (current version `0.1.2-SNAPSHOT`). Full steps in [docs/quickstart.md](docs/quickstart.md).
 
 ## Configuration (application.yml)
 

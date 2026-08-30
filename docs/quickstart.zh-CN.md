@@ -14,7 +14,7 @@
 
 ## 1. 引入依赖
 
-已发布到 Maven Central——直接加 `0.1.0`：
+尚未发布到 Maven Central（发布管线已就绪，待 Central Portal 账号——见 [release-central.md](release-central.md)）。开发期先 `mvn install` 本地安装一次，再加 `0.1.2-SNAPSHOT`：
 
 **Maven** — 加入 `pom.xml`：
 
