@@ -10,6 +10,7 @@ All notable changes to this project are documented in this file. Format follows 
 - **`keelbase-java-crm-example`** — Integrator Kit Reference Project: a legacy Java CRM (customers/orders/follow-ups) declared as 5 governed AI tools (read R1 / write R3 + revocable `create_followup_task`), the real Java side of the `external-crm-demo` CRM domain, with `verify-crm-e2e.mjs` and `docs/reference-project-crm{,.zh-CN}.md`.
 - **Class-level `@KeelbaseTool`** — `@KeelbaseTool` now also targets `TYPE`: a whole `@RestController` is tooled up in one go (tool name = method `camelCase → snake_case`), with method-level `enabled=false` to exclude helper/internal endpoints. Method-level attributes override class-level. Demoed by `keelbase-java-crm-example`'s `CrmInsightsController` (3 tools + 1 excluded).
 - **Export param description** — `@RequestParam` parameters now export enum allowed values (`可选: A/B/C`) and explicit defaults (`默认: x`) into the tool parameter `description`, matching the `@RequestBody` enum description so the LLM sees precise options.
+- **Spring Boot 3.5.16** — dependency BOM + Gradle plugin upgraded from 3.2.5 to 3.5.16 (Spring Framework 6.2); full Maven + Gradle builds green.
 
 ## [0.1.0] - 2026-08-29
 

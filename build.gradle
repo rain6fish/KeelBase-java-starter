@@ -3,7 +3,7 @@
 // 依赖与各模块 pom.xml 保持一一对应（compile → api / provided → compileOnly / runtime → runtimeOnly）。
 
 plugins {
-    id 'org.springframework.boot' version '3.2.5' apply false
+    id 'org.springframework.boot' version '3.5.16' apply false
     id 'io.spring.dependency-management' version '1.1.4' apply false
 }
 
@@ -21,7 +21,7 @@ subprojects {
 
     dependencyManagement {
         imports {
-            mavenBom 'org.springframework.boot:spring-boot-dependencies:3.2.5'
+            mavenBom 'org.springframework.boot:spring-boot-dependencies:3.5.16'
         }
         // Spring Boot BOM 不管 jjwt；对齐 Maven 父 pom 的 dependencyManagement（jjwt.version）
         dependencies {
