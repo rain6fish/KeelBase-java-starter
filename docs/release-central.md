@@ -65,9 +65,17 @@ mvn clean install
 mvn deploy -Prelease -DskipTests
 ```
 
-### 若用 Central Portal（s01.oss.sonatype.org 新流程）
+### 若用 Central Portal 网页上传（central.sonatype.com → Publish）
 
-改用 `central.sonatype.com` 的发布 API（`central` server id + publish 步骤），或在 `-Prelease` 上加 `-DaltDeploymentRepository` 指向你的 staging repo。
+Portal 校验要求**每个上传构件**都带齐 `.pom` / `.jar` / `-sources.jar` / `-javadoc.jar` + **`.asc`（GPG 签名）+ `.md5` + `.sha1`**。任何文件缺 `.md5`/`.sha1`，整次部署都会 FAILED（`Error: Missing md5/sha1 checksum for file: ...`），且不产生任何同步。`mvn install -Prelease` 只产出 pom/jar/sources/javadoc + `.asc`，**不含校验和**。
+
+一键生成完整上传包（从 `~/.m2` 的 release 构件签名 + 补校验和 + 打包，产出 `~/.m2/keelbase-<版本>-upload.zip`）：
+
+```bash
+bash scripts/build-central-upload.sh 0.1.0   # 版本号默认 0.1.0
+```
+
+> 直接上传 `target/` 目录里的构件会因缺 `.md5`/`.sha1` 导致 FAILED，务必用上面脚本打包后再传。
 
 ### 验证 / Verify
 
@@ -93,3 +101,4 @@ https://central.sonatype.com/artifact/cn.com.keelbase/keelbase-spring-boot-start
 | `[ERROR] Failed to deploy artifacts: 401` | `~/.m2/settings.xml` ossrh 凭据错 |
 | `[ERROR] ... signature validation` | GPG 密钥与 `gpg.keyname` 不一致 |
 | Central 拒绝 `cn.com.keelbase` 未验证 | 先完成命名空间归属验证 |
+| Portal 报 `Error: Missing md5/sha1 checksum for file: xxx.pom` | 上传包缺校验和 → 用 `scripts/build-central-upload.sh` 重新打包（补 `.md5`/`.sha1`/`.asc`）再上传 |
