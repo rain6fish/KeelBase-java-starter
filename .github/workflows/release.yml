@@ -51,4 +51,6 @@ jobs:
           EOF
 
       - name: Deploy to Maven Central Portal
-        run: mvn -B -Prelease deploy -Dgpg.keyname="${{ secrets.GPG_KEY_ID }}" -Dgpg.passphraseFile=/tmp/gpg-passphrase.txt
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: mvn -B -Prelease deploy -Dgpg.keyname="${{ secrets.GPG_KEY_ID }}" -Dgpg.passphrase="$GPG_PASSPHRASE"
