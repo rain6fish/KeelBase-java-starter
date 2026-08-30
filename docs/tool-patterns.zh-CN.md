@@ -79,6 +79,24 @@ public ResponseEntity<?> revoke(@PathVariable Long id, HttpServletRequest reques
 
 嵌套/复杂 `@RequestBody` 字段映射为 `string`——模型传 JSON 文本，你的 Jackson 绑定负责解析。把模型应显式设置的（标量/枚举）扁平化为一级参数；自由格式部分留作 JSON 字符串字段。
 
+## 8. 批量写
+
+批量操作用嵌套数组承载 payload，模型以 JSON 文本传入：
+
+```java
+public record BatchCreateFollowupsRequest(
+        @JsonProperty(required = true) Long customerId,
+        @JsonProperty(required = true) List<BatchItem> items) { ... }
+
+@PostMapping("/followups/batch")
+@KeelbaseTool(name = "batch_create_followups",
+              description = "批量创建跟进任务（写，R3；body items 为跟进数组 JSON 文本）")
+public Map<String, Object> batchCreate(@RequestBody BatchCreateFollowupsRequest req,
+                                       @DelegationUser DelegationPrincipal principal) { ... }
+```
+
+嵌套 `items` 数组导出为 `string` 参数（模式 7）——模型传 JSON 数组，你的 Jackson 绑定解析。示例：`keelbase-java-crm-example` 的 `batch_create_followups`。
+
 ## 参考示例
 
 | 模式 | 示例 |
@@ -89,3 +107,4 @@ public ResponseEntity<?> revoke(@PathVariable Long id, HttpServletRequest reques
 | 类级 + `@Operation` | `CrmInsightsController` |
 | springdoc `@Parameter`/`@Schema` | `CrmController` |
 | 写 + 撤销 | `create_followup_task` / `revoke` |
+| 批量写 + 复杂 body | `batch_create_followups` |

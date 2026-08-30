@@ -108,6 +108,25 @@ public class CrmController extends KeelBaseCompensationSupport<FollowupTask> {
         return task;
     }
 
+    @PostMapping("/followups/batch")
+    @KeelbaseTool(name = "batch_create_followups",
+            description = "批量创建跟进任务（写工具，R3 需人工确认；body items 为跟进数组 JSON 文本）")
+    public Map<String, Object> batchCreateFollowups(@RequestBody BatchCreateFollowupsRequest req,
+                                                    @DelegationUser DelegationPrincipal principal) {
+        if (!store.customers.containsKey(req.customerId())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "customer not found");
+        }
+        String createdBy = principal == null ? "anonymous" : principal.identity();
+        List<FollowupTask> created = new ArrayList<>();
+        for (BatchCreateFollowupsRequest.BatchItem item : req.items()) {
+            long id = store.taskId.getAndIncrement();
+            FollowupTask task = new FollowupTask(id, req.customerId(), item.content(), item.dueDate(), createdBy);
+            store.followups.put(id, task);
+            created.add(task);
+        }
+        return Map.of("created", created.size());
+    }
+
     @PatchMapping("/customers/{id}/orders/{orderId}")
     @KeelbaseTool(name = "update_order_amount",
             description = "修改订单金额（高风险写，R3 需人工确认；改价不可逆，撤销走诚实语义）")

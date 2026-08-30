@@ -193,4 +193,36 @@ class CrmExportTest {
         assertTrue(sawPage, "应导出 page 分页参数");
         assertTrue(sawLimit, "应导出 limit 分页参数");
     }
+
+    @Test
+    void export_batchCreateFollowups_complexBodyToString() throws Exception {
+        JsonNode tools = export().get("tools");
+        JsonNode batch = tool(tools, "batch_create_followups");
+        assertNotNull(batch, "应包含 batch_create_followups");
+        assertEquals("POST", batch.get("method").asText());
+        assertEquals("/api/followups/batch", batch.get("path").asText());
+        assertEquals("R3", batch.get("riskLevel").asText());
+
+        boolean sawCustomerId = false;
+        boolean sawItems = false;
+        for (JsonNode p : batch.get("parameters")) {
+            switch (p.get("name").asText()) {
+                case "customerId" -> {
+                    sawCustomerId = true;
+                    assertEquals("integer", p.get("type").asText());
+                    assertTrue(p.get("required").asBoolean(), "customerId 必填");
+                }
+                case "items" -> {
+                    sawItems = true;
+                    assertEquals("string", p.get("type").asText(),
+                            "嵌套数组 items 应映射为 string（Agent 传 JSON 数组文本）");
+                    assertTrue(p.get("required").asBoolean(), "items 必填");
+                }
+                default -> {
+                }
+            }
+        }
+        assertTrue(sawCustomerId, "应导出 customerId");
+        assertTrue(sawItems, "应导出 items（复杂 body → string）");
+    }
 }

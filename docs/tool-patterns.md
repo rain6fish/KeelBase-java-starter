@@ -79,6 +79,24 @@ Compensation endpoints are idempotent (KeelBase retries safely) and audit the re
 
 A nested/complex `@RequestBody` field maps to `string` — the model passes JSON text and your Jackson binding parses it. Flatten what the model should set explicitly (scalars, enums) into first-class params; leave the free-form part as a JSON string field.
 
+## 8. Batch writes
+
+For bulk operations, put the payload in a nested array and let the model pass it as JSON text:
+
+```java
+public record BatchCreateFollowupsRequest(
+        @JsonProperty(required = true) Long customerId,
+        @JsonProperty(required = true) List<BatchItem> items) { ... }
+
+@PostMapping("/followups/batch")
+@KeelbaseTool(name = "batch_create_followups",
+              description = "Batch create follow-ups (write, R3; body items = follow-up array as JSON text)")
+public Map<String, Object> batchCreate(@RequestBody BatchCreateFollowupsRequest req,
+                                       @DelegationUser DelegationPrincipal principal) { ... }
+```
+
+The nested `items` array exports as a `string` parameter (pattern #7) — the model sends a JSON array and your Jackson binding parses it. Example: `keelbase-java-crm-example` `batch_create_followups`.
+
 ## Reference examples
 
 | Pattern | Example |
@@ -89,3 +107,4 @@ A nested/complex `@RequestBody` field maps to `string` — the model passes JSON
 | class-level + `@Operation` | `CrmInsightsController` |
 | springdoc `@Parameter`/`@Schema` | `CrmController` |
 | write + revocation | `create_followup_task` / `revoke` |
+| batch write + complex body | `batch_create_followups` |
