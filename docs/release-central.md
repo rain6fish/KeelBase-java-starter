@@ -77,6 +77,8 @@ bash scripts/build-central-upload.sh 0.1.0   # 版本号默认 0.1.0
 
 > 直接上传 `target/` 目录里的构件会因缺 `.md5`/`.sha1` 导致 FAILED，务必用上面脚本打包后再传。
 
+> 更省事：**打 `v*` tag 全自动发布**（GitHub Actions），见 [release-automation.md](release-automation.md)。
+
 ### 验证 / Verify
 
 ```bash
