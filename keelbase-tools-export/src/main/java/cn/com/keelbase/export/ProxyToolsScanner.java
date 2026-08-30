@@ -16,10 +16,12 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 扫描带 {@code @KeelbaseTool} 的 Spring MVC handler 方法，推断为代理工具配置。
@@ -145,7 +147,8 @@ public class ProxyToolsScanner {
                 boolean required = rp.required()
                         && org.springframework.web.bind.annotation.ValueConstants.DEFAULT_NONE
                                 .equals(rp.defaultValue());
-                parameters.add(new ToolParameter(pname, TypeMapper.map(mp.getParameterType()), "", required));
+                String paramDesc = paramDescription(mp.getParameterType(), rp.defaultValue());
+                parameters.add(new ToolParameter(pname, TypeMapper.map(mp.getParameterType()), paramDesc, required));
                 if (write) {
                     queryParams.add(pname);
                 }
@@ -193,5 +196,26 @@ public class ProxyToolsScanner {
         }
         String n = s.replaceAll("[-\\s]", "_");
         return n.matches("^[a-z][a-zA-Z0-9_]{0,29}$") ? n : null;
+    }
+
+    /**
+     * 参数描述：枚举类型附可选值列表；@RequestParam 显式 defaultValue 附默认值
+     * （与 {@link RequestBodyFields} 的枚举描述口径一致，让 LLM 工具参数更准）。
+     */
+    static String paramDescription(Class<?> type, String defaultValue) {
+        StringBuilder sb = new StringBuilder();
+        if (type != null && type.isEnum()) {
+            Object[] constants = type.getEnumConstants();
+            sb.append("可选: ").append(
+                    Arrays.stream(constants).map(Object::toString).collect(Collectors.joining("/")));
+        }
+        if (defaultValue != null
+                && !org.springframework.web.bind.annotation.ValueConstants.DEFAULT_NONE.equals(defaultValue)) {
+            if (sb.length() > 0) {
+                sb.append("；");
+            }
+            sb.append("默认: ").append(defaultValue);
+        }
+        return sb.toString();
     }
 }

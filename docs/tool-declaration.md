@@ -51,7 +51,7 @@ The scanner derives tool parameters from the method signature:
 | Source | Behavior |
 |---|---|
 | `@PathVariable Long id` | Required path parameter (`integer`). |
-| `@RequestParam` | Query parameter; `required` unless it has a default value. On **write** methods it is also added to the tool's `queryParams` (KeelBase sends it as a query string instead of body). |
+| `@RequestParam` | Query parameter; `required` unless it has a default value (exported as `默认: x`). Enum parameters export their allowed values (`可选: A/B/C`). On **write** methods it is also added to the tool's `queryParams` (KeelBase sends it as a query string instead of body). |
 | `@RequestBody Dto dto` | Each DTO field becomes a parameter — **Jackson-aware**: inherited fields included, `@JsonIgnore`/static/transient fields skipped, `@JsonProperty` respected for name & `required`, records supported. |
 | `@DelegationUser` / `HttpServletRequest` / `Model` / servlet types | Skipped (not tool parameters). |
 

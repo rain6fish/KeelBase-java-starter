@@ -3,6 +3,8 @@ package cn.com.keelbase.example;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+
+import java.nio.charset.StandardCharsets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,7 +32,7 @@ class ExportIntegrationTest {
         MvcResult res = mvc.perform(get("/keelbase/proxy-tools/export"))
                 .andExpect(status().isOk())
                 .andReturn();
-        return mapper.readTree(res.getResponse().getContentAsString());
+        return mapper.readTree(res.getResponse().getContentAsString(StandardCharsets.UTF_8));
     }
 
     @Test
@@ -144,6 +146,8 @@ class ExportIntegrationTest {
                     sawPriority = true;
                     priorityRequired = p.get("required").asBoolean();
                     assertEquals("string", p.get("type").asText());
+                    assertEquals("可选: LOW/MEDIUM/HIGH", p.get("description").asText(),
+                            "枚举 @RequestParam 应透传可选值");
                 }
                 default -> {
                 }
@@ -171,6 +175,8 @@ class ExportIntegrationTest {
                     sawDone = true;
                     doneRequired = p.get("required").asBoolean();
                     assertEquals("boolean", p.get("type").asText());
+                    assertEquals("默认: true", p.get("description").asText(),
+                            "@RequestParam(defaultValue) 应透传默认值");
                 }
                 default -> {
                 }
@@ -194,7 +200,7 @@ class ExportIntegrationTest {
         MvcResult res = mvc.perform(get("/keelbase/status"))
                 .andExpect(status().isOk())
                 .andReturn();
-        JsonNode root = mapper.readTree(res.getResponse().getContentAsString());
+        JsonNode root = mapper.readTree(res.getResponse().getContentAsString(StandardCharsets.UTF_8));
 
         JsonNode delegation = root.get("delegation");
         assertTrue(delegation.get("configured").asBoolean());
@@ -203,7 +209,7 @@ class ExportIntegrationTest {
         assertEquals("keelbase", delegation.get("issuer").asText());
         assertTrue(delegation.get("protectedPaths").isArray(), "protectedPaths 应为数组");
         // 不泄露密钥明文：任何位置都不应出现 secret 值本身
-        assertFalse(res.getResponse().getContentAsString().contains("0123456789012345678901234567890123456789012345678901234567890123"),
+        assertFalse(res.getResponse().getContentAsString(StandardCharsets.UTF_8).contains("0123456789012345678901234567890123456789012345678901234567890123"),
                 "status 响应不得包含密钥明文");
 
         JsonNode export = root.get("export");
