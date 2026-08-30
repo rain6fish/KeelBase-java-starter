@@ -166,6 +166,13 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
             <version>3.2.2</version>
+            <configuration>
+              <!-- CI 无 pinentry：loopback 从 passphraseFile/-Dgpg.passphrase 读 passphrase 签名 -->
+              <gpgArguments>
+                <arg>--pinentry-mode</arg>
+                <arg>loopback</arg>
+              </gpgArguments>
+            </configuration>
             <executions>
               <execution><id>sign-artifacts</id><phase>verify</phase>
                 <goals><goal>sign</goal></goals>
