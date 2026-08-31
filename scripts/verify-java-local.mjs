@@ -33,8 +33,11 @@ function delegationToken() {
   return `${header}.${payload}.${sig}`;
 }
 
-async function get(path, token) {
-  const res = await fetch(BASE + path, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+async function get(path, token, method = 'GET') {
+  const res = await fetch(BASE + path, {
+    method,
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
   const body = await res.json().catch(() => ({}));
   return { status: res.status, body };
 }
@@ -95,13 +98,16 @@ async function main() {
     if (!revokable) {
       console.log(`  ${C.dim}· 委托验签门控 跳过（无写工具/无 revokePath 可测）${C.reset}`);
     } else {
-      const path = new URL(revokable.revokePath.replace('{id}', '99999'), BASE).pathname;
-      const noToken = await get(path);
+      // revokePath 形如 "DELETE /api/compensation/followups/{id}"——取 method + 纯路径
+      const m = revokable.revokePath.trim().match(/^(GET|POST|PUT|PATCH|DELETE)\s+(\S+)/);
+      const method = m ? m[1] : 'DELETE';
+      const path = (m ? m[2] : revokable.revokePath).replace('{id}', '99999');
+      const noToken = await get(path, null, method);
       const okNoToken = noToken.status === 401;
       report('受保护路径（无 token）', okNoToken, `${revokable.revokePath} → ${noToken.status}（期望 401）`);
       if (!okNoToken) fail += 1; else pass += 1;
 
-      const withToken = await get(path, delegationToken());
+      const withToken = await get(path, delegationToken(), method);
       const okWithToken = withToken.status === 200;
       report('委托验签（构造 token）', okWithToken,
         `→ ${withToken.status} idempotent=${withToken.body?.idempotent}（期望 200 幂等）`);
