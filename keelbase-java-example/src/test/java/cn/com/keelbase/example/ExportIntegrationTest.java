@@ -65,6 +65,23 @@ class ExportIntegrationTest {
         assertEquals("GET", listTool.get("method").asText());
         assertEquals("/api/followups", listTool.get("path").asText());
         assertEquals("R1", listTool.get("riskLevel").asText());
+        // 零样板导出：无 springdoc 描述的 @RequestParam 自动生成语义描述（customerId → customer ID（integer））
+        boolean sawAutoDesc = false;
+        for (JsonNode t : tools) {
+            if (!"list_followups_by_customer".equals(t.get("name").asText())) {
+                continue;
+            }
+            for (JsonNode p : t.get("parameters")) {
+                if ("customerId".equals(p.get("name").asText())) {
+                    assertEquals("integer", p.get("type").asText());
+                    String desc = p.get("description").asText();
+                    assertFalse(desc.isBlank(), "customerId 无 springdoc 描述时应有自动语义描述");
+                    assertTrue(desc.toLowerCase().contains("customer"), "自动描述应含参数名语义（customer）");
+                    sawAutoDesc = true;
+                }
+            }
+        }
+        assertTrue(sawAutoDesc, "list_followups_by_customer 应包含带自动描述的 customerId 参数");
 
         assertNotNull(createTool, "应包含 create_followup 写工具");
         assertEquals("POST", createTool.get("method").asText());

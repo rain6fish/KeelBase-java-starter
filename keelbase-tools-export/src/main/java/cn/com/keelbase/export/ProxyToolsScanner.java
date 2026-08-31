@@ -144,6 +144,9 @@ public class ProxyToolsScanner {
                 String pname = sanitizeParamName(shortName(pv.name(), mp));
                 if (pname != null && seen.add(pname)) {
                     String pathDesc = swaggerDoc.paramDescription(mp, "");
+                    if (pathDesc.isBlank()) {
+                        pathDesc = autoParamDescription(pname, mp.getParameterType());
+                    }
                     parameters.add(new ToolParameter(pname, TypeMapper.map(mp.getParameterType()), pathDesc, true));
                 }
             } else if (rp != null) {
@@ -157,6 +160,9 @@ public class ProxyToolsScanner {
                                 .equals(rp.defaultValue());
                 String paramDesc = swaggerDoc.paramDescription(mp,
                         paramDescription(mp.getParameterType(), rp.defaultValue()));
+                if (paramDesc.isBlank()) {
+                    paramDesc = autoParamDescription(pname, mp.getParameterType());
+                }
                 parameters.add(new ToolParameter(pname, TypeMapper.map(mp.getParameterType()), paramDesc, required));
                 if (write) {
                     queryParams.add(pname);
@@ -226,5 +232,16 @@ public class ProxyToolsScanner {
             sb.append("默认: ").append(defaultValue);
         }
         return sb.toString();
+    }
+
+    /**
+     * 参数描述兜底（零样板）：springdoc @Parameter 与枚举/默认值均无描述时，
+     * 从参数名 camelCase 分词 + 类型自动生成（如 {@code customerId} → {@code customer ID（integer）}），
+     * 让 LLM 工具参数更可读。
+     */
+    static String autoParamDescription(String name, Class<?> type) {
+        String readable = name.replaceAll("([a-z])([A-Z])", "$1 $2").toLowerCase()
+                .replaceAll("\\bid\\b", "ID");
+        return readable + "（" + TypeMapper.map(type) + "）";
     }
 }
