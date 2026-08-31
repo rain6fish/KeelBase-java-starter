@@ -1,0 +1,15 @@
+server:
+  port: 8084
+
+keelbase:
+  delegation:
+    enabled: true
+    secret: ${KEELBASE_DELEGATION_SECRET:0123456789012345678901234567890123456789012345678901234567890123}
+    audience: legacy-approval
+    issuer: keelbase
+    paths:
+      - /api/compensation
+  tools:
+    base-url: http://localhost:8084
+    audience: legacy-approval
+    export-enabled: true

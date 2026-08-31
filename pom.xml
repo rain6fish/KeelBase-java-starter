@@ -23,6 +23,7 @@
     <module>keelbase-java-example</module>
     <module>keelbase-java-crm-example</module>
     <module>keelbase-java-pm-example</module>
+    <module>keelbase-java-approval-example</module>
   </modules>
 
   <properties>
