@@ -22,6 +22,7 @@
     <module>keelbase-spring-boot-starter</module>
     <module>keelbase-java-example</module>
     <module>keelbase-java-crm-example</module>
+    <module>keelbase-java-pm-example</module>
   </modules>
 
   <properties>
