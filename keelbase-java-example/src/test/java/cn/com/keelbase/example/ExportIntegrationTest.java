@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -220,7 +221,17 @@ class ExportIntegrationTest {
         JsonNode tools = root.get("tools");
         assertTrue(tools.get("count").asInt() >= 5, "示例应导出读/写/查询/标记等 5 个以上工具");
         assertNotNull(tools.get("names"));
+        // 接入健康度：风险分布 + 补偿覆盖 + overall health + errors 分级
+        assertTrue(tools.get("riskDistribution").isObject(), "riskDistribution 应为对象（R1/R3 计数）");
+        assertTrue(tools.get("revokeCovered").canConvertToInt(), "revokeCovered 应为整数（补偿覆盖）");
+        assertTrue(tools.get("revokeCovered").asInt() >= 1, "示例写工具应配 revokePath（补偿覆盖 ≥1）");
 
-        assertTrue(root.get("warnings").isArray(), "warnings 应为数组");
+        JsonNode health = root.get("health");
+        assertNotNull(health.get("status"), "health.status 应存在");
+        assertTrue(List.of("healthy", "degraded", "error").contains(health.get("status").asText()),
+                "health.status 应为 healthy/degraded/error");
+        assertNotNull(health.get("summary"));
+        assertTrue(root.get("errors").isArray(), "errors 应为数组（阻断性问题）");
+        assertTrue(root.get("warnings").isArray(), "warnings 应为数组（配置提示）");
     }
 }

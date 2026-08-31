@@ -59,30 +59,62 @@ public class KeelbaseStatusController {
         Map<String, Object> toolsInfo = new LinkedHashMap<>();
         toolsInfo.put("count", tools.size());
         toolsInfo.put("names", tools.stream().map(ProxyToolItem::name).collect(Collectors.toList()));
+        toolsInfo.put("riskDistribution", tools.stream()
+                .collect(Collectors.groupingBy(ProxyToolItem::riskLevel, Collectors.counting())));
+        toolsInfo.put("revokeCovered", tools.stream()
+                .filter(t -> t.revokePath() != null && !t.revokePath().isBlank()).count());
         root.put("tools", toolsInfo);
 
-        root.put("warnings", buildWarnings(tools));
+        // 接入健康度：阻断性 ERROR 与配置性 WARN 分级，overall health
+        List<Finding> findings = buildFindings(tools);
+        List<String> errors = findings.stream().filter(f -> f.severity() == Severity.ERROR)
+                .map(Finding::message).collect(Collectors.toList());
+        List<String> warnings = findings.stream().filter(f -> f.severity() == Severity.WARN)
+                .map(Finding::message).collect(Collectors.toList());
+        root.put("warnings", warnings);
+        root.put("errors", errors);
+
+        String healthStatus = errors.isEmpty() ? (warnings.isEmpty() ? "healthy" : "degraded") : "error";
+        String summary = errors.isEmpty()
+                ? (warnings.isEmpty() ? "接入配置完整，工具可正常导出" : "有配置提示，不影响基本使用")
+                : "存在阻断问题（" + errors.size() + " 项），修复前 KeelBase 无法正确调用工具";
+        root.put("health", Map.of("status", healthStatus, "summary", summary));
         return root;
     }
 
-    private List<String> buildWarnings(List<ProxyToolItem> tools) {
-        List<String> warnings = new ArrayList<>();
+    private enum Severity { ERROR, WARN }
+
+    private record Finding(Severity severity, String message) {}
+
+    private List<Finding> buildFindings(List<ProxyToolItem> tools) {
+        List<Finding> findings = new ArrayList<>();
         String toolsAudience = resolver.configuredToolsAudience();
         String delegationAudience = delegation.audience();
         if (toolsAudience != null && delegationAudience != null && !toolsAudience.equals(delegationAudience)) {
-            warnings.add("keelbase.tools.audience (" + toolsAudience
+            findings.add(new Finding(Severity.ERROR, "keelbase.tools.audience (" + toolsAudience
                     + ") 与 keelbase.delegation.audience (" + delegationAudience
-                    + ") 不一致，会导致 KeelBase 转发请求委托验签失败");
+                    + ") 不一致，会导致 KeelBase 转发请求委托验签失败"));
         }
         if (resolver.effectiveAudience() == null) {
-            warnings.add("audience 未配置（keelbase.tools.audience 与 keelbase.delegation.audience 均为空）");
+            findings.add(new Finding(Severity.ERROR,
+                    "audience 未配置（keelbase.tools.audience 与 keelbase.delegation.audience 均为空）"));
         }
         if (resolver.normalizedBaseUrl() == null) {
-            warnings.add("keelbase.tools.base-url 未配置，导出配置无法被 KeelBase 使用");
+            findings.add(new Finding(Severity.ERROR,
+                    "keelbase.tools.base-url 未配置，导出配置无法被 KeelBase 使用"));
         }
         if (resolver.exportEnabled() && tools.isEmpty()) {
-            warnings.add("未发现 @KeelbaseTool 工具（检查注解是否已加在 @RestController 方法上）");
+            findings.add(new Finding(Severity.ERROR,
+                    "未发现 @KeelbaseTool 工具（检查注解是否已加在 @RestController 方法上）"));
         }
-        return warnings;
+        long writeTools = tools.stream()
+                .filter(t -> List.of("POST", "PUT", "PATCH", "DELETE").contains(t.method())).count();
+        long revokeCovered = tools.stream()
+                .filter(t -> t.revokePath() != null && !t.revokePath().isBlank()).count();
+        if (writeTools > 0 && revokeCovered == 0) {
+            findings.add(new Finding(Severity.WARN,
+                    "存在 " + writeTools + " 个写工具但均未配置 revokePath，AI 写副作用将无法撤销（诚实语义：无本地撤销）"));
+        }
+        return findings;
     }
 }
