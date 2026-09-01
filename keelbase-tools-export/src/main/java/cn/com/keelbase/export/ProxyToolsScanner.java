@@ -55,7 +55,16 @@ public class ProxyToolsScanner {
     }
 
     public List<ProxyToolItem> scan() {
+        return scanWithReport().items();
+    }
+
+    /** 扫描结果 + 被跳过清单（fail-fast 校验 / 诊断用）。 */
+    public record ScanReport(List<ProxyToolItem> items, List<String> skipped) {
+    }
+
+    public ScanReport scanWithReport() {
         List<ProxyToolItem> tools = new ArrayList<>();
+        List<String> skipped = new ArrayList<>();
         Set<String> seenNames = new HashSet<>();
         for (Map.Entry<RequestMappingInfo, HandlerMethod> e : mapping.getHandlerMethods().entrySet()) {
             HandlerMethod handler = e.getValue();
@@ -63,7 +72,7 @@ public class ProxyToolsScanner {
             if (ann == null) {
                 continue;
             }
-            ProxyToolItem tool = buildTool(e.getKey(), handler, ann);
+            ProxyToolItem tool = buildTool(e.getKey(), handler, ann, skipped);
             if (tool == null) {
                 continue;
             }
@@ -84,7 +93,7 @@ public class ProxyToolsScanner {
         }
         // 按工具名排序：导出确定性（mapping.getHandlerMethods() 顺序不稳定，配置 diff/审计友好）
         tools.sort(Comparator.comparing(ProxyToolItem::name));
-        return tools;
+        return new ScanReport(tools, List.copyOf(skipped));
     }
 
     /**
@@ -100,7 +109,8 @@ public class ProxyToolsScanner {
         return typeAnn != null && typeAnn.enabled() ? typeAnn : null;
     }
 
-    private ProxyToolItem buildTool(RequestMappingInfo info, HandlerMethod handler, KeelbaseTool ann) {
+    private ProxyToolItem buildTool(RequestMappingInfo info, HandlerMethod handler, KeelbaseTool ann,
+                                    List<String> skipped) {
         String method = info.getMethodsCondition().getMethods().stream()
                 .findFirst().map(RequestMethod::name).orElse(null);
         // Spring 6.1 默认 PathPattern：getPatternsCondition() 可能为 null，须回退 getPathPatternsCondition()
@@ -112,17 +122,20 @@ public class ProxyToolsScanner {
             path = info.getPatternsCondition().getPatterns().stream()
                     .findFirst().orElse(null);
         }
+        String where = handler.getMethod().getDeclaringClass().getSimpleName() + "#" + handler.getMethod().getName();
         if (method == null || path == null) {
-            log.warn("keelbase 工具跳过 {}#{}: 无法解析 HTTP method/path（检查 @RequestMapping 映射是否完整）",
-                    handler.getMethod().getDeclaringClass().getSimpleName(), handler.getMethod().getName());
+            String reason = "无法解析 HTTP method/path（检查 @RequestMapping 映射是否完整）";
+            log.warn("keelbase 工具跳过 {}: {}", where, reason);
+            skipped.add(where + ": " + reason);
             return null;
         }
         boolean write = WRITE_METHODS.contains(method);
 
         String name = ann.name().isBlank() ? camelToSnake(handler.getMethod().getName()) : ann.name();
         if (name == null || !name.matches("^[a-z][a-z0-9_]{0,39}$")) {
-            log.warn("keelbase 工具跳过 {}#{}: 工具名 '{}' 非法（需 ^[a-z][a-z0-9_]{{0,39}}$；缺省由方法名 camelCase→snake_case）",
-                    handler.getMethod().getDeclaringClass().getSimpleName(), handler.getMethod().getName(), name);
+            String reason = "工具名 '" + name + "' 非法（需 ^[a-z][a-z0-9_]{0,39}$；缺省由方法名 camelCase→snake_case）";
+            log.warn("keelbase 工具跳过 {}: {}", where, reason);
+            skipped.add(where + ": " + reason);
             return null;
         }
         String description = ann.description().isBlank()

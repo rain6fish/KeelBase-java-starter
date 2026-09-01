@@ -21,6 +21,7 @@
     <module>keelbase-spring-boot-autoconfigure</module>
     <module>keelbase-spring-boot-starter</module>
     <module>keelbase-maven-plugin</module>
+    <module>keelbase-test-support</module>
     <module>keelbase-java-example</module>
     <module>keelbase-java-crm-example</module>
     <module>keelbase-java-pm-example</module>
@@ -94,6 +95,11 @@
       <dependency>
         <groupId>cn.com.keelbase</groupId>
         <artifactId>keelbase-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>cn.com.keelbase</groupId>
+        <artifactId>keelbase-test-support</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

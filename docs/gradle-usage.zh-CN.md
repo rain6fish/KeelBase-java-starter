@@ -42,7 +42,25 @@ keelbase:
 
 给 `@RestController` 方法加 `@KeelbaseTool`，启动应用，`GET /keelbase/proxy-tools/export` 导出并在 KeelBase 注册。完整流程见[快速开始](quickstart.zh-CN.md)；常见业务形状配方见[工具模式](tool-patterns.zh-CN.md)。
 
-## 4. 从源码用 Gradle 构建 starter
+## 4. 一键注册（Gradle task）
+
+Gradle 团队与 `mvn keelbase:register` 对齐：apply 模板即得两个 task，一条命令完成「导出 → 写 KeelBase Settings → 热更新生效」：
+
+```groovy
+apply from: "https://raw.githubusercontent.com/rain6fish/KeelBase-java-starter/main/gradle/keelbase.gradle"
+// 或下载本文件到 gradle/keelbase.gradle 后：apply from: "gradle/keelbase.gradle"
+```
+
+```bash
+./gradlew keelbaseExport     # 导出 ai_proxy_tools 到 target/ai_proxy_tools.json
+./gradlew keelbaseRegister   # 导出 + 写入 KeelBase Settings（默认 admin，热更新免重启）
+```
+
+覆盖参数：`-PkeelbaseAppUrl=http://localhost:8081 -PkeelbaseKeelbaseUrl=http://localhost:3000 -PkeelbaseUsername=admin -PkeelbasePassword=...`（密码也可用环境变量 `KEELBASE_ADMIN_PASSWORD`）。
+
+> 需要你的项目已依赖 `keelbase-spring-boot-starter`（task 的 classpath 取自 `sourceSets.main.runtimeClasspath`）。
+
+## 5. 从源码用 Gradle 构建 starter
 
 ```bash
 git clone https://github.com/rain6fish/KeelBase-java-starter.git
@@ -55,7 +73,7 @@ mvn install              # （Maven）安装 SNAPSHOT 供本地消费
 
 | 版本 | 来源 |
 |---|---|
-| `0.1.4` | Maven Central（稳定；0.1.0/0.1.1/0.1.3 也已上线） |
-| `0.1.5-SNAPSHOT` | 本地 `./gradlew build` / `mvn install` 构建 |
+| `0.1.5` | Maven Central（稳定；0.1.0–0.1.4 也已上线） |
+| `0.1.6-SNAPSHOT` | 本地 `./gradlew build` / `mvn install` 构建 |
 
 父 `pom.xml` 与 `build.gradle` 保持同步（同一 Spring Boot BOM、同一模块集），无论用哪套构建产物一致。

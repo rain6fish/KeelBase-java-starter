@@ -1,0 +1,17 @@
+server:
+  port: {{port}}
+
+keelbase:
+  delegation:
+    # 与 KeelBase DELEGATION_SECRET 一致（HS256，≥32 字节）——生产用环境变量注入
+    secret: ${KEELBASE_DELEGATION_SECRET}
+    # 必须等于 KeelBase ai_proxy_tools 顶层 audience
+    audience: {{audience}}
+    issuer: keelbase
+    # 受保护路径（无 Authorization 头即拒绝）；未列路径 fail-open
+    paths:
+      - /api/compensation
+  tools:
+    # 服务器根 baseUrl（导出 ai_proxy_tools 配置用；工具 path 为完整路径）
+    base-url: http://localhost:{{port}}
+    # strict: true   # 开启启动 fail-fast：@KeelbaseTool 声明非法 → 启动失败并列出明细

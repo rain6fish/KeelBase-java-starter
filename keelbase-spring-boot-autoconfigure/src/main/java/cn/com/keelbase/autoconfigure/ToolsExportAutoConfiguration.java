@@ -72,6 +72,13 @@ public class ToolsExportAutoConfiguration {
         return new KeelbaseStatusController(scanner, resolver, snapshot, audit);
     }
 
+    @Bean
+    @ConditionalOnProperty(prefix = "keelbase.tools", name = "strict", havingValue = "true")
+    ToolsExportValidator keelBaseToolsExportValidator(ProxyToolsScanner scanner,
+                                                      ExportConfigResolver resolver) {
+        return new ToolsExportValidator(scanner, resolver);
+    }
+
     private static boolean isSet(String s) {
         return s != null && !s.isBlank();
     }

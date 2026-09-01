@@ -42,7 +42,25 @@ Both `secret` and `audience` are required — the app fails fast at startup if e
 
 Annotate your `@RestController` methods with `@KeelbaseTool`, start the app, then `GET /keelbase/proxy-tools/export` and register the tools in KeelBase. Full flow in [quickstart](quickstart.md); recipes for common business shapes in [tool-patterns](tool-patterns.md).
 
-## 4. Building the starter from source (Gradle)
+## 4. One-command register (Gradle tasks)
+
+Gradle teams get the same experience as `mvn keelbase:register` — apply the template and two tasks appear, one command does "export → write KeelBase Settings → hot reload":
+
+```groovy
+apply from: "https://raw.githubusercontent.com/rain6fish/KeelBase-java-starter/main/gradle/keelbase.gradle"
+// or download it to gradle/keelbase.gradle and: apply from: "gradle/keelbase.gradle"
+```
+
+```bash
+./gradlew keelbaseExport     # export ai_proxy_tools to target/ai_proxy_tools.json
+./gradlew keelbaseRegister   # export + write KeelBase Settings (default admin, hot reload)
+```
+
+Overrides: `-PkeelbaseAppUrl=http://localhost:8081 -PkeelbaseKeelbaseUrl=http://localhost:3000 -PkeelbaseUsername=admin -PkeelbasePassword=...` (or the `KEELBASE_ADMIN_PASSWORD` env var).
+
+> Your project must depend on `keelbase-spring-boot-starter` (the task classpath comes from `sourceSets.main.runtimeClasspath`).
+
+## 5. Building the starter from source (Gradle)
 
 ```bash
 git clone https://github.com/rain6fish/KeelBase-java-starter.git
@@ -55,7 +73,7 @@ mvn install              # (Maven) install the SNAPSHOT for local consumption
 
 | Version | Source |
 |---|---|
-| `0.1.4` | Maven Central (stable; 0.1.0/0.1.1/0.1.3 live) |
-| `0.1.5-SNAPSHOT` | build locally with `./gradlew build` / `mvn install` |
+| `0.1.5` | Maven Central (stable; 0.1.0–0.1.4 live) |
+| `0.1.6-SNAPSHOT` | build locally with `./gradlew build` / `mvn install` |
 
 The parent `pom.xml` and `build.gradle` stay in sync (same Spring Boot BOM, same module set), so whichever build you use produces the same artifacts.

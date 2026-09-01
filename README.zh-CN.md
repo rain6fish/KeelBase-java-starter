@@ -118,6 +118,8 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
 | `keelbase-compensation` | 补偿脚手架 + 幂等账本 + 审计钩子 |
 | `keelbase-client` | `KeelbaseClient`（委托 token 生命周期）+ 治理台审计上报 |
 | `keelbase-spring-boot-autoconfigure` | 自动装配（四件套 + 可选 Security 适配） |
+| `keelbase-maven-plugin` | Maven 插件：`mvn keelbase:export/register` |
+| `keelbase-test-support` | `KeelbaseContractTest` 契约测试基类（自家 CI 内建接入合规验证） |
 | `keelbase-java-crm-example` | 参考项目：传统 Java CRM → AI CRM（不发布） |
 | `keelbase-spring-boot-starter` | 聚合器（用户只引这个） |
 | `keelbase-java-example` | 示例应用（不发布） |

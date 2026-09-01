@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: Apache-2.0
+// KeelBase Gradle task 模板 — 复制到你的项目并 apply：
+//
+//   apply from: "https://raw.githubusercontent.com/rain6fish/KeelBase-java-starter/main/gradle/keelbase.gradle"
+//   // 或下载本文件到本地 gradle/keelbase.gradle 后：apply from: "gradle/keelbase.gradle"
+//
+// 提供两个 task（需要你的项目已依赖 cn.com.keelbase:keelbase-spring-boot-starter）：
+//   ./gradlew keelbaseExport    → 导出 ai_proxy_tools 到 target/ai_proxy_tools.json
+//   ./gradlew keelbaseRegister  → 导出 + 写入 KeelBase Settings（热更新生效，免重启）
+//
+// 覆盖参数（-P 或环境变量）：
+//   -PkeelbaseAppUrl     应用地址（默认 http://localhost:8081）
+//   -PkeelbaseKeelbaseUrl KeelBase 地址（默认 http://localhost:3000，仅 register）
+//   -PkeelbaseUsername    管理台账号（默认 admin，仅 register）
+//   -PkeelbasePassword    或 KEELBASE_ADMIN_PASSWORD 环境变量（默认 Admin@1234）
+//   -PkeelbaseOutput      导出文件路径（默认 target/ai_proxy_tools.json）
+
+def keelbaseAppUrl = project.findProperty('keelbaseAppUrl') ?: 'http://localhost:8081'
+def keelbaseKeelbaseUrl = project.findProperty('keelbaseKeelbaseUrl') ?: 'http://localhost:3000'
+def keelbaseUsername = project.findProperty('keelbaseUsername') ?: 'admin'
+def keelbasePassword = project.findProperty('keelbasePassword')
+        ?: (System.getenv('KEELBASE_ADMIN_PASSWORD') ?: 'Admin@1234')
+def keelbaseOutput = project.findProperty('keelbaseOutput') ?: 'target/ai_proxy_tools.json'
+
+tasks.register('keelbaseExport', JavaExec) {
+    group = 'keelbase'
+    description = '从运行中的应用导出 ai_proxy_tools 配置到 JSON 文件'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'cn.com.keelbase.export.KeelbaseToolsCli'
+    args 'export', "--appUrl=${keelbaseAppUrl}", "--output=${keelbaseOutput}"
+}
+
+tasks.register('keelbaseRegister', JavaExec) {
+    group = 'keelbase'
+    description = '导出 + 写入 KeelBase Settings（热更新生效，免重启）'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'cn.com.keelbase.export.KeelbaseToolsCli'
+    args 'register', "--appUrl=${keelbaseAppUrl}", "--keelbaseUrl=${keelbaseKeelbaseUrl}",
+            "--username=${keelbaseUsername}", "--password=${keelbasePassword}"
+}

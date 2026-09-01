@@ -118,6 +118,8 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
 | `keelbase-compensation` | Compensation scaffold + idempotency ledger + audit hook |
 | `keelbase-client` | `KeelbaseClient` (delegation-token lifecycle) + audit reporting to the governance plane |
 | `keelbase-spring-boot-autoconfigure` | Auto-configuration (all four pieces + optional Security adapter) |
+| `keelbase-maven-plugin` | Maven plugin: `mvn keelbase:export/register` |
+| `keelbase-test-support` | `KeelbaseContractTest` base class for JUnit contract tests in your own CI |
 | `keelbase-java-crm-example` | Reference Project: legacy Java CRM → AI CRM (not published) |
 | `keelbase-spring-boot-starter` | Aggregator (the only dependency you need) |
 | `keelbase-java-example` | Example app (not published) |

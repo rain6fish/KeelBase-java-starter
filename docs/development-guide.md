@@ -2,6 +2,20 @@
 
 > 从零把一个存量 Java / Spring 系统接入 KeelBase 的**完整开发路径**——依赖、配置、声明工具、委托身份、补偿撤销、自检调试、测试、发布。集成商按本手册一次接通。
 
+## 0. 从脚手架开始（最快路径）
+
+一条命令生成一个「已接治理的 AI 工具」Spring Boot 项目（读 R1 + 写 R3 + 补偿端点就绪）：
+
+```bash
+node scripts/new-keelbase-project.mjs --artifactId my-tools --audience legacy-app --dir ./my-tools
+cd my-tools
+export KEELBASE_DELEGATION_SECRET=<与 KeelBase 共享的密钥，≥32字节>
+mvn spring-boot:run        # 启动
+mvn keelbase:register      # 导出 + 写入 KeelBase（热更新生效，免重启）
+```
+
+参数：`--package`（默认 `cn.example`）/ `--port`（默认 8081）/ `--groupId`。骨架 = `keelbase-java-skeleton/`（两个 `@KeelbaseTool` + 补偿端点 + README），替换内存 Store 为你的 Service/DB 即可。
+
 ## 1. 依赖与配置
 
 ### 1.1 添加依赖（Maven / Gradle）
@@ -171,6 +185,19 @@ node scripts/verify-java-local.mjs http://localhost:8081
 
 ```bash
 mvn -pl keelbase-java-example -am test -Dtest=ExportIntegrationTest
+```
+
+### 7.1 接入合规契约测试（`keelbase-test-support`）
+
+把你自己的接入合规验证内建进 CI——加依赖 `cn.com.keelbase:keelbase-test-support`（test scope），写一个继承 `KeelbaseContractTest` 的 `@SpringBootTest` 类即可自动断言：
+
+- 导出契约：工具非空、audience 一致、写工具必带 `revokePath`
+- 受保护补偿路径：无 Authorization → 401；携带共享密钥签发的委托 JWT → 2xx 幂等
+
+```java
+@SpringBootTest
+class MyContractComplianceTest extends KeelbaseContractTest {
+}
 ```
 
 ## 8. 发布与升级

@@ -14,6 +14,7 @@
 | `keelbase.tools.audience` | string | — | — | 导出 audience 的可选覆盖。**缺省回退 `keelbase.delegation.audience`**——通常只需配置 `delegation.audience`。若两者都配，必须一致（不一致会被 `/keelbase/status` 告警并导致委托验签失败）。 |
 | `keelbase.tools.export-enabled` | boolean | `true` | — | 控制 `GET /keelbase/proxy-tools/export`。注册完成后生产可关。 |
 | `keelbase.tools.status-enabled` | boolean | `true` | — | 控制 `GET /keelbase/status`（诊断端点，绝不泄露密钥）。 |
+| `keelbase.tools.strict` | boolean | `false` | — | 启动 fail-fast：为 `true` 时若扫描发现 `@KeelbaseTool` 声明非法（无法解析 method/path、工具名非法）被跳过，则**应用启动失败**并列出明细，替代默认只打 WARN 跳过导致的「导出缺工具」困惑。 |
 | `keelbase.compensation.ledger-size` | integer | `1024` | — | 补偿端点的进程内幂等账本 LRU 上限。 |
 | `keelbase.client.base-url` | string | — | — | KeelBase 服务根（如 `http://localhost:3000`），调 `POST /api/v1/auth/delegation-token`。未配置 → `KeelbaseClient.obtain` 不可用（仅本地 `verify`）。见[客户端与审计上报](client.zh-CN.md)。 |
 | `keelbase.client.audience` | string | — | — | 委托 token 的目标 audience。**缺省回退 `keelbase.delegation.audience`。** |

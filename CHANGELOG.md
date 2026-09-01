@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning follows [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- **Gradle 团队体验** — 抽 `ProxyToolsExportClient`（纯 JDK + Jackson，Maven 插件 / Gradle task / CLI 三处复用）+ `KeelbaseToolsCli` + `gradle/keelbase.gradle` 模板：`./gradlew keelbaseExport` / `keelbaseRegister` 与 `mvn keelbase:export/register` 对齐（导出 → 写 Settings → 热更新免重启）。Maven 插件重构为薄壳。
+- **启动 fail-fast 校验** — `keelbase.tools.strict=true`：`@KeelbaseTool` 声明非法（无法解析 method/path、工具名非法）启动即失败并列出明细（`ToolsExportValidator` + `ProxyToolsScanner.scanWithReport`），替代默认只 WARN 跳过导致的「导出缺工具」困惑。
+- **JUnit 契约测试基类** — `keelbase-test-support`：`KeelbaseContractTest` 抽象类（`@SpringBootTest` 继承即断言导出契约 / 受保护路径 401 / 委托 JWT 2xx 幂等），把接入合规验证内建进 Java 团队自己的 CI；example 附 `ContractComplianceTest`。
+- **Spring 脚手架** — `keelbase-java-skeleton` 模板 + `scripts/new-keelbase-project.mjs`：一条命令生成「读 R1 + 写 R3 + 补偿端点」就绪的 Spring Boot 项目（starter 版本自动从根 pom 读取），development-guide 加「从脚手架开始」。
+
 ## [0.1.5] - 2026-09-01
 
 ### Added

@@ -19,7 +19,6 @@ public class ExportMojo extends AbstractKeelbaseMojo {
     @Override
     public void execute() throws MojoExecutionException {
         JsonNode cfg = fetchExport();
-        validate(cfg);
         writeOutput(cfg);
         getLog().info("已导出 " + cfg.path("tools").size() + " 个工具"
                 + "（audience=" + cfg.path("audience").asText() + "）");

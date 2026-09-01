@@ -15,6 +15,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *       {@code keelbase.delegation.audience}（单一来源，避免两处配置不一致）。</li>
  *   <li>{@code keelbase.tools.export-enabled}：导出端点开关（缺省 true，生产可关）。</li>
  *   <li>{@code keelbase.tools.status-enabled}：诊断端点开关（缺省 true，生产可关）。</li>
+ *   <li>{@code keelbase.tools.strict}：启动 fail-fast（缺省 false）——为 true 时若扫描发现
+ *       {@code @KeelbaseTool} 声明非法（无法解析 method/path、工具名非法）则应用启动失败并列出明细，
+ *       替代默认只打 WARN 跳过导致的「导出缺工具」运行时困惑。</li>
  * </ul>
  */
 @ConfigurationProperties(prefix = "keelbase.tools")
@@ -28,6 +31,8 @@ public class ProxyToolExportProperties {
 
     private boolean statusEnabled = true;
 
+    private boolean strict = false;
+
     public String getBaseUrl() { return baseUrl; }
     public void setBaseUrl(String baseUrl) { this.baseUrl = baseUrl; }
     public String getAudience() { return audience; }
@@ -36,4 +41,6 @@ public class ProxyToolExportProperties {
     public void setExportEnabled(boolean exportEnabled) { this.exportEnabled = exportEnabled; }
     public boolean isStatusEnabled() { return statusEnabled; }
     public void setStatusEnabled(boolean statusEnabled) { this.statusEnabled = statusEnabled; }
+    public boolean isStrict() { return strict; }
+    public void setStrict(boolean strict) { this.strict = strict; }
 }
