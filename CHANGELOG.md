@@ -2,7 +2,24 @@
 
 All notable changes to this project are documented in this file. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning follows [SemVer](https://semver.org/).
 
-## [Unreleased]
+## [0.1.3] - 2026-08-31
+
+### Added
+
+- **`keelbase/status` 接入健康度面板** — tools 加 riskDistribution（R1/R3 分布）+ revokeCovered（补偿覆盖）+ audit 上报状态（configured 布尔，不泄 api-key）+ overall health（healthy/degraded/error + 中文 summary）+ 告警分级（errors 阻断 / warnings 提示，含 export 关闭 / 写无 revokePath / audit 未配置提示）。
+- **零样板导出** — 无 springdoc `@Parameter`/枚举/默认值的 `@RequestParam`/`@PathVariable` 自动生成语义描述（`customerId` → `customer ID（integer）`，camelCase 分词 + 类型）。
+- **PM 参考项目** — `keelbase-java-pm-example`：存量 Java PM 样板（读 R1 自动 + `create_pm_task` 写 R3 确认 + revokePath 补偿），对齐 AI Project 旗舰延期风险分析。
+- **审批参考项目** — `keelbase-java-approval-example`：存量 Java 审批流样板（AI 预审 + 人工复核语义，¥800 自动通过 / ¥12000 转人工；`decide_approval_request` 写 R3 + 可撤销恢复待审）。
+- **本地调试** — `scripts/verify-java-local.mjs`：不依赖 KeelBase 的接入自检（委托验签 / 工具契约 / 受保护路径门控 / audit 状态，PASS/FAIL 诊断）。
+- **治理可见性** — `docs/governance-visibility.md`：Java 工具在治理台工具/审计/风险中心的落点 + status 健康度治理面。
+- **Boot 2 / Java 8 适配** — `docs/boot2-java8-adapter.md`：存量 Java 栈双路径（A starter Boot3+Java17 / B API 代理零代码任意栈）。
+
+### Fixed
+
+- **Gradle 构建缺失** — pm/approval 补 `build.gradle`（settings.gradle include 后模块缺构建文件）。
+- **四层 code review 修复** — 健康度补审计上报（Spec 阻塞）/ export 关闭健康明确 WARN / `PmTask.markDone` 死代码删除 / revokeCovered 重复计算合并 / approval secret 生产警告注释。
+
+## [0.1.2] - 2026-08-30
 
 ### Added
 
@@ -19,6 +36,18 @@ All notable changes to this project are documented in this file. Format follows 
 - **Deterministic export order** — the scanner now sorts exported tools by name (the underlying `RequestMappingHandlerMapping` iteration order is unstable across restarts), so `ai_proxy_tools` diffs/audits are stable; `CrmExportTest` asserts the sorted order.
 - **Gradle consumer guide** — `docs/gradle-usage{,.zh-CN}.md`: dependency block, `application.yml`, version table, and building from source via Gradle.
 - **`KeelbaseClient.verifyAndGet`** — after verifying, returns the parsed identity (`subject` / `oidcSub` / `audience` / `expiresAt`) so callers can map the delegation subject to a local user.
+
+## [0.1.1] - 2026-08-30
+
+### Added
+
+- **`@RequestParam` 枚举/默认值描述** — 参数描述透传枚举可选值（`可选: A/B/C`）与显式默认值（`默认: x`），对齐 `@RequestBody` 枚举口径。
+- **CRM 参考项目** — `keelbase-java-crm-example`：存量 Java CRM 样板（5 个治理工具，读 R1 自动 / 写 R3 确认 + revokePath 撤销），域与 `external-crm-demo` 对齐。
+- **Spring Boot 3.5.16** — BOM/Gradle 插件升级（Spring Framework 6.2）。
+
+### Fixed
+
+- **Central 发布校验和** — 上传包补 `.md5`/`.sha1`（0.1.0 首发因缺校验 FAILED 的根因），发布流程文档化。
 
 ## [0.1.0] - 2026-08-29
 
