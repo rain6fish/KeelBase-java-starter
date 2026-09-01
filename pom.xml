@@ -20,6 +20,7 @@
     <module>keelbase-client</module>
     <module>keelbase-spring-boot-autoconfigure</module>
     <module>keelbase-spring-boot-starter</module>
+    <module>keelbase-maven-plugin</module>
     <module>keelbase-java-example</module>
     <module>keelbase-java-crm-example</module>
     <module>keelbase-java-pm-example</module>

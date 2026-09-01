@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented in this file. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning follows [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- **Maven 导出/注册插件** — `keelbase-maven-plugin`：`mvn keelbase:export`（导出 + 校验 `ai_proxy_tools` 到文件，默认绑定 verify 阶段）/ `mvn keelbase:register`（admin 登录 → 导出 → 写 KeelBase Settings）；复用运行时 `GET /keelbase/proxy-tools/export` 端点，`docs/maven-plugin{,.zh-CN}.md`。Maven-only（Gradle 团队走 HTTP/脚本）。
+- **一键演示脚本** — `scripts/demo-starter.mjs`：一条命令跑通「起 example → 接入自检 → 导出 → 写配置 → 完整闭环」（`--start-example` 后台起示例）；quickstart 加「一键演示」小节。
+
+### Changed
+
+- **热更新配套** — `verify-java-starter-e2e.mjs` configure 提示改为「KeelBase 热更新生效（免重启）」（配合主仓 ai_proxy_tools 免重启热更新）。
+
 ## [0.1.4] - 2026-09-01
 
 ### Added

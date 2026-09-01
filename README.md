@@ -39,6 +39,7 @@
 | [client](docs/client.md) | Delegation-token lifecycle (`KeelbaseClient`) + audit reporting |
 | [reference-project-crm](docs/reference-project-crm.md) | Integrator Kit Reference Project: legacy Java CRM → AI CRM (real Java side) |
 | [tool-patterns](docs/tool-patterns.md) | Recipes: pagination, filters, enum params, springdoc descriptions, class-level tools, write+revoke |
+| [maven-plugin](docs/maven-plugin.md) | Maven 导出/注册插件（`keelbase:export/register`，配合热更新免重启） |
 | [gradle-usage](docs/gradle-usage.md) | Consumer-side Gradle guide: dependency, config, versions |
 | [troubleshooting](docs/troubleshooting.md) | Error codes, common mistakes, verification checklist |
 | [production-checklist](docs/production-checklist.md) | Hardening, secret rotation, ops monitoring before go-live |

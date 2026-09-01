@@ -6,6 +6,19 @@ Full reference: [configuration](configuration.md) · [delegated identity](delega
 
 ---
 
+## Faster: one-command demo
+
+With a running KeelBase backend (main repo `npm run start:dev` or `docker compose up`), one command runs the whole loop — start the example, self-check, export, write the config, full E2E:
+
+```bash
+node scripts/demo-starter.mjs --start-example   # the script starts the example in the background (needs JDK 17 + Maven)
+# or if the example is already running: node scripts/demo-starter.mjs
+```
+
+The demo verifies: confirmation gate → streaming approve → delegated write-back → audit → revocation compensation. To register tool changes afterwards, use `mvn keelbase:register` (hot reload, no restart — see [Maven Plugin](maven-plugin.md)).
+
+---
+
 ## 0. Prerequisites
 
 - JDK 17+ (Spring Boot 3.x).

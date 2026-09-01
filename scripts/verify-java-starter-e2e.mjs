@@ -5,16 +5,16 @@
  * KeelBase-java-starter 端到端联调验收（M3）。
  *
  * 验证「Java 存量系统接入 KeelBase 作为受治理 AI 工具」完整闭环：
- *   导出（@KeelbaseTool → ai_proxy_tools）→ 写配置 → 重启 KeelBase 生效
+ *   导出（@KeelbaseTool → ai_proxy_tools）→ 写配置 → 热更新生效（免重启）
  *   → AI 对话触发写确认门控 → **流式边读边批准**（确认门控使流挂起等 decision）
  *   → proxy 转发到 Java 示例（委托身份）→ 审计落哈希链 → 撤销副作用 → 补偿端点幂等。
  *
  * 前置：
- *   1. KeelBase 后端已起（默认 http://localhost:3000），且 ai_proxy_tools 已配置并重启
+ *   1. KeelBase 后端已起（默认 http://localhost:3000），且 ai_proxy_tools 已配置（热更新生效）
  *   2. Java 示例已起（默认 http://localhost:8081，mvn spring-boot:run）
  *
  * 用法：
- *   node verify-java-starter-e2e.mjs --configure      # 导出并写入 ai_proxy_tools（提示重启）
+ *   node verify-java-starter-e2e.mjs --configure      # 导出并写入 ai_proxy_tools（热更新生效）
  *   node verify-java-starter-e2e.mjs --verify         # 跑完整闭环（默认确定性 demo provider）
  *   node verify-java-starter-e2e.mjs --verify --llm    # 用真实 LLM（需 API Key）
  *
@@ -63,7 +63,7 @@ async function configure() {
     body: JSON.stringify({ value: JSON.stringify(cfg), type: 'string' }),
   });
   if (!put.ok) throw new Error(`写入 ai_proxy_tools 失败: ${put.status}`);
-  console.log('[configure] ai_proxy_tools 已写入。请重启 KeelBase 使生效，然后 --verify。');
+  console.log('[configure] ai_proxy_tools 已写入。KeelBase 热更新生效（免重启），然后 --verify。');
 }
 
 async function verify() {

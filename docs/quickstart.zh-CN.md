@@ -6,6 +6,19 @@
 
 ---
 
+## 更快：一键演示
+
+已有 KeelBase 后端时（主仓库 `npm run start:dev` 或 `docker compose up`），一条命令跑通「起示例 → 接入自检 → 导出 → 写配置 → 完整闭环」：
+
+```bash
+node scripts/demo-starter.mjs --start-example   # 脚本后台起 example（需本机 JDK17 + Maven）
+# 或示例已自己跑：node scripts/demo-starter.mjs
+```
+
+演示验证：确认门控 → 流式批准 → 委托身份写回 → 审计 → 撤销补偿。之后改工具用 `mvn keelbase:register` 一键注册（配合热更新免重启，见 [Maven 插件](maven-plugin.zh-CN.md)）。
+
+---
+
 ## 0. 前置
 
 - JDK 17+（Spring Boot 3.x）。
