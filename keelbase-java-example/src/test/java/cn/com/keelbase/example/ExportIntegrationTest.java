@@ -250,5 +250,12 @@ class ExportIntegrationTest {
         assertNotNull(health.get("summary"));
         assertTrue(root.get("errors").isArray(), "errors 应为数组（阻断性问题）");
         assertTrue(root.get("warnings").isArray(), "warnings 应为数组（配置提示）");
+        // 审计上报状态（接入健康度·审计维度）：只报 configured 布尔，不泄 api-key
+        JsonNode audit = root.get("audit");
+        assertNotNull(audit, "audit 应存在（健康度面板·审计上报）");
+        assertTrue(audit.get("configured").isBoolean(), "audit.configured 应为布尔（base-url 已配且 enabled）");
+        assertTrue(audit.get("enabled").isBoolean(), "audit.enabled 应为布尔");
+        assertFalse(res.getResponse().getContentAsString(StandardCharsets.UTF_8).contains("apiKey"),
+                "status 响应不得含 api-key 字段名");
     }
 }

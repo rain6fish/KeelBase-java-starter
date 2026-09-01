@@ -1,5 +1,6 @@
 package cn.com.keelbase.autoconfigure;
 
+import cn.com.keelbase.client.KeelbaseAuditProperties;
 import cn.com.keelbase.delegation.DelegationProperties;
 import cn.com.keelbase.export.DelegationSnapshot;
 import cn.com.keelbase.export.ExportConfigResolver;
@@ -60,12 +61,13 @@ public class ToolsExportAutoConfiguration {
     @ConditionalOnMissingBean
     KeelbaseStatusController keelbaseStatusController(ProxyToolsScanner scanner,
                                                       ExportConfigResolver resolver,
-                                                      ObjectProvider<DelegationProperties> delegation) {
+                                                      ObjectProvider<DelegationProperties> delegation,
+                                                      KeelbaseAuditProperties audit) {
         DelegationProperties d = delegation.getIfAvailable();
         DelegationSnapshot snapshot = d == null ? DelegationSnapshot.unconfigured()
                 : new DelegationSnapshot(true, isSet(d.getSecret()), d.getAudience(), d.getIssuer(),
                         d.getPaths() == null ? java.util.List.of() : d.getPaths());
-        return new KeelbaseStatusController(scanner, resolver, snapshot);
+        return new KeelbaseStatusController(scanner, resolver, snapshot, audit);
     }
 
     private static boolean isSet(String s) {

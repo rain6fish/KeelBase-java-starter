@@ -61,8 +61,9 @@ async function main() {
     } else {
       const health = body.health?.status ?? '?';
       const toolCount = body.tools?.count ?? 0;
+      const auditConfigured = body.audit?.configured ?? false;
       pass += report('接入健康度', true,
-        `health=${health} tools=${toolCount} errors=${(body.errors ?? []).length}`);
+        `health=${health} tools=${toolCount} audit=${auditConfigured ? 'on' : 'off'} errors=${(body.errors ?? []).length}`);
       if (body.errors?.length) {
         for (const e of body.errors) console.log(`       ${C.red}→ ${e}${C.reset}`);
       }

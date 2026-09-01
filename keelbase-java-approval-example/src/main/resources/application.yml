@@ -4,6 +4,7 @@ server:
 keelbase:
   delegation:
     enabled: true
+    # 与 KeelBase 共享的 DELEGATION_SECRET（HS256，≥32 字节）。生产用环境变量注入（示例仅演示）。
     secret: ${KEELBASE_DELEGATION_SECRET:0123456789012345678901234567890123456789012345678901234567890123}
     audience: legacy-approval
     issuer: keelbase

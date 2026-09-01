@@ -8,10 +8,6 @@ public record PmTask(
         String status, // todo | in_progress | done
         boolean cancelled) {
 
-    public PmTask markDone() {
-        return new PmTask(id, projectId, title, "done", cancelled);
-    }
-
     public PmTask cancel() {
         return new PmTask(id, projectId, title, "cancelled", true);
     }
