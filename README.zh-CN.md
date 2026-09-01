@@ -8,6 +8,16 @@
   <img src="docs/keelbase-java-starter-position.svg" alt="KeelBase Java Starter 的位置——处于 KeelBase Trust Runtime 与你的 Java 业务系统之间" width="840">
 </p>
 
+## 试用征集（0.1.3）
+
+> **0.1.3 已具备生产接入能力**：接入健康度自检、零样板工具导出、3 个参考项目（CRM / PM / Approval）、本地调试、Boot 2 / Java 8 适配路径。欢迎集成商试用反馈——反馈将决定 1.0 API 冻结。
+> **0.1.3 is production-wiring ready** — trial it and open a GitHub Issue with what blocked you or what's missing.
+
+- **5 分钟试用**：clone → `mvn install` → 起 `keelbase-java-example` → `node scripts/verify-java-local.mjs`（接入自检）
+- **参考项目**：[CRM](docs/reference-project-crm.zh-CN.md) · [PM](docs/reference-project-pm.md) · [Approval](docs/reference-project-approval.md)
+- **完整开发路径**：[开发使用手册](docs/development-guide.md)
+- **反馈**：GitHub Issues（https://github.com/rain6fish/KeelBase-java-starter/issues）
+
 ## 它能做什么
 
 1. **委托身份**（`DelegationAuthFilter`）：校验 KeelBase 转发请求携带的委托 JWT（HS256 + audience + issuer + 过期），映射到本地用户，注入 `@DelegationUser DelegationPrincipal`。无 Spring Security 也能用；classpath 含 Security 时自动写入 SecurityContext。`secret` 与 `audience` 均为必填——缺任一项启动即失败（fail-fast）。
@@ -19,6 +29,7 @@
 
 | 主题 | 说明 |
 |---|---|
+| [开发使用手册](docs/development-guide.md) | 从零接入的完整开发路径（依赖/配置/工具/委托身份/补偿/自检/测试/发布）|
 | [快速开始](docs/quickstart.zh-CN.md) | 10 分钟端到端接入指南 |
 | [配置参考](docs/configuration.zh-CN.md) | 全量属性参考 + audience 解析规则 |
 | [委托身份与授权](docs/delegated-identity.zh-CN.md) | JWT、验签、用户映射、Spring Security、行级归属 |

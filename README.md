@@ -8,6 +8,16 @@
   <img src="docs/keelbase-java-starter-position.svg" alt="KeelBase Java Starter — positioned between the KeelBase Trust Runtime and your Java business systems" width="840">
 </p>
 
+## Try it — integrators welcome / 试用征集（0.1.3）
+
+> **0.1.3 is production-wiring ready**: access health self-check, zero-boilerplate tool export, three reference projects (CRM / PM / Approval), local debug script, and a Boot 2 / Java 8 path. We're inviting integrators to trial it and report back — every report shapes the 1.0 API freeze.
+> **0.1.3 已具备生产接入能力**：接入健康度自检、零样板工具导出、3 个参考项目（CRM / PM / Approval）、本地调试、Boot 2 / Java 8 适配。欢迎集成商试用反馈，反馈将决定 1.0 API 冻结。
+
+- **5-minute trial**: clone → `mvn install` → run `keelbase-java-example` → `node scripts/verify-java-local.mjs`（接入自检）
+- **Reference projects**: [CRM](docs/reference-project-crm.md) · [PM](docs/reference-project-pm.md) · [Approval](docs/reference-project-approval.md) — real Java systems wired to governed AI tools
+- **Full path**: [Development Guide](docs/development-guide.md)（从零接入的开发使用手册）
+- **Feedback**: open a [GitHub Issue](https://github.com/rain6fish/KeelBase-java-starter/issues) — what blocked you, what's missing, what felt awkward.
+
 ## What it does
 
 1. **Delegated identity** (`DelegationAuthFilter`): verifies the delegation JWT that KeelBase attaches to forwarded calls (HS256 + audience + issuer + expiry), maps it to a local user, and injects `@DelegationUser DelegationPrincipal`. Works without Spring Security; auto-writes the Spring Security context when Security is on the classpath. `secret` and `audience` are required — the app fails fast at startup if either is missing.
@@ -19,6 +29,7 @@
 
 | Topic | Description |
 |---|---|
+| [development-guide](docs/development-guide.md) | 开发使用手册——从零接入的完整开发路径（依赖/配置/工具/委托身份/补偿/自检/测试/发布）|
 | [quickstart](docs/quickstart.md) | 10-minute end-to-end wiring guide |
 | [configuration](docs/configuration.md) | Full property reference + audience resolution rules |
 | [delegated-identity](docs/delegated-identity.md) | JWT, verification, user mapping, Spring Security, row-level ownership |
