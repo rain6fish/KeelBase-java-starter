@@ -8,10 +8,10 @@
   <img src="docs/keelbase-java-starter-position.svg" alt="KeelBase Java Starter 的位置——处于 KeelBase Trust Runtime 与你的 Java 业务系统之间" width="840">
 </p>
 
-## 试用征集（0.1.4）
+## 试用征集（0.1.5）
 
-> **0.1.4 已具备生产接入能力**：接入健康度自检、零样板工具导出、3 个参考项目（CRM / PM / Approval）、本地调试、Boot 2 / Java 8 适配路径。欢迎集成商试用反馈——反馈将决定 1.0 API 冻结。
-> **0.1.4 is production-wiring ready** — trial it and open a GitHub Issue with what blocked you or what's missing.
+> **0.1.5 已具备生产接入能力**：接入健康度自检、零样板工具导出、3 个参考项目（CRM / PM / Approval）、本地调试、Boot 2 / Java 8 适配路径。欢迎集成商试用反馈——反馈将决定 1.0 API 冻结。
+> **0.1.5 is production-wiring ready** — trial it and open a GitHub Issue with what blocked you or what's missing.
 
 - **5 分钟试用**：clone → `mvn install` → 起 `keelbase-java-example` → `node scripts/verify-java-local.mjs`（接入自检）
 - **参考项目**：[CRM](docs/reference-project-crm.zh-CN.md) · [PM](docs/reference-project-pm.md) · [Approval](docs/reference-project-approval.md)
@@ -59,10 +59,10 @@ curl http://localhost:8081/keelbase/status
 # 3. 导出 ai_proxy_tools 配置
 curl http://localhost:8081/keelbase/proxy-tools/export
 
-# 4. 写入 KeelBase（PUT /settings/ai_proxy_tools，value 为导出 JSON 的字符串），重启 KeelBase
+# 4. 写入 KeelBase（PUT /settings/ai_proxy_tools，value 为导出 JSON 的字符串）——热更新生效，免重启
 ```
 
-已发布到 Maven Central——直接加依赖 `cn.com.keelbase:keelbase-spring-boot-starter:0.1.4`（0.1.0–0.1.4 均已上线）。开发快照版（`0.1.5-SNAPSHOT`）需 `mvn install` 本地安装一次。发布自动化（`-Prelease` profile + Central Portal token 流程）已配置——见 [docs/release-central.md](docs/release-central.md)。完整步骤见 [docs/quickstart.zh-CN.md](docs/quickstart.zh-CN.md)。
+已发布到 Maven Central——直接加依赖 `cn.com.keelbase:keelbase-spring-boot-starter:0.1.5`（0.1.0–0.1.5 均已上线）。开发快照版（`0.1.6-SNAPSHOT`）需 `mvn install` 本地安装一次。发布自动化（`-Prelease` profile + Central Portal token 流程）已配置——见 [docs/release-central.md](docs/release-central.md)。完整步骤见 [docs/quickstart.zh-CN.md](docs/quickstart.zh-CN.md)。
 
 ## 配置（application.yml）
 
@@ -142,7 +142,7 @@ mvn install          # Maven：编译全部模块 + 跑 JUnit
 
 ```bash
 # 前置：KeelBase（localhost:3000）与示例（localhost:8081）已启动
-node scripts/verify-java-starter-e2e.mjs --configure   # 导出 + 写入 ai_proxy_tools（然后重启 KeelBase）
+node scripts/verify-java-starter-e2e.mjs --configure   # 导出 + 写入 ai_proxy_tools（热更新生效，免重启）
 node scripts/verify-java-starter-e2e.mjs --verify --llm # 完整闭环：确认门控 → 流式批准 → proxy 写回 → 审计 → 撤销 → 补偿
 ```
 
