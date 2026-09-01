@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 package cn.com.keelbase.pmsample;
 
 import cn.com.keelbase.annotation.KeelbaseTool;

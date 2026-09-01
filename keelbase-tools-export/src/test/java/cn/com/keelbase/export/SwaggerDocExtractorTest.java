@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 package cn.com.keelbase.export;
 
 import io.swagger.v3.oas.annotations.Operation;

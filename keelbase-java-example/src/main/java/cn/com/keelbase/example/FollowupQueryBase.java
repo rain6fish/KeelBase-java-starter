@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 package cn.com.keelbase.example;
 
 /** 跟进查询的父类字段：分页参数（演示继承字段会被导出为工具参数）。 */

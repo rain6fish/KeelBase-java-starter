@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 package cn.com.keelbase.approvalsample;
 
 /** 审批请求实体（存量 Java 审批流的记录）。 */

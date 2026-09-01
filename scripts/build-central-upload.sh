@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+
+# SPDX-License-Identifier: Apache-2.0
 # Build a complete Maven Central upload package from the release build in ~/.m2.
 #
 # Central Portal rejects any deployment whose files lack .md5/.sha1 checksums

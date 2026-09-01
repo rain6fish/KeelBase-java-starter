@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 package cn.com.keelbase.autoconfigure;
 
 import cn.com.keelbase.delegation.DefaultKeelBaseUserMapper;

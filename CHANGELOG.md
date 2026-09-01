@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning follows [SemVer](https://semver.org/).
 
+## [0.1.4] - 2026-09-01
+
+### Added
+
+- **Apache-2.0 SPDX 许可头全量补齐** — 全仓 84 个源码文件（.java + scripts 的 .sh/.mjs）加 `SPDX-License-Identifier: Apache-2.0`（幂等脚本 `scripts/add-license-headers.mjs` 可复用，`--check` 校验），对齐主仓库开源可信度包装。
+- **架构与数据流文档** — `docs/architecture{,.zh-CN}.md`：总览「控制面/数据面」定位、B 路径接入选路、三条数据流时序（AI→Java 调用 / 写+确认+撤销补偿 / Java→KeelBase 反向）、委托 JWT 身份桥细节与治理边界。
+
 ## [0.1.3] - 2026-08-31
 
 ### Added

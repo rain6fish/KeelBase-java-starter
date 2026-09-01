@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 package cn.com.keelbase.client;
 
 /** KeelbaseClient 运行时异常：委托 token 获取/验签/响应解析失败。 */

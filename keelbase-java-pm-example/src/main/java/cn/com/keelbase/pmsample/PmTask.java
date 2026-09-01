@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 package cn.com.keelbase.pmsample;
 
 /** 项目任务实体（写工具创建 + 可撤销的目标）。 */

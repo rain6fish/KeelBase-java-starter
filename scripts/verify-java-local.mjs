@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+
+// SPDX-License-Identifier: Apache-2.0
 /**
  * 本地调试 / 接入自检（不依赖 KeelBase 后端）：
  * 验证 Java 参考项目（keelbase-java-example / -crm / -pm / -approval）的接入健康——

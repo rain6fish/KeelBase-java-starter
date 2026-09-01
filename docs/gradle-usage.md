@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.1'
+    implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.4'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 }
 ```
@@ -55,7 +55,7 @@ mvn install              # (Maven) install the SNAPSHOT for local consumption
 
 | Version | Source |
 |---|---|
-| `0.1.1` | Maven Central (stable; 0.1.0 also live) |
-| `0.1.2-SNAPSHOT` | build locally with `./gradlew build` / `mvn install` |
+| `0.1.4` | Maven Central (stable; 0.1.0/0.1.1/0.1.3 live) |
+| `0.1.5-SNAPSHOT` | build locally with `./gradlew build` / `mvn install` |
 
 The parent `pom.xml` and `build.gradle` stay in sync (same Spring Boot BOM, same module set), so whichever build you use produces the same artifacts.

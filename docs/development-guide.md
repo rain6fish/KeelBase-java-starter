@@ -10,12 +10,12 @@
 <dependency>
   <groupId>cn.com.keelbase</groupId>
   <artifactId>keelbase-spring-boot-starter</artifactId>
-  <version>0.1.3</version>
+  <version>0.1.4</version>
 </dependency>
 ```
 
 ```gradle
-implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.3'
+implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.4'
 ```
 
 > 要求 **Spring Boot 3 + Java 17**。Boot 2 / Java 8 团队走 B 路径（零代码 API 代理，见 [boot2-java8-adapter](boot2-java8-adapter.md)）。

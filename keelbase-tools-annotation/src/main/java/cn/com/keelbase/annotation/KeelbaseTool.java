@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 package cn.com.keelbase.annotation;
 
 import java.lang.annotation.ElementType;

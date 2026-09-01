@@ -14,7 +14,7 @@ Full reference: [configuration](configuration.md) · [delegated identity](delega
 
 ## 1. Add the dependency
 
-Published to Maven Central — add `cn.com.keelbase:keelbase-spring-boot-starter:0.1.1` (0.1.0 is also live):
+Published to Maven Central — add `cn.com.keelbase:keelbase-spring-boot-starter:0.1.4` (0.1.0–0.1.4 live):
 
 **Maven** — `pom.xml`:
 
@@ -22,17 +22,17 @@ Published to Maven Central — add `cn.com.keelbase:keelbase-spring-boot-starter
 <dependency>
   <groupId>cn.com.keelbase</groupId>
   <artifactId>keelbase-spring-boot-starter</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.4</version>
 </dependency>
 ```
 
 **Gradle** — `build.gradle`:
 
 ```groovy
-implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.1'
+implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.4'
 ```
 
-> For the development snapshot (`0.1.2-SNAPSHOT`), install it locally once first:
+> For the development snapshot (`0.1.5-SNAPSHOT`), install it locally once first:
 
 ```bash
 git clone https://github.com/rain6fish/KeelBase-java-starter.git

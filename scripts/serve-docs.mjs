@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 /** 本地静态托管（预览 README / SVG 用）：node scripts/serve-docs.mjs → http://localhost:8100 */
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';

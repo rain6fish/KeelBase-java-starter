@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.1'
+    implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.4'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 }
 ```
@@ -55,7 +55,7 @@ mvn install              # （Maven）安装 SNAPSHOT 供本地消费
 
 | 版本 | 来源 |
 |---|---|
-| `0.1.1` | Maven Central（稳定；0.1.0 也已上线） |
-| `0.1.2-SNAPSHOT` | 本地 `./gradlew build` / `mvn install` 构建 |
+| `0.1.4` | Maven Central（稳定；0.1.0/0.1.1/0.1.3 也已上线） |
+| `0.1.5-SNAPSHOT` | 本地 `./gradlew build` / `mvn install` 构建 |
 
 父 `pom.xml` 与 `build.gradle` 保持同步（同一 Spring Boot BOM、同一模块集），无论用哪套构建产物一致。
