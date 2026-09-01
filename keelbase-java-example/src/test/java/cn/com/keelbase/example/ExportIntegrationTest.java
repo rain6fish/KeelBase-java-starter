@@ -257,5 +257,12 @@ class ExportIntegrationTest {
         assertTrue(audit.get("enabled").isBoolean(), "audit.enabled 应为布尔");
         assertFalse(res.getResponse().getContentAsString(StandardCharsets.UTF_8).contains("apiKey"),
                 "status 响应不得含 api-key 字段名");
+        // 来源指纹（provenance）：身份/版本/仓库——机器可读「这是什么接入层、哪来的」
+        JsonNode provenance = root.get("provenance");
+        assertNotNull(provenance, "provenance 应存在（来源指纹，对齐主库）");
+        assertEquals("keelbase-java-starter", provenance.get("identity").asText());
+        assertTrue(provenance.get("repository").asText().contains("github.com/rain6fish/KeelBase-java-starter"),
+                "provenance.repository 应为源码仓库");
+        assertNotNull(provenance.get("version"), "provenance.version 字段应存在（实现版本，dev 下可为 null）");
     }
 }

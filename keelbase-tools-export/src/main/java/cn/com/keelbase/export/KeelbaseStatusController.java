@@ -44,6 +44,14 @@ public class KeelbaseStatusController {
         }
         Map<String, Object> root = new LinkedHashMap<>();
 
+        // 来源指纹（对齐主库 provenance）：jar MANIFEST Implementation-* 元数据，回答「这是什么接入层、哪来的」
+        Package pkg = KeelbaseStatusController.class.getPackage();
+        Map<String, Object> provenance = new LinkedHashMap<>();
+        provenance.put("identity", "keelbase-java-starter");
+        provenance.put("version", pkg != null ? pkg.getImplementationVersion() : null);
+        provenance.put("repository", "https://github.com/rain6fish/KeelBase-java-starter");
+        root.put("provenance", provenance);
+
         Map<String, Object> delegationInfo = new LinkedHashMap<>();
         delegationInfo.put("configured", delegation.configured());
         delegationInfo.put("secretConfigured", delegation.secretConfigured());
