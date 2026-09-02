@@ -27,7 +27,7 @@ node scripts/demo-starter.mjs --start-example   # 脚本后台起 example（需�
 
 ## 1. 引入依赖
 
-已发布到 Maven Central——直接加依赖 `cn.com.keelbase:keelbase-spring-boot-starter:0.1.4`（0.1.0–0.1.4 也已上线）：
+已发布到 Maven Central——直接加依赖 `cn.com.keelbase:keelbase-spring-boot-starter:0.1.6`（0.1.0–0.1.5 也已上线）：
 
 **Maven** — 加入 `pom.xml`：
 
@@ -42,10 +42,10 @@ node scripts/demo-starter.mjs --start-example   # 脚本后台起 example（需�
 **Gradle** — 加入 `build.gradle`：
 
 ```groovy
-implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.4'
+implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.6'
 ```
 
-> 开发快照版（`0.1.5-SNAPSHOT`）需先在本地构建安装一次：
+> 开发快照版（`0.1.7-SNAPSHOT`）需先在本地构建安装一次：
 
 ```bash
 git clone https://github.com/rain6fish/KeelBase-java-starter.git
