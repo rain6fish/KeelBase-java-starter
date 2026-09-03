@@ -27,7 +27,7 @@ The demo verifies: confirmation gate → streaming approve → delegated write-b
 
 ## 1. Add the dependency
 
-Published to Maven Central — add `cn.com.keelbase:keelbase-spring-boot-starter:0.1.6` (0.1.0–0.1.5 live):
+Published to Maven Central — add `cn.com.keelbase:keelbase-spring-boot-starter:0.1.7` (0.1.0–0.1.5 live):
 
 **Maven** — `pom.xml`:
 
@@ -42,7 +42,7 @@ Published to Maven Central — add `cn.com.keelbase:keelbase-spring-boot-starter
 **Gradle** — `build.gradle`:
 
 ```groovy
-implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.6'
+implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.7'
 ```
 
 > For the development snapshot (`0.1.7-SNAPSHOT`), install it locally once first:

@@ -15,6 +15,7 @@ All properties live under the `keelbase.*` prefix. Spring Boot's [relaxed bindin
 | `keelbase.tools.export-enabled` | boolean | `true` | — | Enables `GET /keelbase/proxy-tools/export`. Turn off in production once registered. |
 | `keelbase.tools.status-enabled` | boolean | `true` | — | Enables `GET /keelbase/status` (diagnostics; never leaks the secret). |
 | `keelbase.tools.strict` | boolean | `false` | — | Startup fail-fast: when `true`, an invalid `@KeelbaseTool` declaration (unresolvable method/path, illegal tool name) makes the app **fail to start** listing every skipped one — instead of a WARN-only skip that only shows up as a missing tool at export. |
+| `keelbase.health.enabled` | boolean | `true` | — | Exposes `/keelbase/status` through the Spring Boot actuator `/health` (consumer must add `spring-boot-starter-actuator` for it to assemble): healthy/degraded → `UP` (degraded carries warnings), error → `DOWN` (carries errors), `status-enabled=false` → `UP`. |
 | `keelbase.compensation.ledger-size` | integer | `1024` | — | LRU cap of the in-memory idempotency ledger for compensation endpoints. |
 | `keelbase.client.base-url` | string | — | — | KeelBase service root (e.g. `http://localhost:3000`) for `POST /api/v1/auth/delegation-token`. Unset → `KeelbaseClient.obtain` disabled (only local `verify` works). See [client](client.md). |
 | `keelbase.client.audience` | string | — | — | Target audience for delegation tokens. **Falls back to `keelbase.delegation.audience`.** |

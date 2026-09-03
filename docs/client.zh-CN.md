@@ -88,6 +88,26 @@ audit.report(KeelbaseAuditEvent.builder()
 
 ---
 
+## 3. KeelbasePolicyClient — 拉取治理策略
+
+业务系统本地按治理台实时策略约束执行（工具开关 / 确认 / 角色白名单 / 审计粒度）。配置复用 `keelbase.audit.base-url` + `api-key`（治理台服务身份）：
+
+```java
+@Autowired KeelbasePolicyClient policy;
+
+Optional<GovernancePolicy> opt = policy.fetch();
+opt.ifPresent(p -> {
+    // override（null = 不覆盖该维度，沿用本地默认）
+    Boolean confirmation = p.tools().get("create_followup") == null
+            ? null : p.tools().get("create_followup").requiresConfirmation();
+    String granularity = p.auditGranularity();   // "all" | "write" | "off"
+});
+```
+
+端点：治理台 `GET /api/v1/external/governance/policy` + `x-api-key`（与审计上报同服务身份）。`tools` 只含被覆盖字段（partial override），需与自身工具默认合并得「生效值」；未配置 `base-url/api-key` → `Optional.empty()`（本地全默认）；HTTP/解析失败抛 `KeelbaseClientException`。
+
+---
+
 ## 相关
 
 - [委托身份](delegated-identity.zh-CN.md) — 接收方如何验签委托 JWT（`DelegationAuthFilter`）

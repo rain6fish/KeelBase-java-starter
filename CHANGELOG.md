@@ -2,6 +2,22 @@
 
 All notable changes to this project are documented in this file. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning follows [SemVer](https://semver.org/).
 
+## [0.1.7] - 2026-09-03
+
+> 0.1.7 — Java 接入可观测与合规：actuator 健康指示器 / 治理台策略实时拉取 / CI 接入合规模板。
+
+### Added
+
+- **actuator HealthIndicator** — `/keelbase/status` 接入 Spring Boot actuator `/health`（`keelbase.health.enabled`，需消费者自加 `spring-boot-starter-actuator`）：healthy/degraded→`UP`（degraded 带 warnings）、error→`DOWN`；`KeelbaseHealthIndicator` 复用 `KeelbaseStatusController.status()` 健康判定，不重写规则。
+- **治理策略拉取** — `KeelbasePolicyClient`（治理台 `GET /api/v1/external/governance/policy` + x-api-key 服务身份）拉取实时治理策略（工具 override / 审计粒度），业务系统本地按策略约束执行；复用 `keelbase.audit.base-url/api-key`；未配置 → `Optional.empty()`。`GovernancePolicy` record + autoconfigure 注册 bean。
+- **CI 接入合规模板** — `ci-template.yml` + `docs/ci-integration.md`/`ci-integration.zh-CN.md`：消费方复制即得「契约测试 + 本地自检 + 导出门禁」双 job，接入合规持续守护。
+
+## [Unreleased]
+
+### Added
+
+（待发布）
+
 ## [0.1.6] - 2026-09-01
 
 ### Added

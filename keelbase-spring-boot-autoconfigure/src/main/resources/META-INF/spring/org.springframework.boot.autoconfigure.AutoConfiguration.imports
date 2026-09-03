@@ -2,3 +2,4 @@ cn.com.keelbase.autoconfigure.DelegationAutoConfiguration
 cn.com.keelbase.autoconfigure.ToolsExportAutoConfiguration
 cn.com.keelbase.autoconfigure.CompensationAutoConfiguration
 cn.com.keelbase.autoconfigure.KeelbaseClientAutoConfiguration
+cn.com.keelbase.autoconfigure.KeelbaseHealthAutoConfiguration

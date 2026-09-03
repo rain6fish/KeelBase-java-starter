@@ -15,6 +15,7 @@
 | `keelbase.tools.export-enabled` | boolean | `true` | — | 控制 `GET /keelbase/proxy-tools/export`。注册完成后生产可关。 |
 | `keelbase.tools.status-enabled` | boolean | `true` | — | 控制 `GET /keelbase/status`（诊断端点，绝不泄露密钥）。 |
 | `keelbase.tools.strict` | boolean | `false` | — | 启动 fail-fast：为 `true` 时若扫描发现 `@KeelbaseTool` 声明非法（无法解析 method/path、工具名非法）被跳过，则**应用启动失败**并列出明细，替代默认只打 WARN 跳过导致的「导出缺工具」困惑。 |
+| `keelbase.health.enabled` | boolean | `true` | — | 把 `/keelbase/status` 接入 Spring Boot actuator `/health` 的开关（需消费者自加 `spring-boot-starter-actuator` 才装配）：healthy/degraded→`UP`（degraded 带 warnings）、error→`DOWN`（带 errors）、`status-enabled=false`→`UP`。 |
 | `keelbase.compensation.ledger-size` | integer | `1024` | — | 补偿端点的进程内幂等账本 LRU 上限。 |
 | `keelbase.client.base-url` | string | — | — | KeelBase 服务根（如 `http://localhost:3000`），调 `POST /api/v1/auth/delegation-token`。未配置 → `KeelbaseClient.obtain` 不可用（仅本地 `verify`）。见[客户端与审计上报](client.zh-CN.md)。 |
 | `keelbase.client.audience` | string | — | — | 委托 token 的目标 audience。**缺省回退 `keelbase.delegation.audience`。** |

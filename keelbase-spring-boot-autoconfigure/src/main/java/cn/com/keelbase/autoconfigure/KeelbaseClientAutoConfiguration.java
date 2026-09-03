@@ -6,6 +6,7 @@ import cn.com.keelbase.client.KeelbaseAuditProperties;
 import cn.com.keelbase.client.KeelbaseAuditReporter;
 import cn.com.keelbase.client.KeelbaseClient;
 import cn.com.keelbase.client.KeelbaseClientProperties;
+import cn.com.keelbase.client.KeelbasePolicyClient;
 import cn.com.keelbase.delegation.DelegationProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -43,5 +44,11 @@ public class KeelbaseClientAutoConfiguration {
     @ConditionalOnMissingBean
     KeelbaseAuditReporter keelbaseAuditReporter(KeelbaseAuditProperties properties) {
         return new KeelbaseAuditReporter(properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    KeelbasePolicyClient keelbasePolicyClient(KeelbaseAuditProperties properties) {
+        return new KeelbasePolicyClient(properties);
     }
 }

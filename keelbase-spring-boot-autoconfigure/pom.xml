@@ -6,7 +6,7 @@
   <parent>
     <groupId>cn.com.keelbase</groupId>
     <artifactId>keelbase-java-starter-parent</artifactId>
-    <version>0.1.6</version>
+    <version>0.1.7</version>
   </parent>
   <artifactId>keelbase-spring-boot-autoconfigure</artifactId>
   <name>KeelBase Spring Boot Autoconfigure</name>
@@ -44,6 +44,11 @@
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-core</artifactId>
       <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-actuator</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>jakarta.servlet</groupId>

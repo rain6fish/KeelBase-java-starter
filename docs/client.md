@@ -88,6 +88,26 @@ The event is sent as `POST {base-url}/api/v1/external/audit` with `x-api-key`, l
 
 ---
 
+## 3. KeelbasePolicyClient — pulling the governance policy
+
+Your business system can enforce the governance plane's real-time policy locally (tool toggles / confirmation / role allow-lists / audit granularity). Config reuses `keelbase.audit.base-url` + `api-key` (governance-plane service identity):
+
+```java
+@Autowired KeelbasePolicyClient policy;
+
+Optional<GovernancePolicy> opt = policy.fetch();
+opt.ifPresent(p -> {
+    // override (null = not overridden; fall back to your local default)
+    Boolean confirmation = p.tools().get("create_followup") == null
+            ? null : p.tools().get("create_followup").requiresConfirmation();
+    String granularity = p.auditGranularity();   // "all" | "write" | "off"
+});
+```
+
+Endpoint: `GET /api/v1/external/governance/policy` on the governance plane with `x-api-key` (same service identity as audit reporting). `tools` carries only overridden fields (partial override) — merge with your own tool defaults to get effective values. With `base-url/api-key` unset → `Optional.empty()` (all-local defaults); HTTP/parse failure throws `KeelbaseClientException`.
+
+---
+
 ## Related
 
 - [delegated identity](delegated-identity.md) — how receivers verify delegation JWTs (`DelegationAuthFilter`)

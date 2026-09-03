@@ -1,0 +1,74 @@
+# KeelBase 接入合规 CI 模板 — 复制到你的 `.github/workflows/keelbase.yml` 使用。
+#
+# 作用：接入后 CI 持续守护「AI 工具面合规」——契约测试 + 本地自检 + 导出门禁。
+#   1) contract   job：跑 KeelbaseContractTest（导出契约 / 受保护路径 401 / 委托 JWT 2xx 幂等）
+#   2) integration job：起你的应用 → verify-java-local 本地自检 → keelbase:export 导出门禁
+#      （非法工具名 / 缺 revokePath / 空工具集 → 导出失败 → CI 红）
+#
+# 前置：
+#   - 项目已依赖 cn.com.keelbase:keelbase-spring-boot-starter（compile）
+#   - test 依赖 cn.com.keelbase:keelbase-test-support，且有一个 `extends KeelbaseContractTest` 的测试
+#   - JDK 17+ / Maven / Node 20
+#
+# 适配点（必改）：
+#   - 下方 env：APP_PORT（你的应用端口）、KEELBASE_STARTER_VERSION（你用的 starter 版本）
+#   - integration job 的「启动应用」步骤改为你的启动命令（本项目示例为 Spring Boot Maven 项目）
+#   - 若你的 `keelbase.delegation.secret/audience` 非默认，给 verify-java-local 传 KB_SECRET / KB_AUDIENCE env
+name: keelbase-compliance
+
+on:
+  push:
+  pull_request:
+
+env:
+  APP_PORT: "8081"
+  KEELBASE_STARTER_VERSION: "0.1.6"
+  # KB_SECRET: ""      # 你的 DELEGATION_SECRET（缺省用 example 默认值）
+  # KB_AUDIENCE: ""    # 你的 audience（缺省 legacy-crm）
+
+jobs:
+  contract:
+    name: KeelbaseContractTest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Run access-compliance contract tests
+        run: mvn -B test
+
+  integration:
+    name: Self-check + export gate
+    runs-on: ubuntu-latest
+    needs: contract
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Start app (background) and wait for /keelbase/status
+        run: |
+          mvn -B spring-boot:run > /tmp/app.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sf "http://localhost:$APP_PORT/keelbase/status" && exit 0 || sleep 5
+          done
+          echo "app not ready"; tail -40 /tmp/app.log; exit 1
+      - name: Local self-check (delegation / tool contract / protected path)
+        env:
+          KB_SECRET: ${{ env.KB_SECRET }}
+          KB_AUDIENCE: ${{ env.KB_AUDIENCE }}
+        run: |
+          curl -sfLO "https://raw.githubusercontent.com/rain6fish/KeelBase-java-starter/main/scripts/verify-java-local.mjs"
+          node verify-java-local.mjs "http://localhost:$APP_PORT"
+      - name: Export gate (invalid declaration fails the build)
+        run: |
+          mvn -B cn.com.keelbase:keelbase-maven-plugin:${{ env.KEELBASE_STARTER_VERSION }}:export \
+            -Dkeelbase.appUrl="http://localhost:$APP_PORT"
