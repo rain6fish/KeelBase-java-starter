@@ -18,11 +18,11 @@ public class ApprovalStore {
     public ApprovalStore() {
         // 对齐 AI Approval 旗舰：小额（¥800 ≤ 阈值自动通过）与大额（¥12000 转人工）请求
         requests.put(1L, new ApprovalRequest(1L, "8 月差旅报销", "expense", 800,
-                "客户拜访交通与住宿费", "pending", null));
+                "客户拜访交通与住宿费", "pending", null, null));
         requests.put(2L, new ApprovalRequest(2L, "研发服务器采购", "purchase", 12000,
-                "双节点生产环境扩容", "pending", null));
+                "双节点生产环境扩容", "pending", null, null));
         requests.put(3L, new ApprovalRequest(3L, "团队年会预算", "expense", 5000,
-                "Q4 团建活动", "needs_review", "alex"));
+                "Q4 团建活动", "needs_review", "alex", null));
     }
 
     public List<ApprovalRequest> list() {

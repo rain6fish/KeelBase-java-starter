@@ -22,21 +22,22 @@ public class PmStore {
     }
 
     private void seed() {
+        // 存量种子任务无操作者（createdBy=null）——委托身份写回只作用于 AI 写工具新建的任务
         projects.put(1L, new PmProject(1L, "电商平台重构",
                 "active", "high",
                 "Q3 核心项目：订单与库存模块重构，涉及 6 个服务",
-                List.of(new PmTask(1, 1L, "需求冻结", "completed", false),
-                        new PmTask(2, 1L, "订单模块上线", "in_progress", false),
-                        new PmTask(3, 1L, "库存模块上线", "todo", false))));
+                List.of(new PmTask(1, 1L, "需求冻结", "completed", false, null),
+                        new PmTask(2, 1L, "订单模块上线", "in_progress", false, null),
+                        new PmTask(3, 1L, "库存模块上线", "todo", false, null))));
         projects.put(2L, new PmProject(2L, "移动端 App 发布",
                 "active", "medium",
                 "双端打包与商店上架",
-                List.of(new PmTask(4, 2L, "iOS 提审", "in_progress", false),
-                        new PmTask(5, 2L, "Android 灰度", "todo", false))));
+                List.of(new PmTask(4, 2L, "iOS 提审", "in_progress", false, null),
+                        new PmTask(5, 2L, "Android 灰度", "todo", false, null))));
         projects.put(3L, new PmProject(3L, "数据仓库迁移",
                 "on_hold", "medium",
                 "遗留 ETL 迁到新数仓",
-                List.of(new PmTask(6, 3L, "数据核对脚本", "todo", false))));
+                List.of(new PmTask(6, 3L, "数据核对脚本", "todo", false, null))));
     }
 
     public List<PmProject> listProjects() {
@@ -62,12 +63,12 @@ public class PmStore {
         return null;
     }
 
-    public PmTask addTask(long projectId, String title) {
+    public PmTask addTask(long projectId, String title, String createdBy) {
         PmProject p = projects.get(projectId);
         if (p == null) {
             return null;
         }
-        PmTask task = new PmTask(taskSeq.incrementAndGet(), projectId, title, "todo", false);
+        PmTask task = new PmTask(taskSeq.incrementAndGet(), projectId, title, "todo", false, createdBy);
         List<PmTask> tasks = new ArrayList<>(p.tasks());
         tasks.add(task);
         projects.put(projectId, new PmProject(p.id(), p.name(), p.status(), p.riskLevel(), p.description(), tasks));

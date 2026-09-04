@@ -2,15 +2,16 @@
 
 package cn.com.keelbase.pmsample;
 
-/** 项目任务实体（写工具创建 + 可撤销的目标）。 */
+/** 项目任务实体（写工具创建 + 可撤销的目标）。createdBy = 委托身份写回（KeelBase 携身份治理）。 */
 public record PmTask(
         long id,
         long projectId,
         String title,
         String status, // todo | in_progress | done
-        boolean cancelled) {
+        boolean cancelled,
+        String createdBy) {
 
     public PmTask cancel() {
-        return new PmTask(id, projectId, title, "cancelled", true);
+        return new PmTask(id, projectId, title, "cancelled", true, createdBy);
     }
 }

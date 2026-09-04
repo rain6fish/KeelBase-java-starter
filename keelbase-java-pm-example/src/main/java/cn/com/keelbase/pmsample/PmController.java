@@ -6,6 +6,8 @@ import cn.com.keelbase.annotation.KeelbaseTool;
 import cn.com.keelbase.compensation.CompensationAuditSink;
 import cn.com.keelbase.compensation.KeelBaseCompensationSupport;
 import cn.com.keelbase.compensation.RevocationLedgerStore;
+import cn.com.keelbase.delegation.DelegationPrincipal;
+import cn.com.keelbase.delegation.DelegationUser;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -54,11 +56,14 @@ public class PmController extends KeelBaseCompensationSupport<PmTask> {
     @KeelbaseTool(name = "create_pm_task",
             description = "为项目创建任务（写工具，R3 需人工确认；撤销走补偿端点）",
             revokePath = "DELETE /api/compensation/pm-tasks/{id}")
-    public ResponseEntity<?> createTask(@PathVariable long id, @RequestBody CreateTaskRequest req) {
+    public ResponseEntity<?> createTask(@PathVariable long id, @RequestBody CreateTaskRequest req,
+                                        @DelegationUser DelegationPrincipal principal) {
         if (store.project(id) == null) {
             return ResponseEntity.notFound().build();
         }
-        PmTask task = store.addTask(id, req.title());
+        // 委托身份写回：KeelBase 携身份治理（缺省 anonymous，与 CRM reference 一致）
+        String createdBy = principal == null ? "anonymous" : principal.identity();
+        PmTask task = store.addTask(id, req.title(), createdBy);
         return task == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(task);
     }
 

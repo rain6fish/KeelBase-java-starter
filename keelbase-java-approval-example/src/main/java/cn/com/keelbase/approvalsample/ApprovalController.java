@@ -6,6 +6,8 @@ import cn.com.keelbase.annotation.KeelbaseTool;
 import cn.com.keelbase.compensation.CompensationAuditSink;
 import cn.com.keelbase.compensation.KeelBaseCompensationSupport;
 import cn.com.keelbase.compensation.RevocationLedgerStore;
+import cn.com.keelbase.delegation.DelegationPrincipal;
+import cn.com.keelbase.delegation.DelegationUser;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -54,12 +56,15 @@ public class ApprovalController extends KeelBaseCompensationSupport<ApprovalRequ
     @KeelbaseTool(name = "decide_approval_request",
             description = "审批决定（写工具，R3 需人工确认；撤销走补偿端点）——approve/reject，autoApproved=小额自动通过/needsReview=转人工",
             revokePath = "DELETE /api/compensation/approval-decisions/{id}")
-    public ResponseEntity<?> decide(@PathVariable long id, @RequestBody DecisionRequest req) {
+    public ResponseEntity<?> decide(@PathVariable long id, @RequestBody DecisionRequest req,
+                                    @DelegationUser DelegationPrincipal principal) {
         ApprovalRequest current = store.get(id);
         if (current == null) {
             return ResponseEntity.notFound().build();
         }
-        ApprovalRequest decided = current.decide(req.approve(), req.needsReview());
+        // 委托身份写回：KeelBase 携身份治理（缺省 anonymous，与 CRM reference 一致）
+        String actor = principal == null ? "anonymous" : principal.identity();
+        ApprovalRequest decided = current.decide(req.approve(), req.needsReview(), actor);
         return ResponseEntity.ok(store.replace(decided));
     }
 
