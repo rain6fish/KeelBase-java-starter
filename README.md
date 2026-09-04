@@ -15,6 +15,7 @@
 
 - **5-minute trial**: clone → `mvn install` → run `keelbase-java-example` → `node scripts/verify-java-local.mjs`（接入自检）
 - **Reference projects**: [CRM](docs/reference-project-crm.md) · [PM](docs/reference-project-pm.md) · [Approval](docs/reference-project-approval.md) — real Java systems wired to governed AI tools
+- **Customer scenario — legacy Java CRM × LangChain4j agent 客户对接样板**: one-page topology + phased PoC plan → [internal solution](https://github.com/rain6fish/KeelBase/blob/main/docs/integrator-kit/java-crm-langchain4j-solution.md) · [customer-facing copy](https://github.com/rain6fish/KeelBase/blob/main/docs/integrator-kit/java-crm-langchain4j-customer.md)（在 KeelBase 主仓 integrator-kit）
 - **Full path**: [Development Guide](docs/development-guide.md)（从零接入的开发使用手册）
 - **Feedback**: open a [GitHub Issue](https://github.com/rain6fish/KeelBase-java-starter/issues) — what blocked you, what's missing, what felt awkward.
 
