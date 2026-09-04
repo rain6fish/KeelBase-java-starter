@@ -37,11 +37,37 @@ curl http://localhost:8083/keelbase/proxy-tools/export
 
 ## The governed AI loop
 
-1. AI asks "which projects are at risk?" → `query_projects` + `get_project` run automatically (R1) over real project data.
-2. AI proposes creating a task → KeelBase raises a **confirmation request** (R3) → a human approves.
-3. The write lands in `create_pm_task` → recorded in the audit chain as a revocable side effect.
-4. `DELETE /api/compensation/pm-tasks/{id}` revokes it (idempotent, delegated identity, audited).
+```
+You: "Which projects are at risk of delay?"
+
+AI:
+  1. query_projects (R1, auto) → find the active/high project 电商平台重构
+  2. get_project (R1, auto) → read its tasks/milestones
+  3. deadline-risk analysis → propose create_pm_task
+  4. confirmation gate (R3) — not executed without your approval
+  5. approve → proxy writes back to the Java PM with delegated identity (createdBy = your user)
+  6. audit hash chain records it; revoke → compensation endpoint soft-cancels the task (idempotent)
+```
+
+## Delegated identity write-back
+
+`create_pm_task` takes `@DelegationUser DelegationPrincipal` and stores `createdBy = principal.identity()` (your `oidcSub`, or `local:<id>` after stripping the prefix; defaults to `anonymous` when no delegation token is present). KeelBase's "identity-carrying governance" therefore reaches into the legacy Java system — the record knows *who* (via the AI) created it, and that identity survives revocation (a cancelled task keeps its `createdBy`). Verified by `PmCompensationTest` (write → assert `createdBy` → revoke → idempotent → 401 fail-closed).
+
+## Same domain, two integration paths
+
+| | B-path OpenAPI proxy | This Java implementation |
+|---|---|---|
+| Declaration | `specs/external-pm.openapi.json` → `keelbase init --import-openapi-proxy` | `@KeelbaseTool` on real endpoints |
+| Tool set | identical 3 PM tools | identical 3 PM tools |
+| Write gate | R3 (same) | R3 (same) |
+| Revoke | revokePath → Java compensation | `KeelBaseCompensationSupport` (idempotent + audit) |
+
+The two are drop-in interchangeable from KeelBase's perspective — same AI tools, only the declaration surface differs (annotation on real Java vs. OpenAPI import).
 
 ## Health check
 
 `GET /keelbase/status` reports delegation/export/tools/health — see [reference-project-crm.md](reference-project-crm.md) for the same diagnostics.
+
+## Configuration
+
+See [configuration](configuration.md) — `keelbase.delegation.*` (shared `DELEGATION_SECRET`, `audience: legacy-pm`) and `keelbase.tools.base-url` (server root `http://localhost:8083`). The compensation path `/api/compensation` is fail-closed (no anonymous revocation).

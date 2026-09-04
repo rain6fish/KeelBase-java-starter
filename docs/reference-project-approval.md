@@ -31,10 +31,42 @@ curl http://localhost:8084/keelbase/proxy-tools/export
 #    (PUT /api/v1/settings/ai_proxy_tools, audience = legacy-approval)
 
 # 3. Full loop (KeelBase + this module running):
-#    AI reads pending approval requests (R1) → pre-audits by policy → proposes a decision (R3 confirmation)
-#    → audit chain → revoke via DELETE /api/compensation/approval-decisions/{id} (idempotent + audited)
+node scripts/verify-approval-e2e.mjs --configure   # export + write config (then restart KeelBase)
+node scripts/verify-approval-e2e.mjs --verify      # confirmation gate → approve → write back → audit → revoke → compensation
 ```
+
+## The governed AI loop
+
+```
+You: "Pre-audit the pending approval requests."
+
+AI:
+  1. query_approval_requests (R1, auto) → find the ¥800 expense + ¥12000 purchase
+  2. pre-audit by policy → propose decide_approval_request (approve)
+  3. confirmation gate (R3) — not executed without your approval
+  4. approve → proxy writes the decision back to the Java approval flow with delegated identity (decidedBy = your user)
+  5. audit hash chain records it; revoke → compensation endpoint restores the request to pending (idempotent)
+```
+
+## Delegated identity write-back
+
+`decide_approval_request` takes `@DelegationUser DelegationPrincipal` and stores `decidedBy = principal.identity()` (your `oidcSub`, or `local:<id>` after stripping the prefix; defaults to `anonymous` when no delegation token is present). KeelBase's "identity-carrying governance" therefore reaches into the legacy Java system — the decision knows *who* (via the AI) approved it, and revoking the decision clears `decidedBy` back to `pending`. Verified by `ApprovalCompensationTest` (decide → assert `decidedBy` + status → revoke → idempotent → restored to `pending` → 401 fail-closed).
+
+## Same domain, two integration paths
+
+| | B-path OpenAPI proxy | This Java implementation |
+|---|---|---|
+| Declaration | `specs/external-approval.openapi.json` → `keelbase init --import-openapi-proxy` | `@KeelbaseTool` on real endpoints |
+| Tool set | identical 3 approval tools | identical 3 approval tools |
+| Write gate | R3 (same) | R3 (same) |
+| Revoke | revokePath → Java compensation | `KeelBaseCompensationSupport` (idempotent + audit) |
+
+The two are drop-in interchangeable from KeelBase's perspective — same AI tools, only the declaration surface differs (annotation on real Java vs. OpenAPI import).
 
 ## Health check
 
 `GET /keelbase/status` reports delegation/export/tools/health — same diagnostics as the other reference projects.
+
+## Configuration
+
+See [configuration](configuration.md) — `keelbase.delegation.*` (shared `DELEGATION_SECRET`, `audience: legacy-approval`) and `keelbase.tools.base-url` (server root `http://localhost:8084`). The compensation path `/api/compensation` is fail-closed (no anonymous revocation).
