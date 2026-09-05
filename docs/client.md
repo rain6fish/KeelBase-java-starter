@@ -108,6 +108,38 @@ Endpoint: `GET /api/v1/external/governance/policy` on the governance plane with 
 
 ---
 
+## 4. Side-effect status reverse query
+
+Java-side reconciliation: is a given AI-initiated business action (e.g. `followup/7`) recorded as a side effect, and has it been revoked? Service identity hits the main app's `GET /api/v1/external/effects/:resultType/:resultId`:
+
+```java
+// config: keelbase.client.base-url (KeelBase main app) + side-effect-api-key (= its GOVERNANCE_API_KEY)
+@Autowired KeelbaseClient client;
+
+SideEffectStatus s = client.querySideEffect("followup", 7);
+if (!s.found()) {
+    // no AI side effect for that action (not AI-created / gone) — treat as ordinary data
+} else if (s.revoked()) {
+    // revoked (local entity = target soft-deleted)
+} else if (s.revokeHint() != null) {
+    // B-path proxy_call: revocation goes through the Java compensation endpoint —
+    // confirm the revoked state on the Java side (honest boundary)
+}
+```
+
+Config (`keelbase.client.*`):
+
+```yaml
+keelbase:
+  client:
+    base-url: http://localhost:3000            # KeelBase main app (same base as delegation token)
+    side-effect-api-key: ${GOVERNANCE_API_KEY}  # x-api-key service identity the main app accepts
+```
+
+Semantics: **local entities** (event/todo/crm_task, etc.) — `revoked = targetSoftDeleted` is the truth; **B-path `proxy_call`** has no revoke column on the main-app effect row (revocation goes through the Java compensation endpoint) → `revokeHint` says "confirm on the Java side" rather than overclaiming. HTTP 404 → `SideEffectStatus.notFound()` (`found=false`); missing `side-effect-api-key` / ≥300 → throws `KeelbaseClientException`.
+
+---
+
 ## Related
 
 - [delegated identity](delegated-identity.md) — how receivers verify delegation JWTs (`DelegationAuthFilter`)

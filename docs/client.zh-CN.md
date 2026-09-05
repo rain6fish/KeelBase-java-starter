@@ -108,6 +108,37 @@ opt.ifPresent(p -> {
 
 ---
 
+## 4. 副作用状态反向查询
+
+Java 侧反向对账：某个由 AI 发起的业务动作（如 `followup/7`）的副作用是否存在、是否已撤销。服务身份调主仓 `GET /api/v1/external/effects/:resultType/:resultId`：
+
+```java
+// 配置：keelbase.client.base-url（KeelBase 主应用）+ side-effect-api-key（= 主应用 GOVERNANCE_API_KEY）
+@Autowired KeelbaseClient client;
+
+SideEffectStatus s = client.querySideEffect("followup", 7);
+if (!s.found()) {
+    // 该业务动作无 AI 副作用记录（非 AI 创建 / 已不存在），按普通数据继续
+} else if (s.revoked()) {
+    // 已撤销（本地实体 = 目标软删）
+} else if (s.revokeHint() != null) {
+    // B 路径 proxy_call：撤销经 Java 补偿端点，撤销态需在 Java 侧确认（诚实边界）
+}
+```
+
+配置（`keelbase.client.*`）：
+
+```yaml
+keelbase:
+  client:
+    base-url: http://localhost:3000          # KeelBase 主应用（调委托 token 同源）
+    side-effect-api-key: ${GOVERNANCE_API_KEY}  # x-api-key 服务身份，需为主应用接受的 key
+```
+
+语义：**本地实体**（event/todo/crm_task 等）`revoked = targetSoftDeleted` 是撤销真值；**B 路径 `proxy_call`** 主库 effect 无撤销列、撤销走 Java 补偿端点 → `revokeHint` 明示「撤销态需在 Java 侧确认」，不夸大。HTTP 404 → `SideEffectStatus.notFound()`（`found=false`）；未配 `side-effect-api-key` / ≥300 → 抛 `KeelbaseClientException`。
+
+---
+
 ## 相关
 
 - [委托身份](delegated-identity.zh-CN.md) — 接收方如何验签委托 JWT（`DelegationAuthFilter`）

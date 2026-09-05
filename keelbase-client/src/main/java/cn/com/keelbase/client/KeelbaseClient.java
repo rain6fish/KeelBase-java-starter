@@ -141,6 +141,76 @@ public class KeelbaseClient {
         return info;
     }
 
+    /**
+     * 服务身份查询 AI 副作用状态（对齐主仓 {@code GET /api/v1/external/effects/:resultType/:resultId}）。
+     *
+     * <p>Java 侧反向对账：某个由 AI 发起的业务动作（如 followup/7）的副作用是否存在、
+     * 是否已撤销（本地实体 = 目标软删）。认证用 {@code keelbase.client.side-effect-api-key}
+     * （x-api-key，= KeelBase 主应用 {@code GOVERNANCE_API_KEY}）。HTTP 404（无该副作用）返回
+     * {@link SideEffectStatus#notFound}，Java 侧可正常处理；其余 ≥300 抛 {@link KeelbaseClientException}。
+     */
+    public SideEffectStatus querySideEffect(String resultType, long resultId) {
+        String apiKey = properties.getSideEffectApiKey();
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new KeelbaseClientException("keelbase.client.side-effect-api-key 未配置："
+                    + "查询副作用状态需服务身份 x-api-key（= KeelBase 主应用 GOVERNANCE_API_KEY）");
+        }
+        if (!canObtain()) {
+            throw new KeelbaseClientException("keelbase.client.base-url 未配置，无法查询副作用状态");
+        }
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(trimTrailingSlash(properties.getBaseUrl())
+                            + "/api/v1/external/effects/" + resultType + "/" + resultId))
+                    .timeout(properties.getReadTimeout())
+                    .header("x-api-key", apiKey)
+                    .GET()
+                    .build();
+            HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 404) {
+                return SideEffectStatus.notFound(resultType, resultId);
+            }
+            if (response.statusCode() >= 300) {
+                throw new KeelbaseClientException("查询副作用状态 HTTP " + response.statusCode() + ": " + response.body());
+            }
+            return parseSideEffectStatus(response.body(), resultType, resultId);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new KeelbaseClientException("查询副作用状态被中断", e);
+        } catch (IOException e) {
+            throw new KeelbaseClientException("查询副作用状态失败: " + e.getMessage(), e);
+        }
+    }
+
+    private SideEffectStatus parseSideEffectStatus(String body, String resultType, long resultId)
+            throws IOException {
+        JsonNode root = mapper.readTree(body);
+        JsonNode data = root.path("data");
+        if (!data.isObject()) {
+            throw new KeelbaseClientException("查询副作用状态响应缺少 data: " + body);
+        }
+        JsonNode effect = data.path("effect");
+        JsonNode target = data.path("target");
+        return new SideEffectStatus(
+                effect.path("id").asLong(0),
+                textOrNull(effect.path("toolName")),
+                textOrNull(effect.path("resultType")) != null
+                        ? effect.path("resultType").asText() : resultType,
+                effect.path("resultId").asLong(resultId),
+                data.path("revoked").asBoolean(false),
+                target.path("targetExists").isMissingNode() || target.path("targetExists").isNull()
+                        ? null : target.path("targetExists").asBoolean(),
+                target.path("targetSoftDeleted").isMissingNode() || target.path("targetSoftDeleted").isNull()
+                        ? null : target.path("targetSoftDeleted").asBoolean(),
+                textOrNull(target.path("targetTitle")),
+                textOrNull(data.path("revokeHint")),
+                true);
+    }
+
+    private static String textOrNull(JsonNode node) {
+        return (node == null || node.isMissingNode() || node.isNull()) ? null : node.asText();
+    }
+
     private Jws<Claims> parse(String token, String expectedAudience) {
         if (delegationSecret == null || delegationSecret.isBlank()) {
             throw new KeelbaseClientException("keelbase.delegation.secret 未配置，无法本地验签委托 token");

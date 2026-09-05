@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -161,5 +162,103 @@ class KeelbaseClientTest {
     void verify_withoutSecret_throws() {
         KeelbaseClient c = new KeelbaseClient(new KeelbaseClientProperties(), null, null);
         assertThrows(KeelbaseClientException.class, () -> c.verify("any", "aud"));
+    }
+
+    @Test
+    void querySideEffect_parsesStatusAndHonestHint() throws Exception {
+        server.createContext("/api/v1/external/effects/proxy_call/7", exchange -> {
+            assertEquals("side-key", exchange.getRequestHeaders().getFirst("x-api-key"));
+            String json = "{\"code\":200,\"data\":{"
+                    + "\"effect\":{\"id\":9,\"toolName\":\"proxy_create_followup\",\"userId\":3,"
+                    + "\"conversationId\":null,\"resultType\":\"proxy_call\",\"resultId\":7,"
+                    + "\"createdAt\":\"2026-09-01T00:00:00Z\"},"
+                    + "\"target\":{\"targetExists\":false,\"targetSoftDeleted\":false,\"targetTitle\":null},"
+                    + "\"revoked\":false,"
+                    + "\"revokeHint\":\"B 路径外部副作用：撤销经 Java 补偿端点，撤销态需在 Java 侧确认\""
+                    + "},\"timestamp\":\"2026-09-01T00:00:00Z\"}";
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+        KeelbaseClientProperties props = new KeelbaseClientProperties();
+        props.setBaseUrl("http://localhost:" + server.getAddress().getPort());
+        props.setSideEffectApiKey("side-key");
+        SideEffectStatus s = new KeelbaseClient(props, SECRET, "x").querySideEffect("proxy_call", 7);
+        assertTrue(s.found());
+        assertEquals(9, s.effectId());
+        assertEquals("proxy_create_followup", s.toolName());
+        assertEquals("proxy_call", s.resultType());
+        assertFalse(s.revoked());
+        assertFalse(s.targetExists());
+        assertNotNull(s.revokeHint());
+        assertTrue(s.revokeHint().contains("Java"));
+    }
+
+    @Test
+    void querySideEffect_localEntityRevoked() throws Exception {
+        server.createContext("/api/v1/external/effects/crm_task/42", exchange -> {
+            String json = "{\"code\":200,\"data\":{"
+                    + "\"effect\":{\"id\":21,\"toolName\":\"create_followup_task\",\"resultType\":\"crm_task\",\"resultId\":42},"
+                    + "\"target\":{\"targetExists\":false,\"targetSoftDeleted\":true,\"targetTitle\":null},"
+                    + "\"revoked\":true"
+                    + "},\"timestamp\":\"2026-09-01T00:00:00Z\"}";
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+        KeelbaseClientProperties props = new KeelbaseClientProperties();
+        props.setBaseUrl("http://localhost:" + server.getAddress().getPort());
+        props.setSideEffectApiKey("side-key");
+        SideEffectStatus s = new KeelbaseClient(props, SECRET, "x").querySideEffect("crm_task", 42);
+        assertTrue(s.found());
+        assertTrue(s.revoked());
+        assertTrue(s.targetSoftDeleted());
+    }
+
+    @Test
+    void querySideEffect_404_returnsNotFound() throws Exception {
+        server.createContext("/api/v1/external/effects/followup/99", exchange -> {
+            String json = "{\"code\":404,\"message\":\"该业务动作无 AI 副作用记录\"}";
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(404, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+        KeelbaseClientProperties props = new KeelbaseClientProperties();
+        props.setBaseUrl("http://localhost:" + server.getAddress().getPort());
+        props.setSideEffectApiKey("side-key");
+        SideEffectStatus s = new KeelbaseClient(props, SECRET, "x").querySideEffect("followup", 99);
+        assertFalse(s.found());
+        assertEquals(0, s.effectId());
+    }
+
+    @Test
+    void querySideEffect_serverError_throws() throws Exception {
+        server.createContext("/api/v1/external/effects/followup/7", exchange -> {
+            String json = "{\"code\":500,\"message\":\"boom\"}";
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(500, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+        KeelbaseClientProperties props = new KeelbaseClientProperties();
+        props.setBaseUrl("http://localhost:" + server.getAddress().getPort());
+        props.setSideEffectApiKey("side-key");
+        assertThrows(KeelbaseClientException.class,
+                () -> new KeelbaseClient(props, SECRET, "x").querySideEffect("followup", 7));
+    }
+
+    @Test
+    void querySideEffect_missingApiKey_throws() {
+        KeelbaseClientProperties props = new KeelbaseClientProperties();
+        props.setBaseUrl("http://localhost:" + server.getAddress().getPort());
+        assertThrows(KeelbaseClientException.class,
+                () -> new KeelbaseClient(props, SECRET, "x").querySideEffect("followup", 7));
     }
 }

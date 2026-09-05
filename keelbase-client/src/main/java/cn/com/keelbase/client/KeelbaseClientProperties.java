@@ -15,6 +15,9 @@ import java.time.Duration;
  *   <li>{@code keelbase.client.audience}：目标系统 audience；缺省回退
  *       {@code keelbase.delegation.audience}。</li>
  *   <li>{@code keelbase.client.connect-timeout} / {@code read-timeout}：HTTP 超时。</li>
+ *   <li>{@code keelbase.client.side-effect-api-key}：查询副作用状态用的服务身份
+ *       （x-api-key，需为 KeelBase 主应用接受的 {@code GOVERNANCE_API_KEY}）；未配置时
+ *       {@link KeelbaseClient#querySideEffect} 抛清晰配置错误。</li>
  * </ul>
  */
 @ConfigurationProperties(prefix = "keelbase.client")
@@ -26,6 +29,9 @@ public class KeelbaseClientProperties {
     /** 目标系统 audience（缺省回退 keelbase.delegation.audience）。 */
     private String audience;
 
+    /** 查询副作用状态的服务身份（x-api-key，= KeelBase 主应用 GOVERNANCE_API_KEY）。 */
+    private String sideEffectApiKey;
+
     private Duration connectTimeout = Duration.ofSeconds(3);
 
     private Duration readTimeout = Duration.ofSeconds(10);
@@ -34,6 +40,8 @@ public class KeelbaseClientProperties {
     public void setBaseUrl(String baseUrl) { this.baseUrl = baseUrl; }
     public String getAudience() { return audience; }
     public void setAudience(String audience) { this.audience = audience; }
+    public String getSideEffectApiKey() { return sideEffectApiKey; }
+    public void setSideEffectApiKey(String sideEffectApiKey) { this.sideEffectApiKey = sideEffectApiKey; }
     public Duration getConnectTimeout() { return connectTimeout; }
     public void setConnectTimeout(Duration connectTimeout) { this.connectTimeout = connectTimeout; }
     public Duration getReadTimeout() { return readTimeout; }
