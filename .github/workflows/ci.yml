@@ -8,17 +8,20 @@ on:
 
 jobs:
   build:
-    name: Build & Test (JDK 17 + Maven)
+    name: Build & Test (Maven JDK ${{ matrix.java }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: ['17', '21']    # 17 = 运行时基线；21 = LTS 兼容验证（企业 Java 栈多用 21）
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: ${{ matrix.java }}
           cache: maven
 
       - name: Build & test (all modules)
