@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * + KeelBase 撤销 AI 副作用时调用的补偿端点。业务逻辑用内存 Map 演示——换成你的 Service/DB 即可。
  */
 @RestController
-@RequestMapping("/api/items")
+@RequestMapping("/api")
 public class {{Domain}}Controller extends KeelBaseCompensationSupport<Map<String, Object>> {
 
     private final Map<Long, Map<String, Object>> store = new ConcurrentHashMap<>();

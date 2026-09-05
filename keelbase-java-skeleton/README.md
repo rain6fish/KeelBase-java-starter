@@ -27,8 +27,15 @@ curl http://localhost:{{port}}/keelbase/status                 # 健康度
 curl http://localhost:{{port}}/keelbase/proxy-tools/export     # 导出契约
 ```
 
+## 合规契约测试（已生成）
+
+```bash
+mvn test        # 跑 {{Domain}}ContractTest：导出契约 / 受保护路径 401 / 委托 JWT 2xx 幂等
+```
+
+项目已含 `keelbase-test-support` 依赖 + `src/test/java/.../{{Domain}}ContractTest.java`（继承 `KeelbaseContractTest`）——`mvn test` 即守护接入合规；与 ci-template.yml 配合可在 CI 持续跑。
+
 ## 下一步
 
 - 替换内存 Store 为你的 Service/DB；在 `{{Domain}}Controller` 加更多 `@KeelbaseTool` 方法
-- 接入合规测试：加依赖 `keelbase-test-support`，写 `class {{Domain}}ContractTest extends KeelbaseContractTest {}`（`@SpringBootTest`）在 CI 里验证导出契约/受保护路径/委托验签
 - 生产上线核对：见 KeelBase-java-starter `docs/production-checklist.md`

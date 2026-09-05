@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning follows [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- **脚手架默认带契约测试** — `keelbase-java-skeleton` 生成的项目自动含 `{{Domain}}ContractTest`（继承 `keelbase-test-support` 的 `KeelbaseContractTest`）+ pom 加 test-support 依赖 + `application.yml` secret 本地默认样例——新项目从第一天 `mvn test` 即守护接入合规（导出契约 / 受保护路径 401 / 委托 JWT 2xx），与 ci-template.yml 闭环。生成项目实测契约测试 3/3 绿。
+
+### Fixed
+
+- **skeleton Controller 路径 bug** — 类 `@RequestMapping("/api/items")` + 方法 `/items`、`/compensation/items/{id}` 使真实端点为嵌套的 `/api/items/items`、`/api/items/compensation/…`，与 `revokePath` 声明 `/api/compensation/items/{id}` 不符（委托撤销 404）；类前缀改 `/api`（对齐 example 模式），真实端点为 `/api/items` + `/api/compensation/items/{id}`，契约测试 `protectedPathAcceptsDelegatedToken` 通过。
+
 ## [0.1.7] - 2026-09-03
 
 > 0.1.7 — Java 接入可观测与合规：actuator 健康指示器 / 治理台策略实时拉取 / CI 接入合规模板。
