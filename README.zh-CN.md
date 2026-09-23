@@ -132,6 +132,12 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
 - `baseUrl` 为**服务器根**，工具 `path` 为**完整路径**（如 `/api/followups`）——KeelBase ProxyTool 用 `baseUrl + path` 拼接。
 - 撤销：`proxy-revoker` 调补偿端点（带委托身份），须返回 2xx 且幂等。
 
+**这些形状定义出自哪里。** 委托令牌发布在
+[`rain6fish/keelbase-contract`](https://github.com/rain6fish/keelbase-contract)——见其
+`delegation-token-v1-vector.json` 与 `delegation-token-claims` schema；本 starter 对齐契约 **v1.0.x**。
+下面那份 `ai_proxy_tools` 配置形状**不在**该契约里——它是桥接自身的配置面，由本 starter 与运行时之间约定。
+若你打算靠契约把依赖的东西全部钉死，这一点值得知道：**它不覆盖这一半**。
+
 ## 构建与测试
 
 两套构建系统皆可（Maven 为 CI/发布主构建；Gradle 为平行开发/发布路径，依赖与 pom 一一对应）：

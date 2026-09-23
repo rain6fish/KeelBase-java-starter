@@ -133,6 +133,14 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
 - `baseUrl` is the **server root**; tool `path` is the **full path** (e.g. `/api/followups`). KeelBase's ProxyTool concatenates `baseUrl + path`.
 - Revocation: `proxy-revoker` calls the compensation endpoint (with delegated identity); it must return 2xx and be idempotent.
 
+**Where these shape definitions come from.** The delegation token is published in
+[`rain6fish/keelbase-contract`](https://github.com/rain6fish/keelbase-contract) — see its
+`delegation-token-v1-vector.json` and `delegation-token-claims` schema; this starter is aligned with
+contract **v1.0.x**. The `ai_proxy_tools` configuration shape below is **not** part of that contract —
+it is the bridge's own configuration surface, defined between this starter and the runtime. Worth
+knowing if you are relying on the contract to pin down everything you depend on: it does not cover
+this half.
+
 ## Build & test
 
 Either build system works (Maven is canonical for CI/release; Gradle is a parallel dev/publish path — dependencies mirror the poms):
