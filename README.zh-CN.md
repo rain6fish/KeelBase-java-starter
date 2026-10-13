@@ -8,6 +8,44 @@
   <img src="docs/keelbase-java-starter-position.svg" alt="KeelBase Java Starter 的位置——处于 KeelBase Trust Runtime 与你的 Java 业务系统之间" width="840">
 </p>
 
+<!-- BEGIN keelbase-family:zh sha256:71b3f61e591ebb6fe93043059b0e22041d60492f0e6bc804ecc44759bef4312f -->
+## 🧬 KeelBase 家族
+
+> KeelBase 是**一套协议、多个实现与多种宿主**——不是几个互相竞争的产品。契约是唯一真源，
+> 各 runtime 与各宿主消费它，**谁也不拥有它**。这里每个仓都是 **Apache-2.0**。
+
+```text
+  宿主适配   KeelBase-YuDao
+             └ 在成熟企业平台上补治理层（芋道）
+
+  runtime    KeelBase（TypeScript）  ·  KeelBase4J（Java / Spring）
+             └ 同一协议的两个载体——互为平行，不是翻译关系
+
+  桥接       KeelBase-java-starter
+             └ 把存量 Java/Spring 系统接成受治理的 AI 工具
+
+  契约       keelbase-contract
+             └ 线缆 schema + 一致性向量 + 两者共用的版本线
+```
+
+| 仓 | 角色 | 技术栈 | 状态 |
+|---|---|---|---|
+| [`KeelBase`](https://github.com/rain6fish/KeelBase) | 参考实现 · 产品文档 · 演示 | TypeScript · NestJS · Vue · Flutter · Taro | 活跃 |
+| [`KeelBase4J`](https://github.com/rain6fish/KeelBase4J) | 同一协议的 Java 载体 | Java 17 · Spring Boot | 活跃 |
+| [`KeelBase-java-starter`](https://github.com/rain6fish/KeelBase-java-starter) | 把存量 Java/Spring 系统接成受治理的 AI 工具 | Maven · Gradle | 0.1.x |
+| [`KeelBase-YuDao`](https://github.com/rain6fish/KeelBase-YuDao) | 宿主适配——芋道平台上的治理层 | Java · Vue 3 | 活跃 |
+| [`keelbase-contract`](https://github.com/rain6fish/keelbase-contract) | 协议本体——schema、向量、版本线 | JSON Schema | v1.x |
+
+**从哪里开始** —— 想看它跑起来：[`KeelBase`](https://github.com/rain6fish/KeelBase)（60 秒
+Docker）· 想让存量 Java 系统具备 AI 能力：
+[`KeelBase-java-starter`](https://github.com/rain6fish/KeelBase-java-starter) · 你已经在用芋道：
+[`KeelBase-YuDao`](https://github.com/rain6fish/KeelBase-YuDao) · 想实现这个协议：
+[`keelbase-contract`](https://github.com/rain6fish/keelbase-contract)。
+
+每个 runtime 对着哪一版契约应答，**只在主仓维护一处**——见
+[兼容矩阵](https://github.com/rain6fish/KeelBase/blob/main/README.zh-CN.md#-兼容矩阵)。此处不重复。
+<!-- END keelbase-family:zh -->
+
 ## 试用征集（0.1.7）
 
 > **0.1.7 已具备生产接入能力**：接入健康度自检、零样板工具导出、3 个参考项目（CRM / PM / Approval）、本地调试、Boot 2 / Java 8 适配路径。欢迎集成商试用反馈——反馈将决定 1.0 API 冻结。

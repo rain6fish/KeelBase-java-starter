@@ -8,6 +8,45 @@
   <img src="docs/keelbase-java-starter-position.svg" alt="KeelBase Java Starter — positioned between the KeelBase Trust Runtime and your Java business systems" width="840">
 </p>
 
+<!-- BEGIN keelbase-family:en sha256:2b814db6cf768ed2e451305808a7a612049519af49310cef56ce7a5bc97bad2c -->
+## 🧬 The KeelBase family
+
+> KeelBase is **one protocol with several implementations and hosts** — not a set of competing
+> products. The contract is the source of truth; runtimes and hosts consume it, and none of them
+> owns it. Every repository here is **Apache-2.0**.
+
+```text
+  host adapters   KeelBase-YuDao
+                  └ governance added to a mature enterprise platform (yudao)
+
+  runtimes        KeelBase (TypeScript)   ·   KeelBase4J (Java / Spring)
+                  └ two carriers of the same protocol — peers, not translations
+
+  bridge          KeelBase-java-starter
+                  └ wire an existing Java/Spring system in as governed AI tools
+
+  contract        keelbase-contract
+                  └ wire schemas + conformance vectors + the version line they share
+```
+
+| Repository | Role | Stack | Status |
+|---|---|---|---|
+| [`KeelBase`](https://github.com/rain6fish/KeelBase) | Reference implementation · product documentation · demo | TypeScript · NestJS · Vue · Flutter · Taro | active |
+| [`KeelBase4J`](https://github.com/rain6fish/KeelBase4J) | The Java carrier of the same protocol | Java 17 · Spring Boot | active |
+| [`KeelBase-java-starter`](https://github.com/rain6fish/KeelBase-java-starter) | Wire an existing Java/Spring system in as governed AI tools | Maven · Gradle | 0.1.x |
+| [`KeelBase-YuDao`](https://github.com/rain6fish/KeelBase-YuDao) | Host adapter — the governance layer on a yudao platform | Java · Vue 3 | active |
+| [`keelbase-contract`](https://github.com/rain6fish/keelbase-contract) | The protocol itself — schemas, vectors, the version line | JSON Schema | v1.x |
+
+**Where to start** — see it run: [`KeelBase`](https://github.com/rain6fish/KeelBase) (60-second
+Docker) · make an existing Java system AI-capable:
+[`KeelBase-java-starter`](https://github.com/rain6fish/KeelBase-java-starter) · you already run yudao:
+[`KeelBase-YuDao`](https://github.com/rain6fish/KeelBase-YuDao) · implement the protocol:
+[`keelbase-contract`](https://github.com/rain6fish/keelbase-contract).
+
+Which contract version each runtime answers for is maintained **once**, in the main repository — see
+[Compatibility](https://github.com/rain6fish/KeelBase#-compatibility). It is not duplicated here.
+<!-- END keelbase-family:en -->
+
 ## Try it — integrators welcome / 试用征集（0.1.7）
 
 > **0.1.7 is production-wiring ready**: access health self-check, zero-boilerplate tool export, three reference projects (CRM / PM / Approval), local debug script, and a Boot 2 / Java 8 path. We're inviting integrators to trial it and report back — every report shapes the 1.0 API freeze.

@@ -43,3 +43,27 @@ jobs:
 
       - name: Build & test (all modules)
         run: ./gradlew build --no-daemon
+
+  family-block:
+    name: The generated family section still matches its stamp
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # The "KeelBase family" section at the top of each README is generated in the main repository,
+      # and each copy carries a sha256 of its own body on its BEGIN line. That is what lets this check
+      # run here with no sibling checkout and no network — the only shape that works for a gate that
+      # has to live in every repository of the family separately. A copy that stops matching its stamp
+      # was hand-edited; edit docs/ecosystem.md in the main repository and sync instead.
+      #
+      # 每个 README 开头的「KeelBase 家族」段在主仓生成，每一份都在 BEGIN 行带着自身内容的 sha256。
+      # 正因如此，这道检查才能在这里、在不检出兄弟仓、不联网的前提下跑 —— 对一道必须分别住在家族每个仓里的
+      # 闸来说，这是唯一行得通的形状。副本一旦不再与戳相符，就是被手改过；改主仓的 docs/ecosystem.md 再同步。
+      - name: The family section in the READMEs must match its stamp
+        run: node scripts/check-family-block.mjs
