@@ -12,6 +12,10 @@ on:
   push:
     tags:
       - 'v*'
+  # Lets a failed publish be retried from `main` without moving a published tag. The pom on `main`
+  # carries the version to publish, so run it from the release commit's line.
+  # 允许从 `main` 重跑一次失败的发布，而不移动已公开的 tag。`main` 上的 pom 带着要发布的版本。
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -29,6 +33,30 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
+
+      # The runner image's Maven moved from 3.9.16 to 3.10.0, and on 3.10.0
+      # `central-publishing-maven-plugin:0.9.0` stops deleting `maven-metadata-central-staging.xml`
+      # from each artifact folder before bundling. Central then rejects the deployment with
+      # "Bundle has content that does NOT have a .pom file" — which is exactly what the 0.1.8
+      # publish hit. Pinned back to the version that deletes them; downloaded here rather than
+      # through a third-party action because this job holds the signing key and the Central token.
+      # The hash is Apache's own, from `apache-maven-3.9.16-bin.tar.gz.sha512`.
+      #
+      # runner 镜像的 Maven 从 3.9.16 升到了 3.10.0，而在这个版本上
+      # `central-publishing-maven-plugin:0.9.0` 不再于打包前删掉每个 artifact 目录里的
+      # `maven-metadata-central-staging.xml`。Central 于是以「Bundle has content that does NOT have
+      # a .pom file」拒绝部署 —— 0.1.8 的发布撞上的正是这件事。现钉回会删它们的那个版本；这里自行
+      # 下载而不用第三方 action，因为这一步握着签名私钥与 Central 凭据。哈希取自 Apache 自己对
+      # `apache-maven-3.9.16-bin.tar.gz.sha512` 的记载。
+      - name: Pin Maven back to the version that cleans the bundle
+        run: |
+          set -euo pipefail
+          url=https://archive.apache.org/dist/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz
+          curl -fsSLo /tmp/apache-maven.tar.gz "$url"
+          echo "831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6  /tmp/apache-maven.tar.gz" | sha512sum -c -
+          sudo tar -xzf /tmp/apache-maven.tar.gz -C /opt
+          echo "/opt/apache-maven-3.9.16/bin" >> "$GITHUB_PATH"
+          /opt/apache-maven-3.9.16/bin/mvn -v
 
       - name: Import GPG key
         run: |

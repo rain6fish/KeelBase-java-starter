@@ -1,5 +1,10 @@
 dependencies {
     api project(':keelbase-tools-annotation')
+    // KeelbaseStatusController reads KeelbaseAuditProperties from the client module; the Maven pom
+    // already declares it, and the Gradle build has to agree or this module does not compile.
+    // KeelbaseStatusController 读 client 模块的 KeelbaseAuditProperties；Maven pom 已声明该依赖，
+    // Gradle 构建必须与之一致，否则本模块编译不过。
+    api project(':keelbase-client')
     api 'org.slf4j:slf4j-api'
     api 'org.springframework:spring-webmvc'
     api 'com.fasterxml.jackson.core:jackson-databind'
