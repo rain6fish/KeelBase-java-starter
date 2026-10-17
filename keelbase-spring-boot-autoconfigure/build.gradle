@@ -7,5 +7,16 @@ dependencies {
     api 'org.springframework.boot:spring-boot-autoconfigure'
     api 'org.springframework.boot:spring-boot'
     compileOnly 'org.springframework.security:spring-security-core'   // Maven optional：classpath 有才装配
+    // Maven declares actuator as `provided`; Gradle needs the same compile classpath for the health indicator.
+    // Maven 把 actuator 声明为 `provided`；Gradle 的编译类路径必须一致，否则健康指示器编译不过。
+    compileOnly 'org.springframework.boot:spring-boot-actuator'
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
+
+    // Maven's `provided` scope is on the test classpath; Gradle's compileOnly is not. Mirror it here,
+    // or the tests that exercise the health indicator and the servlet pieces cannot compile or run.
+    // Maven 的 `provided` 在测试类路径上；Gradle 的 compileOnly 不在。这里补上，否则涉及健康指示器
+    // 与 servlet 的测试既编译不过也跑不起来。
+    testImplementation 'org.springframework.boot:spring-boot-actuator'
+    testImplementation 'org.springframework.security:spring-security-core'
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'
 }

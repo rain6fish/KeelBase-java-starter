@@ -1,0 +1,14 @@
+// Mirrors keelbase-test-support/pom.xml. The module was in the Maven reactor but not in the Gradle
+// build; the examples' contract tests depend on it, so the Gradle build has to see it too.
+// 与 keelbase-test-support/pom.xml 对应。该模块原先只在 Maven reactor 里、不在 Gradle 构建里；
+// 示例的契约测试依赖它，故 Gradle 构建也必须包含它。
+dependencies {
+    api project(':keelbase-delegation-filter')
+    api 'org.springframework.boot:spring-boot-starter-test'
+    api 'io.jsonwebtoken:jjwt-api'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson'
+    api 'com.fasterxml.jackson.core:jackson-databind'
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'
+}

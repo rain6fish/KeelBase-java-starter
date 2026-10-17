@@ -16,6 +16,9 @@ include 'keelbase-compensation'
 include 'keelbase-client'
 include 'keelbase-spring-boot-autoconfigure'
 include 'keelbase-spring-boot-starter'
+// The examples' contract tests extend KeelbaseContractTest from this module.
+// 示例的契约测试继承本模块的 KeelbaseContractTest。
+include 'keelbase-test-support'
 include 'keelbase-java-example'
 include 'keelbase-java-crm-example'
 include 'keelbase-java-pm-example'

@@ -5,4 +5,7 @@ plugins {
 dependencies {
     implementation project(':keelbase-spring-boot-starter')
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    // The contract test extends KeelbaseContractTest; the Maven pom declares this test-scoped.
+    // 契约测试继承 KeelbaseContractTest；Maven pom 以 test scope 声明了它。
+    testImplementation project(':keelbase-test-support')
 }
