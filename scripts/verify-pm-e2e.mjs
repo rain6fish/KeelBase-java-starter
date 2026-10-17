@@ -72,6 +72,12 @@ async function verify() {
   console.log(`[verify] 目标: KeelBase=${KEELBASE} Java-PM=${EXAMPLE}`);
   const token = await login(USER, PASS);
 
+  // Snapshot what exists before this run: a task left by an earlier verification must not be able
+  // to satisfy the assertion below.
+  // 先记下本次运行之前已有什么：上一次验证残留的任务不能让下面的断言蒙混过关。
+  const before = await (await fetch(`${EXAMPLE}/api/projects/1`)).json();
+  const beforeIds = new Set((before.tasks ?? []).map((t) => t.id));
+
   // 触发写对话，流式边读边批准（确定性 demo provider 按工具名匹配）
   const body = { message: 'create_pm_task 演示：为项目 projectId=1 创建任务 title=升级订单模块依赖', conversationId: null };
   const stream = await fetch(`${KEELBASE}/api/v1/ai/chat/stream`, {
@@ -116,15 +122,22 @@ async function verify() {
   if (!confirmed) throw new Error('未捕获 confirmation_request（写确认门控未触发？）');
   console.log('[verify] 确认门控 → 批准 → 流完成');
 
-  // 断言 Java PM 收到带委托身份的写任务（项目 1 下 createdBy != anonymous）
-  await new Promise((r) => setTimeout(r, 500));
-  const project = await (await fetch(`${EXAMPLE}/api/projects/1`)).json();
-  const created = (project.tasks ?? []).filter((t) => t.createdBy && t.createdBy !== 'anonymous');
-  if (created.length === 0) {
-    throw new Error('Java PM 未看到带委托身份的任务（LLM 未调用 create_pm_task，或委托身份没有写回）');
+  // 断言 Java PM 收到带委托身份的写任务（**本次新出现**的任务，createdBy != anonymous）
+  // Poll instead of a single fixed sleep: the write lands asynchronously.
+  // 轮询而不是固定睡一次：写入是异步落地的。
+  const deadline = Date.now() + 10_000;
+  let createdTask = null;
+  while (Date.now() < deadline && !createdTask) {
+    const project = await (await fetch(`${EXAMPLE}/api/projects/1`)).json();
+    createdTask = (project.tasks ?? []).find(
+      (t) => !beforeIds.has(t.id) && t.createdBy && t.createdBy !== 'anonymous',
+    ) ?? null;
+    if (!createdTask) await new Promise((r) => setTimeout(r, 250));
   }
-  const createdTask = created[0];
-  console.log(`[verify] Java PM 已收到委托身份写入: createdBy=${createdTask.createdBy}`);
+  if (!createdTask) {
+    throw new Error('Java PM 未看到本次新建且带委托身份的任务（LLM 未调用 create_pm_task，或委托身份没有写回）');
+  }
+  console.log(`[verify] Java PM 已收到委托身份写入: task=${createdTask.id} createdBy=${createdTask.createdBy}`);
 
   // 撤销副作用（admin）→ 调 Java 补偿端点 → 任务 cancelled
   const adminToken = await login(ADMIN, ADMIN_PASS);
@@ -133,8 +146,12 @@ async function verify() {
   });
   if (!effects.ok) throw new Error(`tool-effects 查询失败: ${effects.status}`);
   const effectsJson = await effects.json();
-  const proxyEffect = (effectsJson.data?.items ?? []).find((e) => e.resultType === 'proxy_call');
-  if (!proxyEffect) throw new Error('未找到 proxy_call 副作用记录');
+  // Scope the effect to the task this run created: a stale proxy_call would revoke a stale task.
+  // 把副作用限定到本次新建的任务：取一条陈旧的 proxy_call 会去撤销一个陈旧的任务。
+  const proxyEffect = (effectsJson.data?.items ?? []).find(
+    (e) => e.resultType === 'proxy_call' && String(e.resultId) === String(createdTask.id),
+  );
+  if (!proxyEffect) throw new Error(`未找到本次任务 ${createdTask.id} 的 proxy_call 副作用记录`);
   const revoke = await fetch(`${KEELBASE}/api/v1/ai/tool-effects/${proxyEffect.id}`, {
     method: 'DELETE', headers: { Authorization: `Bearer ${adminToken}` },
   });

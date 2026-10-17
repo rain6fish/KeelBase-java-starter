@@ -72,6 +72,15 @@ async function verify() {
   console.log(`[verify] 目标: KeelBase=${KEELBASE} Java-Approval=${EXAMPLE}`);
   const token = await login(USER, PASS);
 
+  // Request 1 must be pending before this run. A decision left by an earlier verification would
+  // otherwise satisfy the assertion below even if the LLM never invoked the tool this time.
+  // 请求 1 在本次运行前必须是 pending；否则上一次验证留下的决定会让下面的断言蒙混过关。
+  const before = await fetch(`${EXAMPLE}/api/approval-requests/1`);
+  if (!before.ok) throw new Error(`审批请求 1 读取失败: ${before.status}（审批样板是否已起？）`);
+  if ((await before.json()).status !== 'pending') {
+    throw new Error('审批请求 1 不是 pending（上一次验证残留），重启样板后再跑');
+  }
+
   // 触发写对话，流式边读边批准（确定性 demo provider 按工具名匹配）
   const body = { message: 'decide_approval_request 演示：审批请求 id=1 approve=true needsReview=false', conversationId: null };
   const stream = await fetch(`${KEELBASE}/api/v1/ai/chat/stream`, {
@@ -116,11 +125,20 @@ async function verify() {
   if (!confirmed) throw new Error('未捕获 confirmation_request（写确认门控未触发？）');
   console.log('[verify] 确认门控 → 批准 → 流完成');
 
-  // 断言 Java 审批收到委托身份决定（请求 1 decidedBy != anonymous + 状态变更）
-  await new Promise((r) => setTimeout(r, 500));
-  const req = await (await fetch(`${EXAMPLE}/api/approval-requests/1`)).json();
-  if (!req.decidedBy || req.decidedBy === 'anonymous') {
-    throw new Error('Java 审批未看到带委托身份的决定（LLM 未调用 decide_approval_request，或委托身份没有写回）');
+  // 断言 Java 审批收到委托身份决定（请求 1 由 pending 变为已决 + decidedBy != anonymous）
+  // Poll instead of a single fixed sleep: the decision lands asynchronously.
+  // 轮询而不是固定睡一次：决定是异步落地的。
+  const deadline = Date.now() + 10_000;
+  let req = null;
+  while (Date.now() < deadline) {
+    const res = await fetch(`${EXAMPLE}/api/approval-requests/1`);
+    if (!res.ok) throw new Error(`审批请求 1 读取失败: ${res.status}`);
+    req = await res.json();
+    if (req.decidedBy && req.decidedBy !== 'anonymous') break;
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  if (!req?.decidedBy || req.decidedBy === 'anonymous') {
+    throw new Error('Java 审批未看到本次新增的委托身份决定（LLM 未调用 decide_approval_request，或委托身份没有写回）');
   }
   console.log(`[verify] Java 审批已收到委托身份决定: decidedBy=${req.decidedBy} status=${req.status}`);
 

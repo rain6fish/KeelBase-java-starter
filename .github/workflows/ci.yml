@@ -11,6 +11,10 @@ jobs:
     name: Build & Test (Maven JDK ${{ matrix.java }})
     runs-on: ubuntu-latest
     strategy:
+      # Both legs report even when one fails; otherwise a red 17 leg cancels 21 and the matrix
+      # never answers whether 21 works.
+      # 两条腿各自报结果；否则 17 一红就把 21 取消掉，矩阵永远答不出 21 行不行。
+      fail-fast: false
       matrix:
         java: ['17', '21']    # 17 = 运行时基线；21 = LTS 兼容验证（企业 Java 栈多用 21）
     steps:
