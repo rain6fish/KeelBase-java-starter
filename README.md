@@ -51,10 +51,10 @@ Which contract version each runtime answers for is maintained **once**, in the m
 [Compatibility](https://github.com/rain6fish/KeelBase#-compatibility). It is not duplicated here.
 <!-- END keelbase-family:en -->
 
-## Try it — integrators welcome / 试用征集（0.1.7）
+## Try it — integrators welcome / 试用征集（0.1.8）
 
-> **0.1.7 is production-wiring ready**: access health self-check, zero-boilerplate tool export, three reference projects (CRM / PM / Approval), local debug script, and a Boot 2 / Java 8 path. We're inviting integrators to trial it and report back — every report shapes the 1.0 API freeze.
-> **0.1.7 已具备生产接入能力**：接入健康度自检、零样板工具导出、3 个参考项目（CRM / PM / Approval）、本地调试、Boot 2 / Java 8 适配。欢迎集成商试用反馈，反馈将决定 1.0 API 冻结。
+> **0.1.8 is production-wiring ready**: access health self-check, zero-boilerplate tool export, three reference projects (CRM / PM / Approval), local debug script, and a Boot 2 / Java 8 path. We're inviting integrators to trial it and report back — every report shapes the 1.0 API freeze.
+> **0.1.8 已具备生产接入能力**：接入健康度自检、零样板工具导出、3 个参考项目（CRM / PM / Approval）、本地调试、Boot 2 / Java 8 适配。欢迎集成商试用反馈，反馈将决定 1.0 API 冻结。
 
 - **5-minute trial**: clone → `mvn install` → run `keelbase-java-example` → `node scripts/verify-java-local.mjs`（接入自检）
 - **Reference projects**: [CRM](docs/reference-project-crm.md) · [PM](docs/reference-project-pm.md) · [Approval](docs/reference-project-approval.md) — real Java systems wired to governed AI tools
@@ -107,7 +107,7 @@ curl http://localhost:8081/keelbase/proxy-tools/export
 # 4. Write it into KeelBase (PUT /settings/ai_proxy_tools, value = the exported JSON as a string); hot reload takes effect — no restart
 ```
 
-Published to Maven Central — add `cn.com.keelbase:keelbase-spring-boot-starter:0.1.7` as a dependency (0.1.0–0.1.7 live). For the development snapshot (`0.1.7-SNAPSHOT`), install locally once with `mvn install`. Release automation (the `-Prelease` profile + Central Portal token flow) is configured — see [docs/release-central.md](docs/release-central.md). Full steps in [docs/quickstart.md](docs/quickstart.md).
+Published to Maven Central — add `cn.com.keelbase:keelbase-spring-boot-starter:0.1.8` as a dependency (0.1.0–0.1.8 live). For a local development snapshot, install once with `mvn install`. Release automation (the `-Prelease` profile + Central Portal token flow) is configured — see [docs/release-central.md](docs/release-central.md). Full steps in [docs/quickstart.md](docs/quickstart.md).
 
 ## Configuration (application.yml)
 

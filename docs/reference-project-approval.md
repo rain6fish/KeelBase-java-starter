@@ -27,11 +27,11 @@ mvn spring-boot:run          # http://localhost:8084
 # 1. Export the ai_proxy_tools config (3 approval tools)
 curl http://localhost:8084/keelbase/proxy-tools/export
 
-# 2. PUT the exported JSON into KeelBase Settings (value = the JSON string), restart KeelBase
+# 2. PUT the exported JSON into KeelBase Settings (value = the JSON string); it hot-reloads, no restart
 #    (PUT /api/v1/settings/ai_proxy_tools, audience = legacy-approval)
 
 # 3. Full loop (KeelBase + this module running):
-node scripts/verify-approval-e2e.mjs --configure   # export + write config (then restart KeelBase)
+node scripts/verify-approval-e2e.mjs --configure   # export + write config (hot-reloads, no restart)
 node scripts/verify-approval-e2e.mjs --verify      # confirmation gate → approve → write back → audit → revoke → compensation
 ```
 
@@ -57,11 +57,11 @@ AI:
 | | B-path OpenAPI proxy | This Java implementation |
 |---|---|---|
 | Declaration | `specs/external-approval.openapi.json` → `keelbase init --import-openapi-proxy` | `@KeelbaseTool` on real endpoints |
-| Tool set | identical 3 approval tools | identical 3 approval tools |
+| Tool set | 3 tools named from the OpenAPI `operationId` (`list_approval_requests`, …) | 3 tools declaring `query_approval_requests`, … |
 | Write gate | R3 (same) | R3 (same) |
 | Revoke | revokePath → Java compensation | `KeelBaseCompensationSupport` (idempotent + audit) |
 
-The two are drop-in interchangeable from KeelBase's perspective — same AI tools, only the declaration surface differs (annotation on real Java vs. OpenAPI import).
+Both paths serve the same endpoints at the same risk levels, but they are **not name-identical**: the B path derives tool names from the OpenAPI `operationId` (`list_approval_requests`), while the Java controller declares `query_approval_requests`. Swapping one for the other changes the tool surface the model sees, even though the capabilities match.
 
 ## Health check
 

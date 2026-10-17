@@ -50,10 +50,10 @@ Docker）· 想让存量 Java 系统具备 AI 能力：
 [兼容矩阵](https://github.com/rain6fish/KeelBase/blob/main/README.zh-CN.md#-兼容矩阵)。此处不重复。
 <!-- END keelbase-family:zh -->
 
-## 试用征集（0.1.7）
+## 试用征集（0.1.8）
 
-> **0.1.7 已具备生产接入能力**：接入健康度自检、零样板工具导出、3 个参考项目（CRM / PM / Approval）、本地调试、Boot 2 / Java 8 适配路径。欢迎集成商试用反馈——反馈将决定 1.0 API 冻结。
-> **0.1.7 is production-wiring ready** — trial it and open a GitHub Issue with what blocked you or what's missing.
+> **0.1.8 已具备生产接入能力**：接入健康度自检、零样板工具导出、3 个参考项目（CRM / PM / Approval）、本地调试、Boot 2 / Java 8 适配路径。欢迎集成商试用反馈——反馈将决定 1.0 API 冻结。
+> **0.1.8 is production-wiring ready** — trial it and open a GitHub Issue with what blocked you or what's missing.
 
 - **5 分钟试用**：clone → `mvn install` → 起 `keelbase-java-example` → `node scripts/verify-java-local.mjs`（接入自检）
 - **参考项目**：[CRM](docs/reference-project-crm.zh-CN.md) · [PM](docs/reference-project-pm.md) · [Approval](docs/reference-project-approval.md)
@@ -105,7 +105,7 @@ curl http://localhost:8081/keelbase/proxy-tools/export
 # 4. 写入 KeelBase（PUT /settings/ai_proxy_tools，value 为导出 JSON 的字符串）——热更新生效，免重启
 ```
 
-已发布到 Maven Central——直接加依赖 `cn.com.keelbase:keelbase-spring-boot-starter:0.1.7`（0.1.0–0.1.7 均已上线）。开发快照版（`0.1.7-SNAPSHOT`）需 `mvn install` 本地安装一次。发布自动化（`-Prelease` profile + Central Portal token 流程）已配置——见 [docs/release-central.md](docs/release-central.md)。完整步骤见 [docs/quickstart.zh-CN.md](docs/quickstart.zh-CN.md)。
+已发布到 Maven Central——直接加依赖 `cn.com.keelbase:keelbase-spring-boot-starter:0.1.8`（0.1.0–0.1.8 均已上线）。本地开发快照需 `mvn install` 安装一次。发布自动化（`-Prelease` profile + Central Portal token 流程）已配置——见 [docs/release-central.md](docs/release-central.md)。完整步骤见 [docs/quickstart.zh-CN.md](docs/quickstart.zh-CN.md)。
 
 ## 配置（application.yml）
 

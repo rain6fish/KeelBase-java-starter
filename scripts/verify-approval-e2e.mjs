@@ -7,22 +7,28 @@
  * 验证「传统 Java 审批流接入 KeelBase 作为受治理 AI 工具」完整闭环（域对齐
  * specs/external-approval.openapi.json）：
  *   导出（@KeelbaseTool → ai_proxy_tools：query_approval_requests/get_approval_request/decide_approval_request）
- *   → 写配置 → 重启 KeelBase 生效 → AI 对话触发 decide_approval_request 写确认门控
+ *   → 写配置（热更新，无需重启）→ AI 对话触发 decide_approval_request 写确认门控
  *   → **流式边读边批准** → proxy 转发到 Java 审批（委托身份写回 decidedBy）
  *   → 审计 → 撤销副作用 → 补偿端点幂等（状态恢复 pending）。
  *
  * 前置：
- *   1. KeelBase 后端已起（默认 http://localhost:3000），且 ai_proxy_tools 已配置并重启
+ *   1. KeelBase 后端已起（默认 http://localhost:3000），且 ai_proxy_tools 已配置（写入即热更新）
  *   2. Java 审批样板已起（默认 http://localhost:8084，cd keelbase-java-approval-example && mvn spring-boot:run）
  *
  * 用法：
- *   node verify-approval-e2e.mjs --configure   # 导出并写入 ai_proxy_tools（提示重启）
+ *   node verify-approval-e2e.mjs --configure   # 导出并写入 ai_proxy_tools（写入即热更新）
  *   node verify-approval-e2e.mjs --verify      # 跑完整闭环（默认确定性 demo provider）
  */
 import process from 'node:process';
 
 const KEELBASE = process.env.KEELBASE_URL ?? 'http://localhost:3000';
 const EXAMPLE = process.env.EXAMPLE_URL ?? 'http://localhost:8084';
+// The seed accounts the main repository creates on first start; override for another install.
+// 主仓首次启动创建的演示账号；其它环境用环境变量覆盖。
+const USER = process.env.KEELBASE_USER ?? 'alex';
+const PASS = process.env.KEELBASE_PASS ?? 'Alex@2026$Demo';
+const ADMIN = process.env.KEELBASE_ADMIN ?? 'admin';
+const ADMIN_PASS = process.env.KEELBASE_ADMIN_PASS ?? 'Admin@2026$KeelBase';
 const args = process.argv.slice(2);
 
 async function main() {
@@ -53,18 +59,18 @@ async function configure() {
   if (missing.length > 0) throw new Error(`导出缺少预期工具: ${missing.join(', ')}（实际: ${names.join(', ')}）`);
   console.log(`[configure] Approval 导出 OK: ${names.join(', ')}`);
 
-  const token = await login('admin', 'Admin@1234');
+  const token = await login(ADMIN, ADMIN_PASS);
   const put = await fetch(`${KEELBASE}/api/v1/settings/ai_proxy_tools`, {
     method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ value: JSON.stringify(cfg), type: 'string' }),
   });
   if (!put.ok) throw new Error(`写入 ai_proxy_tools 失败: ${put.status}`);
-  console.log('[configure] ai_proxy_tools 已写入。请重启 KeelBase 使生效，然后 --verify。');
+  console.log('[configure] ai_proxy_tools 已写入（热更新，无需重启），然后 --verify。');
 }
 
 async function verify() {
   console.log(`[verify] 目标: KeelBase=${KEELBASE} Java-Approval=${EXAMPLE}`);
-  const token = await login('alex', '123456');
+  const token = await login(USER, PASS);
 
   // 触发写对话，流式边读边批准（确定性 demo provider 按工具名匹配）
   const body = { message: 'decide_approval_request 演示：审批请求 id=1 approve=true needsReview=false', conversationId: null };
@@ -113,14 +119,13 @@ async function verify() {
   // 断言 Java 审批收到委托身份决定（请求 1 decidedBy != anonymous + 状态变更）
   await new Promise((r) => setTimeout(r, 500));
   const req = await (await fetch(`${EXAMPLE}/api/approval-requests/1`)).json();
-  if (req.decidedBy && req.decidedBy !== 'anonymous') {
-    console.log(`[verify] Java 审批已收到委托身份决定: decidedBy=${req.decidedBy} status=${req.status}`);
-  } else {
-    console.warn('[verify] 提示：Java 审批未看到带委托身份的决定（检查 LLM 是否调用了 decide_approval_request）');
+  if (!req.decidedBy || req.decidedBy === 'anonymous') {
+    throw new Error('Java 审批未看到带委托身份的决定（LLM 未调用 decide_approval_request，或委托身份没有写回）');
   }
+  console.log(`[verify] Java 审批已收到委托身份决定: decidedBy=${req.decidedBy} status=${req.status}`);
 
   // 撤销副作用（admin）→ 调 Java 补偿端点 → 状态恢复 pending
-  const adminToken = await login('admin', 'Admin@1234');
+  const adminToken = await login(ADMIN, ADMIN_PASS);
   const effects = await fetch(`${KEELBASE}/api/v1/ai/tool-effects`, {
     headers: { Authorization: `Bearer ${adminToken}` },
   });
@@ -133,6 +138,14 @@ async function verify() {
   });
   if (!revoke.ok) throw new Error(`撤销失败: ${revoke.status}`);
   console.log(`[verify] 撤销结果: ${JSON.stringify((await revoke.json()).data ?? {})}`);
+
+  // The compensation endpoint must have actually restored the Java row, not merely answered 200.
+  // 补偿端点必须真的恢复了 Java 那一行，而不只是回了 200。
+  const restored = await (await fetch(`${EXAMPLE}/api/approval-requests/1`)).json();
+  if (restored.status !== 'pending') {
+    throw new Error(`撤销后审批请求未恢复 pending（实际: ${restored.status}）`);
+  }
+  console.log('[verify] 补偿生效: 审批请求 1 status=pending');
 
   console.log('[verify] Approval 端到端闭环通过：导出 → 确认门控 → 流式批准 → 委托身份写回 → 审计 → 撤销补偿');
 }

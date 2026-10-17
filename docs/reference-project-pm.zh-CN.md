@@ -19,7 +19,7 @@ cd keelbase-java-pm-example
 mvn spring-boot:run          # http://localhost:8083
 ```
 
-种子数据：三个项目（一个 `active/high`——如电商重构含逾期里程碑，足够 AI 延期风险演示）+ 任务。
+种子数据：三个项目（一个 `active/high`——如电商重构，其状态与风险级足够 AI 延期风险演示；样例模型不带截止日期或里程碑）+ 任务。
 
 ## 接入 KeelBase
 
@@ -27,11 +27,11 @@ mvn spring-boot:run          # http://localhost:8083
 # 1. 导出 ai_proxy_tools 配置（3 个 PM 工具）
 curl http://localhost:8083/keelbase/proxy-tools/export
 
-# 2. 把导出的 JSON 写入 KeelBase Settings（value = JSON 字符串），重启 KeelBase
+# 2. 把导出的 JSON 写入 KeelBase Settings（value = JSON 字符串），写入即热更新，无需重启
 #    (PUT /api/v1/settings/ai_proxy_tools, audience = legacy-pm)
 
 # 3. 完整闭环（KeelBase + 本模块运行）：
-node scripts/verify-pm-e2e.mjs --configure   # 导出 + 写配置（然后重启 KeelBase）
+node scripts/verify-pm-e2e.mjs --configure   # 导出 + 写配置（写入即热更新）
 node scripts/verify-pm-e2e.mjs --verify      # 确认门控 → 批准 → 委托身份写回 → 审计 → 撤销补偿
 ```
 
@@ -42,7 +42,7 @@ node scripts/verify-pm-e2e.mjs --verify      # 确认门控 → 批准 → 委�
 
 AI：
   1. query_projects（R1 自动）→ 找到 active/high 的「电商平台重构」
-  2. get_project（R1 自动）→ 读取任务/里程碑
+  2. get_project（R1 自动）→ 读取任务
   3. 延期风险分析 → 提议 create_pm_task
   4. 确认门控（R3）——未经你批准不执行
   5. 批准 → proxy 以委托身份写回 Java PM（createdBy = 你的用户）
@@ -58,11 +58,11 @@ AI：
 | | B 路径 OpenAPI 代理 | 本 Java 实现 |
 |---|---|---|
 | 声明方式 | `specs/external-pm.openapi.json` → `keelbase init --import-openapi-proxy` | 真实端点 `@KeelbaseTool` |
-| 工具集 | 相同 3 个 PM 工具 | 相同 3 个 PM 工具 |
+| 工具集 | 3 个工具，名字取自 OpenAPI `operationId`（`list_projects` 等） | 3 个工具，声明 `query_projects` 等 |
 | 写门控 | R3（相同） | R3（相同） |
 | 撤销 | revokePath → Java 补偿 | `KeelBaseCompensationSupport`（幂等 + 审计） |
 
-从 KeelBase 视角两者可互换——AI 工具相同，仅声明面不同（真实 Java 注解 vs OpenAPI 导入）。
+两条路服务同一批端点、同一风险级，但**名字并不相同**：B 路径的工具名取自 OpenAPI 的 `operationId`（`list_projects`），Java 控制器声明的是 `query_projects`。替换其中一条会改变模型看到的工具面，尽管能力相同。
 
 ## 健康检查
 

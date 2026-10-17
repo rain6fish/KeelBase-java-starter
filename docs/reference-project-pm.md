@@ -19,7 +19,7 @@ cd keelbase-java-pm-example
 mvn spring-boot:run          # http://localhost:8083
 ```
 
-Seed data: three projects (one `active/high` — e.g. the e-commerce refactor with overdue milestones — enough for the AI deadline-risk demo) + tasks.
+Seed data: three projects (one `active/high` — e.g. the e-commerce refactor, whose status and risk level are enough for the AI deadline-risk demo; the sample model carries no due dates or milestones) + tasks.
 
 ## Wire into KeelBase
 
@@ -27,7 +27,7 @@ Seed data: three projects (one `active/high` — e.g. the e-commerce refactor wi
 # 1. Export the ai_proxy_tools config (3 PM tools)
 curl http://localhost:8083/keelbase/proxy-tools/export
 
-# 2. PUT the exported JSON into KeelBase Settings (value = the JSON string), restart KeelBase
+# 2. PUT the exported JSON into KeelBase Settings (value = the JSON string); it hot-reloads, no restart
 #    (PUT /api/v1/settings/ai_proxy_tools, audience = legacy-pm)
 
 # 3. Full loop (KeelBase + this module running):
@@ -42,7 +42,7 @@ You: "Which projects are at risk of delay?"
 
 AI:
   1. query_projects (R1, auto) → find the active/high project 电商平台重构
-  2. get_project (R1, auto) → read its tasks/milestones
+  2. get_project (R1, auto) → read its tasks
   3. deadline-risk analysis → propose create_pm_task
   4. confirmation gate (R3) — not executed without your approval
   5. approve → proxy writes back to the Java PM with delegated identity (createdBy = your user)
@@ -58,11 +58,11 @@ AI:
 | | B-path OpenAPI proxy | This Java implementation |
 |---|---|---|
 | Declaration | `specs/external-pm.openapi.json` → `keelbase init --import-openapi-proxy` | `@KeelbaseTool` on real endpoints |
-| Tool set | identical 3 PM tools | identical 3 PM tools |
+| Tool set | 3 tools named from the OpenAPI `operationId` (`list_projects`, …) | 3 tools declaring `query_projects`, … |
 | Write gate | R3 (same) | R3 (same) |
 | Revoke | revokePath → Java compensation | `KeelBaseCompensationSupport` (idempotent + audit) |
 
-The two are drop-in interchangeable from KeelBase's perspective — same AI tools, only the declaration surface differs (annotation on real Java vs. OpenAPI import).
+Both paths serve the same endpoints at the same risk levels, but they are **not name-identical**: the B path derives tool names from the OpenAPI `operationId` (`list_projects`), while the Java controller declares `query_projects`. Swapping one for the other changes the tool surface the model sees, even though the capabilities match.
 
 ## Health check
 

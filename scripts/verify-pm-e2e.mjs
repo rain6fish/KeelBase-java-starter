@@ -7,22 +7,28 @@
  * 验证「传统 Java PM 接入 KeelBase 作为受治理 AI 工具」完整闭环（域对齐
  * specs/external-pm.openapi.json）：
  *   导出（@KeelbaseTool → ai_proxy_tools：query_projects/get_project/create_pm_task）
- *   → 写配置 → 重启 KeelBase 生效 → AI 对话触发 create_pm_task 写确认门控
+ *   → 写配置（热更新，无需重启）→ AI 对话触发 create_pm_task 写确认门控
  *   → **流式边读边批准** → proxy 转发到 Java PM（委托身份写回 createdBy）
  *   → 审计 → 撤销副作用 → 补偿端点幂等（任务 cancelled）。
  *
  * 前置：
- *   1. KeelBase 后端已起（默认 http://localhost:3000），且 ai_proxy_tools 已配置并重启
+ *   1. KeelBase 后端已起（默认 http://localhost:3000），且 ai_proxy_tools 已配置（写入即热更新）
  *   2. Java PM 样板已起（默认 http://localhost:8083，cd keelbase-java-pm-example && mvn spring-boot:run）
  *
  * 用法：
- *   node verify-pm-e2e.mjs --configure      # 导出并写入 ai_proxy_tools（提示重启）
+ *   node verify-pm-e2e.mjs --configure      # 导出并写入 ai_proxy_tools（写入即热更新）
  *   node verify-pm-e2e.mjs --verify         # 跑完整闭环（默认确定性 demo provider）
  */
 import process from 'node:process';
 
 const KEELBASE = process.env.KEELBASE_URL ?? 'http://localhost:3000';
 const EXAMPLE = process.env.EXAMPLE_URL ?? 'http://localhost:8083';
+// The seed accounts the main repository creates on first start; override for another install.
+// 主仓首次启动创建的演示账号；其它环境用环境变量覆盖。
+const USER = process.env.KEELBASE_USER ?? 'alex';
+const PASS = process.env.KEELBASE_PASS ?? 'Alex@2026$Demo';
+const ADMIN = process.env.KEELBASE_ADMIN ?? 'admin';
+const ADMIN_PASS = process.env.KEELBASE_ADMIN_PASS ?? 'Admin@2026$KeelBase';
 const args = process.argv.slice(2);
 
 async function main() {
@@ -53,18 +59,18 @@ async function configure() {
   if (missing.length > 0) throw new Error(`导出缺少预期工具: ${missing.join(', ')}（实际: ${names.join(', ')}）`);
   console.log(`[configure] PM 导出 OK: ${names.join(', ')}`);
 
-  const token = await login('admin', 'Admin@1234');
+  const token = await login(ADMIN, ADMIN_PASS);
   const put = await fetch(`${KEELBASE}/api/v1/settings/ai_proxy_tools`, {
     method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ value: JSON.stringify(cfg), type: 'string' }),
   });
   if (!put.ok) throw new Error(`写入 ai_proxy_tools 失败: ${put.status}`);
-  console.log('[configure] ai_proxy_tools 已写入。请重启 KeelBase 使生效，然后 --verify。');
+  console.log('[configure] ai_proxy_tools 已写入（热更新，无需重启），然后 --verify。');
 }
 
 async function verify() {
   console.log(`[verify] 目标: KeelBase=${KEELBASE} Java-PM=${EXAMPLE}`);
-  const token = await login('alex', '123456');
+  const token = await login(USER, PASS);
 
   // 触发写对话，流式边读边批准（确定性 demo provider 按工具名匹配）
   const body = { message: 'create_pm_task 演示：为项目 projectId=1 创建任务 title=升级订单模块依赖', conversationId: null };
@@ -115,13 +121,13 @@ async function verify() {
   const project = await (await fetch(`${EXAMPLE}/api/projects/1`)).json();
   const created = (project.tasks ?? []).filter((t) => t.createdBy && t.createdBy !== 'anonymous');
   if (created.length === 0) {
-    console.warn('[verify] 提示：Java PM 未看到带委托身份的任务（检查 LLM 是否调用了代理工具 create_pm_task）');
-  } else {
-    console.log(`[verify] Java PM 已收到委托身份写入: createdBy=${created[0].createdBy}`);
+    throw new Error('Java PM 未看到带委托身份的任务（LLM 未调用 create_pm_task，或委托身份没有写回）');
   }
+  const createdTask = created[0];
+  console.log(`[verify] Java PM 已收到委托身份写入: createdBy=${createdTask.createdBy}`);
 
   // 撤销副作用（admin）→ 调 Java 补偿端点 → 任务 cancelled
-  const adminToken = await login('admin', 'Admin@1234');
+  const adminToken = await login(ADMIN, ADMIN_PASS);
   const effects = await fetch(`${KEELBASE}/api/v1/ai/tool-effects`, {
     headers: { Authorization: `Bearer ${adminToken}` },
   });
@@ -134,6 +140,15 @@ async function verify() {
   });
   if (!revoke.ok) throw new Error(`撤销失败: ${revoke.status}`);
   console.log(`[verify] 撤销结果: ${JSON.stringify((await revoke.json()).data ?? {})}`);
+
+  // The compensation endpoint must have actually changed the Java row, not merely answered 200.
+  // 补偿端点必须真的改了 Java 那一行，而不只是回了 200。
+  const after = await (await fetch(`${EXAMPLE}/api/projects/1`)).json();
+  const compensated = (after.tasks ?? []).find((t) => t.id === createdTask.id);
+  if (!compensated || compensated.status !== 'cancelled') {
+    throw new Error(`撤销后任务未变为 cancelled（实际: ${compensated ? compensated.status : '缺失'}）`);
+  }
+  console.log(`[verify] 补偿生效: task ${createdTask.id} status=cancelled`);
 
   console.log('[verify] PM 端到端闭环通过：导出 → 确认门控 → 流式批准 → 委托身份写回 → 审计 → 撤销补偿');
 }

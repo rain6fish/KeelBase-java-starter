@@ -27,11 +27,11 @@ mvn spring-boot:run          # http://localhost:8084
 # 1. 导出 ai_proxy_tools 配置（3 个审批工具）
 curl http://localhost:8084/keelbase/proxy-tools/export
 
-# 2. 把导出的 JSON 写入 KeelBase Settings（value = JSON 字符串），重启 KeelBase
+# 2. 把导出的 JSON 写入 KeelBase Settings（value = JSON 字符串），写入即热更新，无需重启
 #    (PUT /api/v1/settings/ai_proxy_tools, audience = legacy-approval)
 
 # 3. 完整闭环（KeelBase + 本模块运行）：
-node scripts/verify-approval-e2e.mjs --configure   # 导出 + 写配置（然后重启 KeelBase）
+node scripts/verify-approval-e2e.mjs --configure   # 导出 + 写配置（写入即热更新）
 node scripts/verify-approval-e2e.mjs --verify      # 确认门控 → 批准 → 委托身份写回 → 审计 → 撤销补偿
 ```
 
@@ -57,11 +57,11 @@ AI：
 | | B 路径 OpenAPI 代理 | 本 Java 实现 |
 |---|---|---|
 | 声明方式 | `specs/external-approval.openapi.json` → `keelbase init --import-openapi-proxy` | 真实端点 `@KeelbaseTool` |
-| 工具集 | 相同 3 个审批工具 | 相同 3 个审批工具 |
+| 工具集 | 3 个工具，名字取自 OpenAPI `operationId`（`list_approval_requests` 等） | 3 个工具，声明 `query_approval_requests` 等 |
 | 写门控 | R3（相同） | R3（相同） |
 | 撤销 | revokePath → Java 补偿 | `KeelBaseCompensationSupport`（幂等 + 审计） |
 
-从 KeelBase 视角两者可互换——AI 工具相同，仅声明面不同（真实 Java 注解 vs OpenAPI 导入）。
+两条路服务同一批端点、同一风险级，但**名字并不相同**：B 路径的工具名取自 OpenAPI 的 `operationId`（`list_approval_requests`），Java 控制器声明的是 `query_approval_requests`。替换其中一条会改变模型看到的工具面，尽管能力相同。
 
 ## 健康检查
 
