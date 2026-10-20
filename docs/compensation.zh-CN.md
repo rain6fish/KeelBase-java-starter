@@ -64,10 +64,10 @@ keelbase:
   compensation:
     store: jdbc
     # jdbc:
-    #   auto-ddl: false   # 由迁移管理 schema 时
+    #   auto-ddl: true    # 显式开启；schema 缺省归迁移
 ```
 
-`auto-ddl` 缺省 `true`：启动时缺表则建表（H2/PostgreSQL/MySQL/MariaDB 支持 `CREATE TABLE IF NOT EXISTS`）；由迁移管理 schema 时设为 `false`。无论哪种，启动都会探测该表，因此 `store=jdbc` 但无 `DataSource`、或缺表时，**启动失败并点名配置键**——不会静默回退到内存。
+`auto-ddl` 缺省 `false`：schema 归迁移管理，本库不建表也不改表，请用下面的 DDL 自行建表。需要 starter 在启动时缺表则建表时，才设 `keelbase.compensation.jdbc.auto-ddl=true`（H2/PostgreSQL/MySQL/MariaDB 支持 `CREATE TABLE IF NOT EXISTS`）。无论哪种，启动都会探测该表，因此 `store=jdbc` 但无 `DataSource`、或缺表时，**启动失败、点名配置键并打印这段 DDL**——不会静默回退到内存。
 
 ```sql
 CREATE TABLE IF NOT EXISTS keelbase_revocation_ledger (

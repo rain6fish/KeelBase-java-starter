@@ -64,10 +64,10 @@ keelbase:
   compensation:
     store: jdbc
     # jdbc:
-    #   auto-ddl: false   # when migrations own the schema
+    #   auto-ddl: true    # opt in; migrations own the schema by default
 ```
 
-With the default `auto-ddl: true` the table is created at startup when missing (H2/PostgreSQL/MySQL/MariaDB accept `CREATE TABLE IF NOT EXISTS`); set it to `false` when migrations own the schema. Either way the table is probed at startup, so `store=jdbc` without a `DataSource`, or with a missing table, **fails startup and names the key** — there is no silent fallback to memory.
+With the default `auto-ddl: false` the schema belongs to migrations: the library never creates or alters it, and you create the table from the DDL below. Set `keelbase.compensation.jdbc.auto-ddl=true` to have the starter create it at startup when missing (H2/PostgreSQL/MySQL/MariaDB accept `CREATE TABLE IF NOT EXISTS`). Either way the table is probed at startup, so `store=jdbc` without a `DataSource`, or with a missing table, **fails startup, names the key and prints this DDL** — there is no silent fallback to memory.
 
 ```sql
 CREATE TABLE IF NOT EXISTS keelbase_revocation_ledger (

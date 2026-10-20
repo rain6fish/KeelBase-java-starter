@@ -39,8 +39,13 @@ public class CompensationProperties {
     /** JDBC ledger options ({@code keelbase.compensation.jdbc.*}). / JDBC 账本选项。 */
     public static class Jdbc {
 
-        /** Create the ledger table at startup when missing (default true). / 启动时缺表则建表（缺省 true）。 */
-        private boolean autoDdl = true;
+        /**
+         * Create the ledger table at startup when missing (default {@code false}; migrations own the
+         * schema). A missing table then fails startup with the DDL to run.
+         *
+         * <p>启动时缺表则建表（缺省 {@code false}；schema 归迁移）。缺表时启动失败并给出要执行的 DDL。
+         */
+        private boolean autoDdl = false;
 
         public boolean isAutoDdl() { return autoDdl; }
         public void setAutoDdl(boolean autoDdl) { this.autoDdl = autoDdl; }

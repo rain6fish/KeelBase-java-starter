@@ -144,9 +144,24 @@ class KeelbaseAutoConfigurationTest {
     }
 
     @Test
-    void jdbcStoreUsesTheHostDataSource() {
+    void jdbcStoreWithoutTheTableFailsStartupAndNamesTheDdl() {
         webRunner()
                 .withPropertyValues("keelbase.compensation.store=jdbc")
+                .withBean(DataSource.class, KeelbaseAutoConfigurationTest::h2DataSource)
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure())
+                            .hasStackTraceContaining(JdbcRevocationLedgerStore.TABLE)
+                            .hasStackTraceContaining(JdbcRevocationLedgerStore.CREATE_TABLE_DDL);
+                });
+    }
+
+    @Test
+    void jdbcStoreUsesTheHostDataSource() {
+        webRunner()
+                .withPropertyValues(
+                        "keelbase.compensation.store=jdbc",
+                        "keelbase.compensation.jdbc.auto-ddl=true")
                 .withBean(DataSource.class, KeelbaseAutoConfigurationTest::h2DataSource)
                 .run(context -> {
                     assertThat(context).hasNotFailed();
