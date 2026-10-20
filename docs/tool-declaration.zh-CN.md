@@ -41,6 +41,7 @@ public class CrmInsightsController {
 | `riskLevel` | `AUTO` | `AUTO` 推断 GET→R1（读自动）/ POST·PUT·PATCH·DELETE→R3（写确认）。可显式设 R0–R5。 |
 | `revokePath` | 无 | 相对 baseUrl 的补偿端点，如 `"DELETE /api/compensation/followups/{id}"`。KeelBase 撤销 AI 副作用时调用。 |
 | `audience` | 全局 | 每工具 audience 覆盖。**仅当**部署真的支持 per-tool audience 才用；必须等于顶层 audience，否则验签失败。 |
+| `infer` | `false` | 零样板推断开关。见 [§3.1](#31-零样板推断infer--true)。缺省关闭，保证存量导出逐字节不变。 |
 
 风险语义（对齐 KeelBase 治理）：R0–R2 自动、R3 人工确认、R4 双人审批、R5 阻断。删除/审批/资金类工具建议 R4，破坏性操作 R5。
 
@@ -66,6 +67,25 @@ public class CrmInsightsController {
 | `List/Map/嵌套对象` | `string`（Agent 传 JSON 文本） |
 
 枚举字段会把选项列表作为参数描述导出（`可选: LOW/MEDIUM/HIGH`）。
+
+### 3.1 零样板推断（`infer = true`）
+
+`@KeelbaseTool(infer = true)` 补全「方法签名 + Javadoc 已经写明」的内容。**缺省关闭**，既有导出逐字节不变。
+
+| 推断项 | 来源 |
+|---|---|
+| 工具名 | 方法名 `camelCase → snake_case`（本来就是缺省行为） |
+| 工具描述 | `@Operation` → Javadoc 摘要 → 可读化方法名（`listOverdueOrders` → `list overdue orders`） |
+| 参数描述 | `@Parameter`/`@Schema` → Javadoc `@param`（含 record 组件的 `@param`）→ 可读化「名称 + 类型」（`customerId` → `customer ID（integer）`） |
+| 裸简单类型参数 | 对齐 Spring 默认的请求参数解析：未标注的 `long`/`String`/枚举参数成为可选查询参数。写方法上同时进 `queryParams`。 |
+
+**永不推断**（治理语义）：`riskLevel`、`revokePath`、`audience`、`enabled`，以及方法是否导出。任何推断值都让位于显式声明。
+
+Javadoc 需要消费方把 `therapi-runtime-javadoc-scribe` 作为注解处理器接入，并在运行时带上 `therapi-runtime-javadoc`；未接入时静默退回 `@Operation` 与可读化名称。starter 自身不新增依赖。
+
+复合 handler 参数（Spring 模型属性）不是工具参数。`infer=true` 时扫描器会打警告并写入 `ScanReport.warnings()`，不再静默丢弃；警告不会让 `keelbase.tools.strict` 失败（该模式仍只针对声明错误）。
+
+`@KeelbaseTool` 声明的是 controller 方法，不是普通 `@Service` 方法：KeelBase 通过 HTTP 端点执行工具，因此必须有 MVC 映射。
 
 ## 4. baseUrl 约定
 

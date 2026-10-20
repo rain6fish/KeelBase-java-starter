@@ -58,4 +58,23 @@ public @interface KeelbaseTool {
      * 缺省 true。
      */
     boolean enabled() default true;
+
+    /**
+     * Zero-boilerplate inference switch. When {@code true}, the scanner fills in what it can
+     * derive from the handler signature and its Javadoc: tool/parameter descriptions
+     * (Javadoc summary / {@code @param}, then a readable fallback) and bare simple-type
+     * parameters (Spring's default request-parameter resolution). Explicit declarations always
+     * win, and governance semantics (risk level, revoke path, audience, whether to export) are
+     * never inferred.
+     *
+     * <p>Defaults to {@code false} so existing exports stay byte-identical.
+     *
+     * <p>零样板推断开关。为 {@code true} 时，扫描器补全能从方法签名与 Javadoc 推断的内容：
+     * 工具/参数描述（Javadoc 摘要 / {@code @param}，其次可读化兜底）以及裸简单类型参数
+     * （对齐 Spring 默认的请求参数解析）。显式声明始终优先；治理语义（风险级、撤销路径、
+     * audience、是否导出）永不推断。
+     *
+     * <p>缺省 {@code false}，保证存量导出逐字节不变。
+     */
+    boolean infer() default false;
 }

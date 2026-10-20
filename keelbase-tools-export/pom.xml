@@ -60,5 +60,21 @@
       <version>2.2.22</version>
       <scope>test</scope>
     </dependency>
+    <!-- Test-only proof for the reflective Javadoc hook: the scribe embeds Javadoc in test
+         class files, the runtime reads it. Neither is a compile/runtime dependency of the
+         starter itself; consumers opt in. / 反射式 Javadoc 钩子的测试专用佐证：scribe 把 Javadoc
+         嵌入测试 class 文件，runtime 读取它。二者都不是 starter 的编译/运行时依赖；消费方按需接入。 -->
+    <dependency>
+      <groupId>com.github.therapi</groupId>
+      <artifactId>therapi-runtime-javadoc</artifactId>
+      <version>0.15.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.therapi</groupId>
+      <artifactId>therapi-runtime-javadoc-scribe</artifactId>
+      <version>0.15.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

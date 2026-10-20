@@ -41,6 +41,7 @@ Method-level attributes (`name`/`description`/`riskLevel`/`revokePath`) override
 | `riskLevel` | `AUTO` | `AUTO` infers GET→R1 (read, auto) / POST·PUT·PATCH·DELETE→R3 (write, confirm). Set explicitly to any of R0–R5. |
 | `revokePath` | none | Compensation endpoint relative to `baseUrl`, e.g. `"DELETE /api/compensation/followups/{id}"`. Used by KeelBase to undo the AI's side effect. |
 | `audience` | global | Per-tool audience override. **Only** use if your deployment ever supports per-tool audiences; it must equal the top-level audience or verification fails. |
+| `infer` | `false` | Zero-boilerplate inference switch. See [§3.1](#31-zero-boilerplate-inference-infer--true). Off by default so existing exports stay byte-identical. |
 
 Risk semantics (aligned with KeelBase governance): R0–R2 auto, R3 human confirmation, R4 dual approval, R5 blocked. Deleting/approving/financial tools deserve R4; destructive ones R5.
 
@@ -66,6 +67,25 @@ Type mapping (aligned with KeelBase's generator):
 | `List/Map/nested objects` | `string` (the agent sends a JSON text) |
 
 Enum fields export the option list as the parameter description (`可选: LOW/MEDIUM/HIGH`).
+
+### 3.1 Zero-boilerplate inference (`infer = true`)
+
+`@KeelbaseTool(infer = true)` fills in what the method signature and its Javadoc already say. It is **off by default**, so existing exports are byte-identical.
+
+| Inferred | Source |
+|---|---|
+| Tool name | method name `camelCase → snake_case` (already the default) |
+| Tool description | `@Operation` → Javadoc summary → readable method name (`listOverdueOrders` → `list overdue orders`) |
+| Parameter descriptions | `@Parameter`/`@Schema` → Javadoc `@param` (including record component `@param`) → readable name + type (`customerId` → `customer ID（integer）`) |
+| Bare simple-type parameters | Spring's default request-parameter resolution: an unannotated `long`/`String`/enum parameter becomes an optional query parameter. On write methods it also joins `queryParams`. |
+
+Never inferred (governance semantics): `riskLevel`, `revokePath`, `audience`, `enabled`, and whether the method is exported at all. Explicit declarations always win over any inferred value.
+
+Javadoc requires the consumer to add `therapi-runtime-javadoc-scribe` as an annotation processor and `therapi-runtime-javadoc` at runtime; without them the starter silently falls back to `@Operation` and the readable name. The starter itself gains no dependency.
+
+Complex handler parameters (Spring model attributes) are not tool parameters. Under `infer=true` the scanner logs a warning and adds it to `ScanReport.warnings()` instead of dropping it silently; warnings never fail `keelbase.tools.strict` (that mode remains for declaration errors).
+
+`@KeelbaseTool` declares controller methods, not plain `@Service` methods: KeelBase executes the tool through its HTTP endpoint, so an MVC mapping is required.
 
 ## 4. baseUrl convention
 

@@ -31,6 +31,21 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- Test-only: prove the zero-boilerplate Javadoc path end to end in the reference project.
+         The starter itself has no dependency on therapi; consumers opt in.
+         / 仅测试：在参考项目里端到端验证零样板 Javadoc 路径。starter 自身不依赖 therapi；消费方按需接入。 -->
+    <dependency>
+      <groupId>com.github.therapi</groupId>
+      <artifactId>therapi-runtime-javadoc</artifactId>
+      <version>0.15.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.therapi</groupId>
+      <artifactId>therapi-runtime-javadoc-scribe</artifactId>
+      <version>0.15.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
