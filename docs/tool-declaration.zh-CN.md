@@ -78,6 +78,7 @@ public class CrmInsightsController {
 | 工具描述 | `@Operation` → Javadoc 摘要 → 可读化方法名（`listOverdueOrders` → `list overdue orders`） |
 | 参数描述 | `@Parameter`/`@Schema` → Javadoc `@param`（含 record 组件的 `@param`）→ 可读化「名称 + 类型」（`customerId` → `customer ID（integer）`） |
 | 裸简单类型参数 | 对齐 Spring 默认的请求参数解析：未标注的 `long`/`String`/枚举参数成为可选查询参数。写方法上同时进 `queryParams`。 |
+| `@RequestParam Optional<T>` | 按 `T` 映射类型并视为非必填（`Optional<Long>` → `integer`、`required=false`），与 `infer` 无关。 |
 
 **永不推断**（治理语义）：`riskLevel`、`revokePath`、`audience`、`enabled`，以及方法是否导出。任何推断值都让位于显式声明。
 

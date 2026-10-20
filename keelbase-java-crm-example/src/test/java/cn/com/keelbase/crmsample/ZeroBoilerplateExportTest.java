@@ -108,6 +108,19 @@ class ZeroBoilerplateExportTest {
     }
 
     @Test
+    void optionalRequestParam_isNotRequiredAndUnwrapped() throws Exception {
+        JsonNode tool = tool("optional_query");
+        assertNotNull(tool);
+        JsonNode param = tool.get("parameters").get(0);
+        assertEquals("customerId", param.get("name").asText());
+        assertEquals("integer", param.get("type").asText(),
+                "Optional<Long> should map by the wrapped Long, not to string");
+        assertFalse(param.get("required").asBoolean(),
+                "Optional<T> is inherently optional");
+        assertEquals("optional customer identifier", param.get("description").asText());
+    }
+
+    @Test
     void unInferableParameter_isReportedAsWarning() {
         var report = scanner.scanWithReport();
         assertTrue(report.warnings().stream().anyMatch(w ->

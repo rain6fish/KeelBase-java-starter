@@ -78,6 +78,7 @@ Enum fields export the option list as the parameter description (`可选: LOW/ME
 | Tool description | `@Operation` → Javadoc summary → readable method name (`listOverdueOrders` → `list overdue orders`) |
 | Parameter descriptions | `@Parameter`/`@Schema` → Javadoc `@param` (including record component `@param`) → readable name + type (`customerId` → `customer ID（integer）`) |
 | Bare simple-type parameters | Spring's default request-parameter resolution: an unannotated `long`/`String`/enum parameter becomes an optional query parameter. On write methods it also joins `queryParams`. |
+| `@RequestParam Optional<T>` | Exported as optional and typed by `T` (`Optional<Long>` → `integer`, `required=false`), regardless of `infer`. |
 
 Never inferred (governance semantics): `riskLevel`, `revokePath`, `audience`, `enabled`, and whether the method is exported at all. Explicit declarations always win over any inferred value.
 

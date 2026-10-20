@@ -211,11 +211,15 @@ public class ProxyToolsScanner {
                 if (pname == null || !seen.add(pname)) {
                     continue;
                 }
-                // 必填 = @RequestParam 默认必填 且 未显式设置 defaultValue（设置缺省值即视为可选）
-                boolean required = rp.required()
+                // Optional<T> is inherently optional and maps by T; otherwise required =
+                // @RequestParam default-required and no explicit defaultValue.
+                // Optional<T> 天然可选且按 T 映射类型；其余按 @RequestParam 默认必填且未设 defaultValue。
+                Class<?> effectiveType = unwrapOptional(mp);
+                boolean optional = effectiveType != mp.getParameterType();
+                boolean required = !optional && rp.required()
                         && org.springframework.web.bind.annotation.ValueConstants.DEFAULT_NONE
                                 .equals(rp.defaultValue());
-                String structural = paramDescription(mp.getParameterType(), rp.defaultValue());
+                String structural = paramDescription(effectiveType, rp.defaultValue());
                 String paramDesc = explicitParamDescription(mp);
                 if (paramDesc == null) {
                     String documented = infer
@@ -228,7 +232,7 @@ public class ProxyToolsScanner {
                 if (paramDesc.isBlank()) {
                     paramDesc = autoParamDescription(pname, mp.getParameterType());
                 }
-                parameters.add(new ToolParameter(pname, TypeMapper.map(mp.getParameterType()), paramDesc, required));
+                parameters.add(new ToolParameter(pname, TypeMapper.map(effectiveType), paramDesc, required));
                 if (write) {
                     queryParams.add(pname);
                 }
@@ -300,6 +304,27 @@ public class ProxyToolsScanner {
      */
     private String explicitParamDescription(MethodParameter mp) {
         return swaggerDoc.paramDescription(mp, null);
+    }
+
+    /**
+     * Unwraps {@code Optional<T>} to {@code T}; returns the declared type otherwise. A missing
+     * generic argument (raw {@code Optional}) stays as declared and is reported as {@code string}.
+     *
+     * <p>把 {@code Optional<T>} 解包为 {@code T}；否则返回声明类型。缺少泛型实参（裸
+     * {@code Optional}）保持声明类型，并按 {@code string} 导出。
+     */
+    private static Class<?> unwrapOptional(MethodParameter mp) {
+        Class<?> declared = mp.getParameterType();
+        if (declared != java.util.Optional.class) {
+            return declared;
+        }
+        java.lang.reflect.Type generic = mp.getGenericParameterType();
+        if (generic instanceof java.lang.reflect.ParameterizedType pt
+                && pt.getActualTypeArguments().length == 1
+                && pt.getActualTypeArguments()[0] instanceof Class<?> inner) {
+            return inner;
+        }
+        return declared;
     }
 
     /**

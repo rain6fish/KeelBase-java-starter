@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Test fixture: zero-boilerplate declarations paired with hand-written equivalents.
@@ -55,6 +56,17 @@ class ZeroBoilerplateController {
     @GetMapping("/search-no-infer")
     @KeelbaseTool(name = "no_infer_search")
     public List<String> searchNoInfer(long customerId, String keyword) {
+        return List.of();
+    }
+
+    /**
+     * Search customers by an optional customer id.
+     *
+     * @param customerId optional customer identifier
+     */
+    @GetMapping("/optional")
+    @KeelbaseTool(name = "optional_query", infer = true)
+    public List<String> optionalQuery(@RequestParam Optional<Long> customerId) {
         return List.of();
     }
 
