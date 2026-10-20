@@ -82,7 +82,7 @@ public class CrmInsightsController {
 
 **永不推断**（治理语义）：`riskLevel`、`revokePath`、`audience`、`enabled`，以及方法是否导出。任何推断值都让位于显式声明。
 
-Javadoc 需要消费方把 `therapi-runtime-javadoc-scribe` 作为注解处理器接入，并在运行时带上 `therapi-runtime-javadoc`；未接入时静默退回 `@Operation` 与可读化名称。starter 自身不新增依赖。
+Javadoc 按三条口径接入：**零依赖**（starter 不引任何编译或运行时依赖）、**反射**（`JavadocDocExtractor` 按类名查找 `com.github.therapi.runtimejavadoc.RuntimeJavadoc`，不在时完全静默）、**按需接入**（消费方把 `therapi-runtime-javadoc-scribe` 作为注解处理器接入，并在运行时带上 `therapi-runtime-javadoc`）。未接入的消费方导出结果与之前逐字节相同——静默退回 `@Operation` 与可读化名称。**springdoc 仍是默认来源**：它在 classpath 上时先取 `@Operation` / `@Schema` 的值，Javadoc 只补它们留空的部分。
 
 复合 handler 参数（Spring 模型属性）不是工具参数。`infer=true` 时扫描器会打警告并写入 `ScanReport.warnings()`，不再静默丢弃；警告不会让 `keelbase.tools.strict` 失败（该模式仍只针对声明错误）。
 

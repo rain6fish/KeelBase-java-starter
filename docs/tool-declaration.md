@@ -82,7 +82,7 @@ Enum fields export the option list as the parameter description (`可选: LOW/ME
 
 Never inferred (governance semantics): `riskLevel`, `revokePath`, `audience`, `enabled`, and whether the method is exported at all. Explicit declarations always win over any inferred value.
 
-Javadoc requires the consumer to add `therapi-runtime-javadoc-scribe` as an annotation processor and `therapi-runtime-javadoc` at runtime; without them the starter silently falls back to `@Operation` and the readable name. The starter itself gains no dependency.
+Javadoc is read under three rules: **zero-dependency** (the starter carries no compile or runtime dependency on it), **reflection** (`JavadocDocExtractor` resolves `com.github.therapi.runtimejavadoc.RuntimeJavadoc` by name and stays inert when it is absent), and **opt-in** (the consumer adds `therapi-runtime-javadoc-scribe` as an annotation processor and `therapi-runtime-javadoc` at runtime). Consumers who do not opt in get exactly the previous output — the starter silently falls back to `@Operation` and the readable name. **springdoc remains the default source**: with it on the classpath, `@Operation` / `@Schema` values are used first, and Javadoc only fills what they leave empty.
 
 Complex handler parameters (Spring model attributes) are not tool parameters. Under `infer=true` the scanner logs a warning and adds it to `ScanReport.warnings()` instead of dropping it silently; warnings never fail `keelbase.tools.strict` (that mode remains for declaration errors).
 
