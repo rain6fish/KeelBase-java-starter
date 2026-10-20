@@ -127,7 +127,7 @@ sequenceDiagram
 **两端职责**：
 
 - **KeelBase 侧**：`ProxyTool` 执行工具时用 `DelegationTokenService.sign(userId, audience)` 签发委托 JWT → `Authorization: Bearer <委托 JWT>` 调 Java 端点。
-- **Java 侧（本 Starter）**：`DelegationAuthFilter` 验签（HS256 + aud/iss/exp，启动时 secret/audience 缺失即 fail-fast）+ `KeelBaseUserMapper` 映射本地用户 + `@DelegationUser` 注入。手写验签示例仅作 Java 8 / Spring Boot 2 存量系统兜底（见 [boot2-java8-adapter](boot2-java8-adapter.md)）。
+- **Java 侧（本 Starter）**：`DelegationAuthFilter` 验签（HS256 + aud/iss/exp，启动时 secret/audience 缺失即 fail-fast）+ `KeelBaseUserMapper` 映射本地用户 + `@DelegationUser` 注入。手写验签示例仅作 Java 8 / Spring Boot 2 存量系统兜底（见 [boot2-java8-adapter](boot2-java8-adapter.zh-CN.md)）。
 
 ---
 

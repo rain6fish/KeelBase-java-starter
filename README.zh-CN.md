@@ -86,6 +86,7 @@ Docker）· 想让存量 Java 系统具备 AI 能力：
 | [CI 接入合规模板](docs/ci-integration.zh-CN.md) | GitHub Actions 样板：契约测试 + 自检 + 导出门禁，合规持续守护 |
 | [排障与 FAQ](docs/troubleshooting.zh-CN.md) | 错误码、常见坑、核对清单 |
 | [生产上线核对清单](docs/production-checklist.zh-CN.md) | 上线硬化、密钥轮换、运维监控 |
+| [Boot 2 / Java 8 适配](docs/boot2-java8-adapter.zh-CN.md) | 逐模块支持矩阵、API 代理兜底路径、迁移清单（Java 8 未实测） |
 
 英文版在同目录（`.md`）。
 

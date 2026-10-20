@@ -32,7 +32,7 @@ mvn keelbase:register      # 导出 + 写入 KeelBase（热更新生效，免重
 implementation 'cn.com.keelbase:keelbase-spring-boot-starter:0.1.7'
 ```
 
-> 要求 **Spring Boot 3 + Java 17**。Boot 2 / Java 8 团队走 B 路径（零代码 API 代理，见 [boot2-java8-adapter](boot2-java8-adapter.md)）。
+> 要求 **Spring Boot 3 + Java 17**。Boot 2 / Java 8 团队走 B 路径（API 代理，不引入 Starter，见 [boot2-java8-adapter](boot2-java8-adapter.md)）。
 
 ### 1.2 配置 `application.yml`
 

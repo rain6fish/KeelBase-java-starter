@@ -88,6 +88,7 @@ Which contract version each runtime answers for is maintained **once**, in the m
 | [ci-integration](docs/ci-integration.md) | GitHub Actions 接入合规模板（契约测试 + 自检 + 导出门禁） |
 | [troubleshooting](docs/troubleshooting.md) | Error codes, common mistakes, verification checklist |
 | [production-checklist](docs/production-checklist.md) | Hardening, secret rotation, ops monitoring before go-live |
+| [boot2-java8-adapter](docs/boot2-java8-adapter.md) | Boot 2 / Java 8 support matrix + API-proxy fallback for legacy stacks |
 
 Chinese versions live alongside each file (`*.zh-CN.md`).
 
