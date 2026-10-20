@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -35,6 +36,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 @AutoConfiguration
 @EnableConfigurationProperties(ProxyToolExportProperties.class)
 @ConditionalOnClass({RequestMappingHandlerMapping.class, ProxyToolsScanner.class})
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnProperty(prefix = "keelbase.tools", name = "enabled", matchIfMissing = true)
 public class ToolsExportAutoConfiguration {
 

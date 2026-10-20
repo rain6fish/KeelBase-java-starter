@@ -42,5 +42,11 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- Test-only: proves the DataSource-backed ledger against a real database. / 仅测试：用真库验证 DataSource 账本。 -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

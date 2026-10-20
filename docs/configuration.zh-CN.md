@@ -17,6 +17,8 @@
 | `keelbase.tools.strict` | boolean | `false` | — | 启动 fail-fast：为 `true` 时若扫描发现 `@KeelbaseTool` 声明非法（无法解析 method/path、工具名非法）被跳过，则**应用启动失败**并列出明细，替代默认只打 WARN 跳过导致的「导出缺工具」困惑。 |
 | `keelbase.health.enabled` | boolean | `true` | — | 把 `/keelbase/status` 接入 Spring Boot actuator `/health` 的开关（需消费者自加 `spring-boot-starter-actuator` 才装配）：healthy/degraded→`UP`（degraded 带 warnings）、error→`DOWN`（带 errors）、`status-enabled=false`→`UP`。 |
 | `keelbase.compensation.ledger-size` | integer | `1024` | — | 补偿端点的进程内幂等账本 LRU 上限。 |
+| `keelbase.compensation.store` | `memory` \| `jdbc` | `memory` | — | 账本后端。`jdbc` 经宿主的 `DataSource` 在多实例间共享撤销状态（JPA、MyBatis 或纯 JDBC 均可）；无 DataSource 时启动失败。 |
+| `keelbase.compensation.jdbc.auto-ddl` | boolean | `true` | — | `store=jdbc` 时启动缺表则建 `keelbase_revocation_ledger`。由迁移管理 schema 时设为 `false`；缺表会在启动失败并给出 DDL。 |
 | `keelbase.client.base-url` | string | — | — | KeelBase 服务根（如 `http://localhost:3000`），调 `POST /api/v1/auth/delegation-token`。未配置 → `KeelbaseClient.obtain` 不可用（仅本地 `verify`）。见[客户端与审计上报](client.zh-CN.md)。 |
 | `keelbase.client.audience` | string | — | — | 委托 token 的目标 audience。**缺省回退 `keelbase.delegation.audience`。** |
 | `keelbase.client.connect-timeout` / `read-timeout` | duration | `3s` / `10s` | — | 委托 token 调用的 HTTP 超时。 |

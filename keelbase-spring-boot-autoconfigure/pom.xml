@@ -60,5 +60,11 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- Test-only: exercises keelbase.compensation.store=jdbc with a real DataSource. / 仅测试：用真 DataSource 验证 jdbc 账本。 -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

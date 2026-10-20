@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -37,6 +38,7 @@ import java.util.List;
 @AutoConfiguration
 @EnableConfigurationProperties(DelegationProperties.class)
 @ConditionalOnClass(DelegationAuthFilter.class)
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnProperty(prefix = "keelbase.delegation", name = "enabled", matchIfMissing = true)
 public class DelegationAutoConfiguration {
 

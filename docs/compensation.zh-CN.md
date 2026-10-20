@@ -57,16 +57,26 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
 
 默认 `RevocationLedgerStore` 是 `RevocationLedger`：进程内 LRU（上限 `keelbase.compensation.ledger-size`，缺省 1024）。**单实例**下正确。
 
-**多实例 / 高可用**：实现 `RevocationLedgerStore` 接持久化存储，注册为 bean 覆盖默认：
+**多实例 / 高可用**：设 `keelbase.compensation.store=jdbc`。starter 会使用宿主的 `DataSource`——JPA/Hibernate、MyBatis、纯 JdbcTemplate 宿主都提供，且不要求任何 ORM API。表 `keelbase_revocation_ledger` 由本库拥有：
 
-```java
-@Bean
-RevocationLedgerStore revocationLedger(JdbcTemplate jdbc) {
-    return new JdbcRevocationLedger(jdbc); // 你的实现
-}
+```yaml
+keelbase:
+  compensation:
+    store: jdbc
+    # jdbc:
+    #   auto-ddl: false   # 由迁移管理 schema 时
 ```
 
-接口极简：`boolean markRevoked(long resultId)` 与 `boolean isRevoked(long resultId)`。建议以你的行状态为最终依据，账本只做快速路径防重。
+`auto-ddl` 缺省 `true`：启动时缺表则建表（H2/PostgreSQL/MySQL/MariaDB 支持 `CREATE TABLE IF NOT EXISTS`）；由迁移管理 schema 时设为 `false`。无论哪种，启动都会探测该表，因此 `store=jdbc` 但无 `DataSource`、或缺表时，**启动失败并点名配置键**——不会静默回退到内存。
+
+```sql
+CREATE TABLE IF NOT EXISTS keelbase_revocation_ledger (
+  result_id BIGINT PRIMARY KEY,
+  revoked_at TIMESTAMP NOT NULL
+);
+```
+
+需要别的后端时，实现 `RevocationLedgerStore` 并注册为 bean 覆盖默认。接口极简：`boolean markRevoked(long resultId)` 与 `boolean isRevoked(long resultId)`。建议以你的行状态为最终依据，账本只做快速路径防重。
 
 ## 5. 审计
 

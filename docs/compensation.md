@@ -57,16 +57,26 @@ public class FollowupController extends KeelBaseCompensationSupport<Map<String, 
 
 `RevocationLedger` is the default `RevocationLedgerStore`: an in-memory LRU (cap `keelbase.compensation.ledger-size`, default 1024). It is correct for a **single instance**.
 
-For **multi-instance / HA**, implement `RevocationLedgerStore` backed by your database and register it as a bean — it replaces the default:
+For **multi-instance / HA**, set `keelbase.compensation.store=jdbc`. The starter then uses the host's `DataSource` — JPA/Hibernate, MyBatis and plain JdbcTemplate hosts all provide one, and no ORM API is required. The library owns the table `keelbase_revocation_ledger`:
 
-```java
-@Bean
-RevocationLedgerStore revocationLedger(JdbcTemplate jdbc) {
-    return new JdbcRevocationLedger(jdbc); // your implementation
-}
+```yaml
+keelbase:
+  compensation:
+    store: jdbc
+    # jdbc:
+    #   auto-ddl: false   # when migrations own the schema
 ```
 
-The interface is minimal: `boolean markRevoked(long resultId)` and `boolean isRevoked(long resultId)`. Prefer your existing row state as the source of truth and use the ledger only as a fast-path guard.
+With the default `auto-ddl: true` the table is created at startup when missing (H2/PostgreSQL/MySQL/MariaDB accept `CREATE TABLE IF NOT EXISTS`); set it to `false` when migrations own the schema. Either way the table is probed at startup, so `store=jdbc` without a `DataSource`, or with a missing table, **fails startup and names the key** — there is no silent fallback to memory.
+
+```sql
+CREATE TABLE IF NOT EXISTS keelbase_revocation_ledger (
+  result_id BIGINT PRIMARY KEY,
+  revoked_at TIMESTAMP NOT NULL
+);
+```
+
+If you need a different backend, implement `RevocationLedgerStore` and register it as a bean — it replaces the default. The interface is minimal: `boolean markRevoked(long resultId)` and `boolean isRevoked(long resultId)`. Prefer your existing row state as the source of truth and use the ledger only as a fast-path guard.
 
 ## 5. Audit
 
