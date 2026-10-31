@@ -2,6 +2,106 @@
 
 All notable changes to this project are documented in this file. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning follows [SemVer](https://semver.org/).
 
+## [0.2.0] - 2026-10-31
+
+**English**
+
+### Changed
+
+- **Auto-DDL is opt-in.** `keelbase.compensation.jdbc.auto-ddl` now defaults to `false`: with
+  `store=jdbc` the starter no longer issues DDL at startup. A missing `keelbase_revocation_ledger`
+  fails startup with the key named and the DDL printed, instead of creating the table silently.
+  Consumers who want the previous behaviour set `auto-ddl: true` explicitly. This is a behaviour
+  change for existing JDBC-ledger deployments, and the reason this release is `0.2.0`.
+
+### Added
+
+- **The auto-configuration is proven conditional, and the ledger can use the host DataSource.**
+  `ApplicationContextRunner` tests cover the whole starter: a complete configuration exposes every
+  bean; a missing secret or audience fails startup by key; a user bean replaces the default ledger;
+  the tools/delegation switches remove only their own beans; and non-servlet applications skip
+  servlet-only auto-configuration. A new optional JDBC-backed revocation ledger
+  (`keelbase.compensation.store=jdbc`) uses plain JDBC, so JPA, MyBatis and plain-JDBC hosts all work
+  without an ORM API; `store=jdbc` without a DataSource or with a missing table fails startup naming
+  the key, with no silent fallback to memory.
+
+- **Zero-boilerplate Javadoc inference, default off.** `@KeelbaseTool(infer=true)` derives the tool
+  description (Javadoc summary, then a readable method name), parameter descriptions (Javadoc
+  `@param` and record-component tags, then a readable name-plus-type fallback), and exports bare
+  simple-type handler parameters as optional query parameters. Javadoc is read reflectively through
+  therapi-runtime-javadoc, so the starter gains no dependency; without the processor it silently
+  falls back. Explicit declarations always win and governance semantics (risk level, revoke path,
+  audience, enabled) are never inferred. With `infer` off every existing export is byte-identical,
+  verified by sha256 against the CRM, PM, Approval and base example exports. Complex handler
+  parameters that cannot become tool parameters are reported in `ScanReport.warnings()` instead of
+  being dropped silently.
+
+- **`Optional<T>` request parameters** are mapped by the wrapped type and exported optional, instead
+  of as `string` with `required=true`.
+
+### Fixed
+
+- **The verification scripts no longer have false-green paths.** The PM script snapshots the
+  project's task ids before the chat and requires a task that appeared in this run; the approval
+  script requires request 1 to be `pending` before the run; both poll with a bounded deadline instead
+  of one fixed sleep. The family-block gate counts raw `BEGIN` markers, so a malformed region next
+  to a well-formed one can no longer hide. The CI matrix sets `fail-fast: false` so the JDK 21 leg
+  reports even when 17 fails.
+
+- **The Gradle build mirrors the Maven poms.** `keelbase-tools-export` now depends on
+  `keelbase-client`; `keelbase-spring-boot-autoconfigure` has the actuator and the provided
+  dependencies on both compile and test classpaths; `keelbase-test-support` is a Gradle module; the
+  example contract test has its test-support dependency; and the H2 and therapi test dependencies
+  are declared, with the scribe named as a test annotation processor. `./gradlew clean build` is
+  green.
+
+- **The Central publisher pins Maven 3.9.16** (the known 3.10.0 / central-publishing-plugin bundle
+  bug) and gains `workflow_dispatch`, so a failed publish can be retried from `main` without moving
+  a published tag.
+
+**中文**
+
+### 变更
+
+- **建表改为显式开启。** `keelbase.compensation.jdbc.auto-ddl` 缺省改为 `false`：`store=jdbc` 时
+  starter 不再在启动时执行 DDL。缺 `keelbase_revocation_ledger` 表会启动失败，错误里点名配置键并
+  打印要执行的 DDL，而不是悄悄建表。需要旧行为者显式设 `auto-ddl: true`。这对已在用 JDBC 账本的
+  部署是行为变更，也是本次发 `0.2.0` 的理由。
+
+### 新增
+
+- **自动配置条件化可证，账本可接宿主 DataSource。** `ApplicationContextRunner` 测试覆盖整个
+  starter：配置齐全即暴露全部 bean；缺 secret 或 audience 时启动失败并点名；用户 bean 可覆盖默认
+  账本；tools/delegation 开关只移除各自的 bean；非 servlet 应用跳过 servlet-only 自动配置。新增
+  可选的 JDBC 账本（`keelbase.compensation.store=jdbc`），用普通 JDBC，JPA / MyBatis / 纯 JDBC
+  宿主均可用且不依赖 ORM API；`store=jdbc` 但无 DataSource 或缺表时启动失败并点名配置键，不静默
+  回退到内存。
+
+- **零样板 Javadoc 推断，默认关闭。** `@KeelbaseTool(infer=true)` 推断工具描述（Javadoc 摘要，
+  其次可读化方法名）、参数描述（Javadoc `@param` 与 record 组件标签，其次可读化「名称+类型」），
+  并把裸简单类型 handler 参数导出为可选查询参数。Javadoc 通过 therapi-runtime-javadoc 反射读取，
+  starter 不新增依赖；未接入处理器时静默退回。显式声明始终优先，治理语义（风险级、撤销路径、
+  audience、enabled）永不推断。`infer` 关闭时所有存量导出逐字节不变，已对 CRM、PM、审批与基础示例
+  四份导出用 sha256 复验。无法成为工具参数的复合 handler 参数改为写入 `ScanReport.warnings()`，
+  不再静默丢弃。
+
+- **`Optional<T>` 请求参数**按内层类型映射并导出为非必填，不再导出成 `string` 且 `required=true`。
+
+### 修复
+
+- **验证脚本不再有假绿路径。** PM 脚本先记下项目里的任务 id，再要求**本次新出现**的委托任务；
+  审批脚本要求请求 1 在运行前是 `pending`；两者都改为有界轮询，不再固定睡一次。家族段门禁数原始
+  `BEGIN` 标记，坏掉的区域不再能被旁边正常的区域盖住。CI 矩阵设 `fail-fast: false`，JDK 21 那条腿
+  在 17 红时也会报结果。
+
+- **Gradle 构建与 Maven pom 对齐。** `keelbase-tools-export` 补上对 `keelbase-client` 的依赖；
+  `keelbase-spring-boot-autoconfigure` 在编译与测试类路径上补齐 actuator 与 `provided` 依赖；
+  `keelbase-test-support` 成为 Gradle 模块；示例的契约测试补上 test-support 依赖；H2 与 therapi
+  测试依赖补上，且 scribe 显式写成测试注解处理器。`./gradlew clean build` 通过。
+
+- **Central 发布钉住 Maven 3.9.16**（已知的 3.10.0 / central-publishing-plugin 缺陷），并加入
+  `workflow_dispatch`，失败的发布可以从 `main` 重跑而无需移动已公开的 tag。
+
 ## [0.1.8] - 2026-10-18
 
 **English**
