@@ -19,4 +19,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-actuator'
     testImplementation 'org.springframework.security:spring-security-core'
     testImplementation 'jakarta.servlet:jakarta.servlet-api'
+    // Test-only: the jdbc ledger is proven against a real DataSource, as the Maven pom already declares.
+    // 仅测试：jdbc 账本对着真 DataSource 验证 —— Maven 的 pom 已这样声明。
+    testImplementation 'com.h2database:h2'
 }

@@ -6,4 +6,5 @@ dependencies {
     api 'org.slf4j:slf4j-api'
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     testImplementation 'jakarta.servlet:jakarta.servlet-api'   // 对齐 Maven provided（测试 classpath 需要）
+    testImplementation 'com.h2database:h2'   // Test-only: the DataSource ledger runs against a real database. / 仅测试：DataSource 账本对着真库跑。
 }

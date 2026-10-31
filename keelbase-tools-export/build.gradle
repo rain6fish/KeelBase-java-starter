@@ -14,4 +14,16 @@ dependencies {
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
 
     testImplementation 'io.swagger.core.v3:swagger-annotations:2.2.22'
+    // Test-only, and only here: the extractor is proven against the real therapi runtime, and the
+    // scribe embeds the Javadoc into the test classes so the reflective read has something to find.
+    // Neither is a dependency of the starter itself; consumers opt in, exactly as the Maven pom says.
+    // 仅测试、且仅本模块：提取器对着真实 therapi 运行时验证；scribe 把 Javadoc 嵌入测试类，
+    // 反射读取才有东西可读。二者都不是 starter 自身的依赖；消费方按需接入 —— 与 Maven 的 pom 一致。
+    testImplementation 'com.github.therapi:therapi-runtime-javadoc:0.15.0'
+    testImplementation 'com.github.therapi:therapi-runtime-javadoc-scribe:0.15.0'
+    // Maven runs processors found on the test classpath; Gradle needs the path stated explicitly,
+    // or the scribe never runs and the javadoc is simply absent from the compiled test classes.
+    // Maven 会跑测试类路径上的处理器；Gradle 必须显式给出处理器路径，否则 scribe 不跑，
+    // 编译出的测试类里根本没有 Javadoc。
+    testAnnotationProcessor 'com.github.therapi:therapi-runtime-javadoc-scribe:0.15.0'
 }

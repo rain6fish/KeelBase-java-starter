@@ -6,4 +6,12 @@ dependencies {
     implementation project(':keelbase-spring-boot-starter')
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'io.swagger.core.v3:swagger-annotations:2.2.22'
+    // Test-only: prove the zero-boilerplate Javadoc path end to end in the reference project. The
+    // runtime is read reflectively; the scribe embeds the Javadoc into the test classes, and Gradle
+    // must be told the processor path explicitly or it never runs.
+    // 仅测试：在参考项目里端到端验证零样板 Javadoc 路径。运行时被反射读取；scribe 把 Javadoc 嵌入
+    // 测试类，且 Gradle 必须显式给出处理器路径，否则它根本不跑。
+    testImplementation 'com.github.therapi:therapi-runtime-javadoc:0.15.0'
+    testImplementation 'com.github.therapi:therapi-runtime-javadoc-scribe:0.15.0'
+    testAnnotationProcessor 'com.github.therapi:therapi-runtime-javadoc-scribe:0.15.0'
 }
