@@ -63,6 +63,26 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <!-- Tomcat has no BOM of its own, so the embedded artifacts are pinned one by one. 10.1.61
+           stays on the 10.1 line Boot 3.5.x targets, which is what makes this a patch-level move
+           rather than the container swap Spring Boot 4 performs (it ships Tomcat 11).
+           Tomcat 没有自己的 BOM，所以内嵌的那几个 artifact 只能逐个钉。10.1.61 仍在 Boot 3.5.x 所面向的
+           10.1 线上，正因如此这是一次补丁级移动，而不是 Spring Boot 4 做的那种容器换代（那边是 Tomcat 11）。 -->
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-core</artifactId>
+        <version>10.1.61</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-el</artifactId>
+        <version>10.1.61</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-websocket</artifactId>
+        <version>10.1.61</version>
+      </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>

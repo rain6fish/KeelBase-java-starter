@@ -45,6 +45,14 @@ subprojects {
             dependency 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.21.7'
             dependency 'org.apache.logging.log4j:log4j-api:2.25.5'
             dependency 'org.apache.logging.log4j:log4j-to-slf4j:2.25.5'
+            // Tomcat publishes no BOM, so its embedded artifacts are pinned individually. 10.1.61
+            // stays on the 10.1 line Boot 3.5.x targets — a patch-level move, not the container swap
+            // Spring Boot 4 makes by moving to Tomcat 11.
+            // Tomcat 没有 BOM，内嵌 artifact 只能逐个钉。10.1.61 仍在 Boot 3.5.x 的 10.1 线上 ——
+            // 这是一次补丁级移动，不是 Spring Boot 4 换到 Tomcat 11 那种容器换代。
+            dependency 'org.apache.tomcat.embed:tomcat-embed-core:10.1.61'
+            dependency 'org.apache.tomcat.embed:tomcat-embed-el:10.1.61'
+            dependency 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.61'
         }
     }
 
