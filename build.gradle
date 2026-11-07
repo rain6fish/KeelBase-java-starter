@@ -28,6 +28,23 @@ subprojects {
             dependency 'io.jsonwebtoken:jjwt-api:0.11.5'
             dependency 'io.jsonwebtoken:jjwt-impl:0.11.5'
             dependency 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+            // Same lift as the parent pom, expressed as explicit pins. Unlike Maven, where the first
+            // BOM import wins, Gradle resolves to the highest version and an earlier mavenBom import
+            // does not override the Boot BOM — pinning each artifact is what actually moves it.
+            // Jackson 2.21.7 and Log4j 2.25.5 are the advisories a version bump can still clear
+            // without moving to Spring Boot 4, which Framework 6.2's end of line would force.
+            // 与父 pom 同样的抬升，这里写成显式钉版本。Maven 里先导入的 BOM 先生效，Gradle 则取最高版本，
+            // 排在前面导入 Boot BOM 之后并不覆写 —— 真正起作用的是逐个钉版本。
+            // Jackson 2.21.7 与 Log4j 2.25.5 是不搬去 Spring Boot 4 仍能清掉的公告。
+            dependency 'com.fasterxml.jackson.core:jackson-core:2.21.7'
+            dependency 'com.fasterxml.jackson.core:jackson-databind:2.21.7'
+            dependency 'com.fasterxml.jackson.core:jackson-annotations:2.21'
+            dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.21.7'
+            dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.7'
+            dependency 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.21.7'
+            dependency 'org.apache.logging.log4j:log4j-api:2.25.5'
+            dependency 'org.apache.logging.log4j:log4j-to-slf4j:2.25.5'
         }
     }
 
