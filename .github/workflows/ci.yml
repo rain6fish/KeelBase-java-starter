@@ -31,6 +31,12 @@ jobs:
       - name: Build & test (all modules)
         run: mvn -B install
 
+      # Assert the JVM the build just ran on actually carries the fixed JSSE implementations, so a
+      # downgraded or substituted JDK cannot pass unnoticed.
+      # 断言构建刚跑过的 JVM 确实带修复版 JSSE 实现，免得 JDK 被降级或替换却无人察觉。
+      - name: Assert the JDK build carries the JSSE fixes
+        run: bash scripts/assert-jdk-build.sh
+
   gradle:
     name: Build & Test (Gradle)
     runs-on: ubuntu-latest
@@ -47,6 +53,44 @@ jobs:
 
       - name: Build & test (all modules)
         run: ./gradlew build --no-daemon
+
+      - name: Assert the JDK build carries the JSSE fixes
+        run: bash scripts/assert-jdk-build.sh
+
+  dependency-scan:
+    name: Known advisories in the dependency tree
+    runs-on: ubuntu-latest
+    # Reports, never gates. The tree resolves to Spring Framework 6.2.19 and Jackson 2.21.4, both
+    # carrying open advisories whose fix is a parent-pom bump rather than a change in this
+    # repository; a blocking gate here would redden every push for something no PR on this branch
+    # can clear. Findings land in the job summary; the follow-up is tracked, not enforced.
+    # 只报告，不设闸。依赖树解析到 Spring Framework 6.2.19 与 Jackson 2.21.4，二者都带着未清的公告，
+    # 修法是父 pom 抬版本、不在本仓的改动；在这里设硬闸会让每次推送都因本分支改不掉的事变红。
+    # 结果写入 job summary；后续作为待办跟踪，不在这里强制。
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned and checksum-verified rather than borrowed from a marketplace action: this job's
+      # output is read as security signal, so the scanner should be the exact binary we named.
+      # 钉版本并校验哈希，而不是借一个 marketplace action：这一步的输出被当作安全信号读，
+      # 扫描器就该是我们点名的那一个二进制。
+      - name: Fetch osv-scanner 2.7.0
+        run: |
+          set -euo pipefail
+          base=https://github.com/google/osv-scanner/releases/download/v2.7.0
+          curl -fsSLo osv-scanner "$base/osv-scanner_linux_amd64"
+          curl -fsSLo SHA256SUMS "$base/osv-scanner_SHA256SUMS"
+          grep 'osv-scanner_linux_amd64$' SHA256SUMS | sha256sum -c -
+          chmod +x osv-scanner
+
+      - name: Scan every pom.xml against the OSV database
+        run: |
+          set +e
+          ./osv-scanner scan source -r --format markdown --verbosity error . > "$RUNNER_TEMP/osv-report.md"
+          status=$?
+          cat "$RUNNER_TEMP/osv-report.md" >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
 
   family-block:
     name: The generated family section still matches its stamp

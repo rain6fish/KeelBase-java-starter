@@ -37,6 +37,41 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
+      # Your application inherits the TLS stack of the JVM it runs on, so pin the vendor build that
+      # carries the fixed JSSE implementations (17.0.21+9 / 21.0.13+9) and fail when it drops below.
+      # The check reads the `Temurin-<version>+<build>` token, not a bare version number: Oracle's
+      # risk matrix lists the same "17.0.21" string under affected releases, so a number alone
+      # cannot tell a fixed JVM from a vulnerable one.
+      # 你的应用继承的是它所在 JVM 的 TLS 栈，所以要钉住带修复版 JSSE 实现的厂商构建
+      # （17.0.21+9 / 21.0.13+9），低于它就失败。
+      # 判据取 `Temurin-<version>+<build>` 这一行，不取裸版本号：Oracle 风险矩阵把同一个「17.0.21」
+      # 串列在受影响版本下，只看数字分不出已修与未修。
+      - name: Assert the JDK build carries the JSSE fixes
+        run: |
+          set -euo pipefail
+          report="$(java -version 2>&1)"
+          printf '%s\n' "$report"
+          build="$(printf '%s\n' "$report" \
+              | sed -n 's/.*Temurin-\([0-9][0-9.]*\)+\([0-9]\+\).*/\1+\2/p' \
+              | head -1)"
+          if [ -z "$build" ]; then
+            echo "::error::No Temurin build string in 'java -version' output." >&2
+            exit 1
+          fi
+          case "$build" in
+            17.*) minimum='17.0.21+9' ;;
+            21.*) minimum='21.0.13+9' ;;
+            *)
+              echo "::error::Unsupported JDK line '$build'; this template pins 17 and 21." >&2
+              exit 1
+              ;;
+          esac
+          lowest="$(printf '%s\n%s\n' "$build" "$minimum" | sort -V | head -1)"
+          if [ "$lowest" != "$minimum" ]; then
+            echo "::error::JDK $build predates $minimum, which carries the fixed JSSE implementations." >&2
+            exit 1
+          fi
+          echo "JDK $build is at or above $minimum."
       - name: Run access-compliance contract tests
         run: mvn -B test
 
@@ -51,6 +86,36 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
+      # Same assertion as in the contract job, and it matters more here: this job starts your
+      # application, so the JVM checked below is the one the server and its TLS endpoint run on.
+      # 与 contract job 中同一道断言，在这里更要紧：本 job 会启动你的应用，
+      # 下面检查的 JVM 就是服务和它的 TLS 端点实际跑在其上的那个。
+      - name: Assert the JDK build carries the JSSE fixes
+        run: |
+          set -euo pipefail
+          report="$(java -version 2>&1)"
+          printf '%s\n' "$report"
+          build="$(printf '%s\n' "$report" \
+              | sed -n 's/.*Temurin-\([0-9][0-9.]*\)+\([0-9]\+\).*/\1+\2/p' \
+              | head -1)"
+          if [ -z "$build" ]; then
+            echo "::error::No Temurin build string in 'java -version' output." >&2
+            exit 1
+          fi
+          case "$build" in
+            17.*) minimum='17.0.21+9' ;;
+            21.*) minimum='21.0.13+9' ;;
+            *)
+              echo "::error::Unsupported JDK line '$build'; this template pins 17 and 21." >&2
+              exit 1
+              ;;
+          esac
+          lowest="$(printf '%s\n%s\n' "$build" "$minimum" | sort -V | head -1)"
+          if [ "$lowest" != "$minimum" ]; then
+            echo "::error::JDK $build predates $minimum, which carries the fixed JSSE implementations." >&2
+            exit 1
+          fi
+          echo "JDK $build is at or above $minimum."
       - uses: actions/setup-node@v4
         with:
           node-version: '20'

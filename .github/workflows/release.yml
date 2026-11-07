@@ -34,6 +34,14 @@ jobs:
           java-version: '17'
           cache: maven
 
+      # Asserted before the deploy, not after: everything this job signs and publishes is built on
+      # this JVM, so a sub-fix build has to stop the release rather than be reported once the
+      # artifacts are already on Central.
+      # 放在发布之前而非之后：本 job 签名并发布的每个产物都构建在这个 JVM 上，低于修复构建的 JDK
+      # 必须拦住发布，而不是等产物已经上了 Central 再报一句。
+      - name: Assert the JDK build carries the JSSE fixes
+        run: bash scripts/assert-jdk-build.sh
+
       # The runner image's Maven moved from 3.9.16 to 3.10.0, and on 3.10.0
       # `central-publishing-maven-plugin:0.9.0` stops deleting `maven-metadata-central-staging.xml`
       # from each artifact folder before bundling. Central then rejects the deployment with
