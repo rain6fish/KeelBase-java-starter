@@ -39,6 +39,50 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Pinned ahead of the Boot BOM on purpose: the first import that manages an artifact wins,
+           so declaring these first lifts Jackson 2 and Log4j above the versions Boot 3.5.16 ships.
+           Boot 3.5.x is the newest line that still runs on Framework 6.2, and 6.2.19 is where that
+           line ends — these two are the advisories a version bump can still clear without moving
+           to Spring Boot 4. Jackson is imported as a whole BOM rather than artifact by artifact so
+           databind, core and the datatype modules cannot drift apart.
+           故意排在 Boot BOM 之前：同一个 artifact 由先声明的 import 生效，所以先写这两个就能把
+           Jackson 2 与 Log4j 抬到 Boot 3.5.16 自带版本之上。Boot 3.5.x 是仍跑在 Framework 6.2 上的
+           最后一条线，而 6.2.19 就是这条线的终点 —— 这两项是不搬去 Spring Boot 4 仍能清掉的公告。
+           Jackson 按整份 BOM 导入而不是逐个 artifact，这样 databind、core 与各 datatype 模块不会错位。 -->
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>2.21.7</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-bom</artifactId>
+        <version>2.25.5</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- Tomcat has no BOM of its own, so the embedded artifacts are pinned one by one. 10.1.61
+           stays on the 10.1 line Boot 3.5.x targets, which is what makes this a patch-level move
+           rather than the container swap Spring Boot 4 performs (it ships Tomcat 11).
+           Tomcat 没有自己的 BOM，所以内嵌的那几个 artifact 只能逐个钉。10.1.61 仍在 Boot 3.5.x 所面向的
+           10.1 线上，正因如此这是一次补丁级移动，而不是 Spring Boot 4 做的那种容器换代（那边是 Tomcat 11）。 -->
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-core</artifactId>
+        <version>10.1.61</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-el</artifactId>
+        <version>10.1.61</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-websocket</artifactId>
+        <version>10.1.61</version>
+      </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>

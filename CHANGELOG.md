@@ -2,6 +2,51 @@
 
 All notable changes to this project are documented in this file. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning follows [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+**English**
+
+### Security
+
+- **Dependency advisories cleared within the 3.5.x line.** Jackson 2 moves from 2.21.4 to **2.21.7**
+  and Log4j from 2.24.3 to **2.25.5**, both imported ahead of the Spring Boot BOM in the parent pom
+  and pinned explicitly in `build.gradle` (Gradle resolves to the highest version rather than
+  honouring import order). The embedded Tomcat moves from 10.1.55 to **10.1.61**, still on the 10.1
+  line Spring Boot 3.5.x targets. An OSV scan of the dependency tree drops from 192 advisories
+  across 50 packages to 22 across 12.
+
+- **Two Spring Framework advisories remain and cannot be fixed on this line.**
+  `CVE-2026-47890` (SSE stream corruption while rendering fragments) and `CVE-2026-47884`
+  (improper path limitation in `XsltView`) affect Spring Framework 6.2.0 through **6.2.19**, which
+  is the last release of that line; the fix exists only in 7.0.9 and therefore only in Spring Boot 4.
+  Both require SSE streaming or `XsltView` to be reachable, and neither this starter nor its
+  examples uses either — but a consuming application that does is exposed. See the dependency
+  security section in `SECURITY.md`.
+
+- **Two advisories are left deliberately.** `commons-lang3` and `plexus-utils` reach the tree through
+  `maven-plugin-api` at `provided` scope: they are Maven's own runtime classes, are not packaged
+  into `keelbase-maven-plugin`, and are not inherited by consumers. Overriding them here would only
+  compile the plugin against an API the running Maven need not have. Run a current Maven instead.
+
+**中文**
+
+### 安全
+
+- **3.5.x 线内可清的依赖公告已清。** Jackson 2 从 2.21.4 升到 **2.21.7**，Log4j 从 2.24.3 升到
+  **2.25.5**，二者在父 pom 中排在 Spring Boot BOM 之前导入、并在 `build.gradle` 中显式钉版本
+  （Gradle 取最高版本，不遵循导入顺序）。内嵌 Tomcat 从 10.1.55 升到 **10.1.61**，仍在
+  Spring Boot 3.5.x 面向的 10.1 线上。依赖树的 OSV 扫描从 50 个包 / 192 条降到 12 个包 / 22 条。
+
+- **仍有两条 Spring Framework 公告在本线内无法修复。**
+  `CVE-2026-47890`（渲染 fragment 时 SSE 流损坏）与 `CVE-2026-47884`（`XsltView` 路径限制不当）
+  影响 Spring Framework 6.2.0 至 **6.2.19** —— 6.2.19 是这条线的最后一版；修复只存在于 7.0.9，
+  因而只在 Spring Boot 4 中可用。两者都需要 SSE 流式输出或 `XsltView` 才可达，本 starter 与其示例
+  均未使用 —— 但使用其中任一项的接入应用会受影响。见 `SECURITY.md` 的依赖安全一节。
+
+- **另两条是有意留下的。** `commons-lang3` 与 `plexus-utils` 经 `maven-plugin-api` 以 `provided`
+  作用域进入依赖树：它们是 Maven 自身的运行时类，不打进 `keelbase-maven-plugin` 的产物，也不被
+  下游继承。在本仓覆写只会让插件编译期对着一个运行中的 Maven 未必具备的 API。请使用较新的 Maven。
+
 ## [0.2.0] - 2026-10-31
 
 **English**
